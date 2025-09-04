@@ -20,12 +20,12 @@ public class Task1 {
     }
 
     private static int factorial(int number) {
-        int sum = 0;
+        int result = 1;
         int i = 1;
         while (i <= number) {
-            sum += i;
+            result *= i;
             i++;
         }
-        return sum;
+        return result;
     }
 }

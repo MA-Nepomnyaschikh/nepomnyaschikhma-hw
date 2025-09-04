@@ -17,12 +17,12 @@ public class Task2 {
         int a = sc.nextInt();
         int b = sc.nextInt();
 
-        if (a != b) {
-            if (a > b) {
-                System.out.println(a);
-            } else {
-                System.out.println(b);
-            }
+        if (a == b) {
+            System.out.println(a);
+        } else if (a > b) {
+            System.out.println(a);
+        } else {
+            System.out.println(b);
         }
 
     }

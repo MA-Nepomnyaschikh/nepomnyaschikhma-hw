@@ -29,6 +29,7 @@ public class Task4 {
         for (int i = 2; i <= number - 1; i++) {
             if (number % i == 0) {
                 isPrime = false;
+                break;
             }
         }
         return isPrime;

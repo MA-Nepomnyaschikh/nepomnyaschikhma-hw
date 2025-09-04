@@ -28,8 +28,10 @@ public class Task3 {
         if (x >= 0 && x <= 100) {
             if (x >= 90) {
                 System.out.println("A");
-            } else if (x >= 70 && x <= 79) {
+            } else if (x >= 80 && x <= 89) {
                 System.out.println("B");
+            } else if (x >= 70 && x <= 79) {
+                System.out.println("С");
             } else if (x >= 60 && x <= 69) {
                 System.out.println("D");
             } else {

@@ -35,6 +35,10 @@ public class Task5 {
                 sum = x * y;
                 break;
             case "/":
+                if (x == 0 || y == 0){
+                    System.out.println("Числа не должны быть равны нулю");
+                    break;
+                }
                 sum = x / y;
                 break;
         }
