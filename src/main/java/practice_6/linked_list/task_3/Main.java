@@ -9,11 +9,11 @@ import java.util.List;
 
 public class Main {
     public static void main(String[] args) {
-        List<String> list = new LinkedList<>(List.of("test1", "test2","test3","test4","test5","test6"));
+        LinkedList<String> list = new LinkedList<>(List.of("test1", "test2","test3","test4","test5","test6"));
         printFirstAndLast(list);
     }
 
-    public static void printFirstAndLast(List<String> list) {
+    public static void printFirstAndLast(LinkedList<String> list) {
         System.out.println(list.getFirst());
         System.out.println(list.getLast());
     }
