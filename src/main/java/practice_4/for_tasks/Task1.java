@@ -1,4 +1,4 @@
-package main.java.practice_4.for_tasks;
+package practice_4.for_tasks;
 
 /**
  * Задача:

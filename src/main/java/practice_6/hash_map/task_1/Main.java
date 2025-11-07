@@ -1,4 +1,4 @@
-package main.java.practice_6.hash_map.task_1;
+package practice_6.hash_map.task_1;
 
 import java.util.HashMap;
 import java.util.Map;

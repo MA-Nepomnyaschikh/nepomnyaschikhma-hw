@@ -1,4 +1,4 @@
-package main.java.practice_8.part_1.task_4;
+package practice_8.part_1.task_4;
 
 import java.util.function.Function;
 

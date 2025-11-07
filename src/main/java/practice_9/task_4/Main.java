@@ -1,4 +1,4 @@
-package main.java.practice_9.task_4;
+package practice_9.task_4;
 
 /**
  * Условие задачи: Напишите класс Counter с методом increment, увеличивающим значение счётчика.

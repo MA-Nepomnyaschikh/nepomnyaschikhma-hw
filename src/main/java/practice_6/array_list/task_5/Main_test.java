@@ -1,4 +1,4 @@
-package main.java.practice_6.array_list.task_5;
+package practice_6.array_list.task_5;
 
 import java.util.ArrayList;
 import java.util.List;

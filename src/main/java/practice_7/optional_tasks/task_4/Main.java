@@ -1,4 +1,4 @@
-package main.java.practice_7.optional_tasks.task_4;
+package practice_7.optional_tasks.task_4;
 
 import java.util.ArrayList;
 import java.util.List;

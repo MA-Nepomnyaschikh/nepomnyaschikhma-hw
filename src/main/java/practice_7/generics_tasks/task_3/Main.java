@@ -1,4 +1,4 @@
-package main.java.practice_7.generics_tasks.task_3;
+package practice_7.generics_tasks.task_3;
 
 /**
  * Условие задачи: Создайте класс Pair, который может хранить два объекта разных типов.

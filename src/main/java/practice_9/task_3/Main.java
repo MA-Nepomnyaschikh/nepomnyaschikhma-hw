@@ -1,4 +1,4 @@
-package main.java.practice_9.task_3;
+package practice_9.task_3;
 
 import java.util.concurrent.atomic.AtomicInteger;
 

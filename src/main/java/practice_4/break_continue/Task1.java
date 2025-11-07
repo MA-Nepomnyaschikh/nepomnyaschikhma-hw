@@ -1,4 +1,4 @@
-package main.java.practice_4.break_continue;
+package practice_4.break_continue;
 
 import java.util.Scanner;
 

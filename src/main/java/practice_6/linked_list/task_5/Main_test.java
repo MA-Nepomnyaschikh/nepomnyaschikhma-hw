@@ -1,4 +1,4 @@
-package main.java.practice_6.linked_list.task_5;
+package practice_6.linked_list.task_5;
 
 import java.util.LinkedList;
 import java.util.ListIterator;

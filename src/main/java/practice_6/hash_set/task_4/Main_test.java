@@ -1,4 +1,4 @@
-package main.java.practice_6.hash_set.task_4;
+package practice_6.hash_set.task_4;
 
 import java.util.HashSet;
 import java.util.Scanner;

@@ -1,4 +1,4 @@
-package main.java.practice_7.optional_tasks.task_7;
+package practice_7.optional_tasks.task_7;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -1,4 +1,4 @@
-package main.java.practice_8.part_2.task_1;
+package practice_8.part_2.task_1;
 
 import java.util.ArrayList;
 import java.util.List;

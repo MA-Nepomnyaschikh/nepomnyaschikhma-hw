@@ -1,4 +1,4 @@
-package main.java.practice_9.task_6;
+package practice_9.task_6;
 
 import java.util.concurrent.*;
 

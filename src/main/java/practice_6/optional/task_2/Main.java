@@ -1,4 +1,4 @@
-package main.java.practice_6.optional.task_2;
+package practice_6.optional.task_2;
 
 import java.util.Deque;
 import java.util.LinkedList;

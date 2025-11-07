@@ -1,4 +1,4 @@
-package main.java.practice_4.do_while_tasks;
+package practice_4.do_while_tasks;
 
 /**
  * Задача:

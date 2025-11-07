@@ -1,4 +1,4 @@
-package main.java.practice_6.optional.task_7;
+package practice_6.optional.task_7;
 
 import java.util.ArrayDeque;
 import java.util.Scanner;

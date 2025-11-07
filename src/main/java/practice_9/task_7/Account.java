@@ -1,4 +1,4 @@
-package main.java.practice_9.task_7;
+package practice_9.task_7;
 
 import java.util.concurrent.locks.ReentrantLock;
 

@@ -1,4 +1,4 @@
-package main.java.practice_4.if_else_tasks;
+package practice_4.if_else_tasks;
 
 import java.util.Scanner;
 

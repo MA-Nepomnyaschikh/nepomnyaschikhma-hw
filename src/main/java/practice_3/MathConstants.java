@@ -1,4 +1,4 @@
-package main.java.practice_3;
+package practice_3;
 
 public class MathConstants {
     public static final double PI = 3.14159;

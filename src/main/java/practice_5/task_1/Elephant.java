@@ -1,4 +1,4 @@
-package main.java.practice_5.task_1;
+package practice_5.task_1;
 
 public class Elephant extends Animal {
 

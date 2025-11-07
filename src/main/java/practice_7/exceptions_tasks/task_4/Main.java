@@ -1,6 +1,6 @@
-package main.java.practice_7.exceptions_tasks.task_4;
+package practice_7.exceptions_tasks.task_4;
 
-import main.java.practice_7.exceptions_tasks.task_4.exceptions.EmailValidationException;
+import practice_7.exceptions_tasks.task_4.exceptions.EmailValidationException;
 
 import java.util.Scanner;
 import java.util.regex.Matcher;

@@ -1,4 +1,4 @@
-package main.java.practice_6.linked_hash_set.task_2;
+package practice_6.linked_hash_set.task_2;
 
 import java.util.LinkedHashSet;
 import java.util.Set;

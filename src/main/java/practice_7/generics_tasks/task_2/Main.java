@@ -1,4 +1,4 @@
-package main.java.practice_7.generics_tasks.task_2;
+package practice_7.generics_tasks.task_2;
 
 /**
  * Условие задачи: Напишите дженерик метод printArray, который принимает массив элементов любого типа

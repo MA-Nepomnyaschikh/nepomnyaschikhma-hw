@@ -1,4 +1,4 @@
-package main.java.practice_5.task_8;
+package practice_5.task_8;
 
 public abstract class Exhibit {
     private String history;

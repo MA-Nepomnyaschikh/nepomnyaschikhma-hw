@@ -1,4 +1,4 @@
-package main.java.practice_6.tree_map.task_2;
+package practice_6.tree_map.task_2;
 
 import java.util.Map;
 import java.util.TreeMap;

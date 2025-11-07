@@ -1,44 +1,44 @@
-package main.java.practice_3;
+package practice_3;
 
 public class Main {
     public static void main(String[] args) {
-        Company employee1 = new Company(1, "Misha");
-        Company employee2 = new Company(2, "Dima");
-        Company.printCompanyName();
-        Company.companyName = "newCompany";
-        Company.printCompanyName();
+        practice_3.Company employee1 = new practice_3.Company(1, "Misha");
+        practice_3.Company employee2 = new practice_3.Company(2, "Dima");
+        practice_3.Company.printCompanyName();
+        practice_3.Company.companyName = "newCompany";
+        practice_3.Company.printCompanyName();
 
         System.out.println();
 
-        System.out.println(MathConstants.calculateCircleArea(4.32));
-        System.out.println(MathConstants.calculateCircleArea(2.79));
-        System.out.println(MathConstants.calculateCircumference(4.32));
-        System.out.println(MathConstants.calculateCircumference(2.79));
+        System.out.println(practice_3.MathConstants.calculateCircleArea(4.32));
+        System.out.println(practice_3.MathConstants.calculateCircleArea(2.79));
+        System.out.println(practice_3.MathConstants.calculateCircumference(4.32));
+        System.out.println(practice_3.MathConstants.calculateCircumference(2.79));
 
         System.out.println();
 
-        Library library = new Library();
+        practice_3.Library library = new practice_3.Library();
         library.category = "test";
         library.author = "Misha";
         library.year = 123;
 
         System.out.println();
 
-        University student1 = new University(1, "Misha");
-        University student2 = new University(2, "Alex");
-        University student3 = new University(3, "Dima");
+        practice_3.University student1 = new practice_3.University(1, "Misha");
+        practice_3.University student2 = new practice_3.University(2, "Alex");
+        practice_3.University student3 = new practice_3.University(3, "Dima");
         student1.printStudentInfo();
         student2.printStudentInfo();
         student3.printStudentInfo();
-        University.universityName = "newUniversity";
+        practice_3.University.universityName = "newUniversity";
         student1.printStudentInfo();
         student2.printStudentInfo();
         student3.printStudentInfo();
 
         System.out.println();
 
-        GameSettings game1 = new GameSettings("game1");
-        GameSettings game2 = new GameSettings("game2");
+        practice_3.GameSettings game1 = new practice_3.GameSettings("game1");
+        practice_3.GameSettings game2 = new practice_3.GameSettings("game2");
         game1.addPlayer();
         game1.addPlayer();
         game1.addPlayer();
@@ -47,7 +47,7 @@ public class Main {
         game2.addPlayer();
         game1.printGameStatus();
         game2.printGameStatus();
-        GameSettings.setMaxPlayers(5);
+        practice_3.GameSettings.setMaxPlayers(5);
         game1.addPlayer();
         game1.addPlayer();
         game2.addPlayer();

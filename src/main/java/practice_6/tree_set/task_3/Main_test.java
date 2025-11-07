@@ -1,4 +1,4 @@
-package main.java.practice_6.tree_set.task_3;
+package practice_6.tree_set.task_3;
 
 import java.util.TreeSet;
 

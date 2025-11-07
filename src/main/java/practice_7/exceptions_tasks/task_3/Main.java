@@ -1,6 +1,6 @@
-package main.java.practice_7.exceptions_tasks.task_3;
+package practice_7.exceptions_tasks.task_3;
 
-import main.java.practice_7.exceptions_tasks.task_3.exceptions.AgeValidationException;
+import practice_7.exceptions_tasks.task_3.exceptions.AgeValidationException;
 
 import java.util.Scanner;
 

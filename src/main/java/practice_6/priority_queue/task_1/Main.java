@@ -1,4 +1,4 @@
-package main.java.practice_6.priority_queue.task_1;
+package practice_6.priority_queue.task_1;
 
 import java.util.PriorityQueue;
 

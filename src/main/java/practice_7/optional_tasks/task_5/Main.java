@@ -1,4 +1,4 @@
-package main.java.practice_7.optional_tasks.task_5;
+package practice_7.optional_tasks.task_5;
 
 import java.util.List;
 

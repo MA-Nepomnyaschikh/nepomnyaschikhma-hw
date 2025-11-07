@@ -1,4 +1,4 @@
-package main.java.practice_7.exceptions_tasks.task_1;
+package practice_7.exceptions_tasks.task_1;
 
 import java.io.*;
 

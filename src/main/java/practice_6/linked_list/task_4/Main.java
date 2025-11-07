@@ -1,4 +1,4 @@
-package main.java.practice_6.linked_list.task_4;
+package practice_6.linked_list.task_4;
 
 import java.util.ArrayList;
 import java.util.LinkedList;

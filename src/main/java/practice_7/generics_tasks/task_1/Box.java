@@ -1,4 +1,4 @@
-package main.java.practice_7.generics_tasks.task_1;
+package practice_7.generics_tasks.task_1;
 
 public class Box <T> {
 

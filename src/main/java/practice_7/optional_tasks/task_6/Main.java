@@ -1,4 +1,4 @@
-package main.java.practice_7.optional_tasks.task_6;
+package practice_7.optional_tasks.task_6;
 
 public class Main {
     public static void main(String[] args) {

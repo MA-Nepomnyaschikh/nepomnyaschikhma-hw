@@ -1,4 +1,4 @@
-package main.java.practice_5.task_7;
+package practice_5.task_7;
 
 public class RollerCoaster extends Attraction {
 

@@ -1,4 +1,4 @@
-package main.java.practice_1;
+package practice_1;
 
 public class MathOperations {
     public static void main(String[] args) {
