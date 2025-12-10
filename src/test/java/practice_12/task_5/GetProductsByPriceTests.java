@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-public class GetProductsByPriceTest extends InventoryServiceTest {
+public class GetProductsByPriceTests extends InventoryServiceTest {
     @Test
     public void getProductsByPriceTest() {
         List<Product> products = List.of(

@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import practice_12.task_5.exceptions.OutOfStockException;
 
-public class GetProductFromCategoryTest extends InventoryServiceTest {
+public class GetProductFromCategoryTests extends InventoryServiceTest {
 
     @Test
     void getProductFromCategoryTest() {
