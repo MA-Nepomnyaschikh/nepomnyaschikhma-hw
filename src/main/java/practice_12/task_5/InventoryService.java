@@ -25,7 +25,7 @@ public class InventoryService {
                 .add(product);
     }
 
-    public Product getProductFormCategory(String category) {
+    public Product getProductFromCategory(String category) {
         checkInventory("Инвентарь закрыт. Продукт не получить");
 
         Queue<Product> products = requireCategoryExist(category);

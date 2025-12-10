@@ -27,7 +27,7 @@ public class EntityManager <T extends Entity> {
     }
 
     public List<T> filterByAge(int minAge, int maxAge) {
-        validate(minAge >= 0, "Возраст не может быть меньше 0");
+        validate(minAge >= 0, "Минимальный возраст не может быть меньше 0");
         validate(maxAge >= minAge, "Минимальный возраст не может быть больше максимального");
 
         synchronized(entities) {

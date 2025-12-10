@@ -9,5 +9,6 @@ public class UserValidatorTest {
     @BeforeEach
     public void setUp() {
         validator = new UserValidator();
+        UserValidator.setFlag(true);
     }
 }

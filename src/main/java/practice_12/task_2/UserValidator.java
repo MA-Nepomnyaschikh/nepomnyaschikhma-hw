@@ -8,7 +8,7 @@ public class UserValidator {
 
     public void validateName(String name) {
         if (name == null) {
-            throw new IllegalArgumentException("Email cannot be null");
+            throw new IllegalArgumentException("Name cannot be null");
         }
         if (flag) {
             if (!name.matches("^[A-Z].*")) {

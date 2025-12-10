@@ -9,5 +9,6 @@ public class InventoryServiceTest {
     @BeforeEach
     public void setUp() {
         inventoryService = new InventoryService();
+        InventoryService.setIsInventoryOpen(true);
     }
 }
