@@ -1,6 +1,6 @@
 package clean_code.practice_1.task_8.after;
 
-class NotificationService {
+public class NotificationService {
     private final NotificationSender sender;
 
     public NotificationService(NotificationSender sender) {
