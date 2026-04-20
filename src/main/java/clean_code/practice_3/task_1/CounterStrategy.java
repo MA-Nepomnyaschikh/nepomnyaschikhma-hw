@@ -7,6 +7,7 @@ public class CounterStrategy implements ShorteningStrategy {
 
     @Override
     public String shorten(String fullUrl) {
-        return "" + COUNTER.getAndIncrement() + fullUrl.length();
+        StringBuilder sb = new StringBuilder();
+        return sb.append(COUNTER.getAndIncrement()).append(fullUrl.length()).toString();
     }
 }

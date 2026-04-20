@@ -1,6 +1,7 @@
 package clean_code.practice_3.task_2;
 
 import clean_code.practice_3.task_2.exceptions.UnsupportedFormatException;
+import clean_code.practice_3.task_2.exceptions.VideoNotFoundException;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -47,7 +48,7 @@ public class VideoService {
         Video video = videos.get(id);
 
         if (video == null) {
-            throw new RuntimeException("Video not found");
+            throw new VideoNotFoundException("Video not found");
         }
 
         String fakeData = video.getFilePath();

@@ -3,8 +3,8 @@ package clean_code.practice_3.task_1;
 import clean_code.practice_3.task_1.validators.UrlValidator;
 
 public class UrlShortenerService {
-    ShorteningStrategy shorteningStrategy;
-    UrlStorage storage;
+    private final ShorteningStrategy shorteningStrategy;
+    private final UrlStorage storage;
 
     public UrlShortenerService(ShortenerFactory factory, UrlStorage storage) {
         this.shorteningStrategy = factory.createStrategy();

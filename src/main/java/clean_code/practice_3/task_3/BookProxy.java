@@ -44,6 +44,10 @@ public class BookProxy {
         if (book == null) {
             String[] content = BookData.bookContent.get(id);
 
+            if (content == null) {
+                throw new IllegalStateException("No content for book with id: " + id);
+            }
+
             this.book = new Book.Builder()
                     .setTitle(this.title)
                     .setAuthor(this.author)

@@ -15,13 +15,13 @@ public class InMemoryUrlStorage implements UrlStorage {
     }
 
     @Override
-    public synchronized String saveIfAbsent(String fullUrl, String shortUrl) {
-        String existingShortUrl = shortToFullStorage.get(fullUrl);
+    public String saveIfAbsent(String fullUrl, String shortUrl) {
+        String existingShortUrl = fullToShortStorage.putIfAbsent(fullUrl, shortUrl);
+
         if (existingShortUrl != null) {
             return existingShortUrl;
         }
 
-        fullToShortStorage.put(fullUrl, shortUrl);
         shortToFullStorage.put(shortUrl, fullUrl);
         return shortUrl;
     }
