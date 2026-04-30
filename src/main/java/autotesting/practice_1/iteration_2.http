@@ -1,0 +1,287 @@
+// Подготовка
+
+### Get auth token
+POST http://localhost:4111/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "username": "testX2p",
+  "password": "test$X2p"
+}
+
+### Positive test. Authorized user can create account
+POST http://localhost:4111/api/v1/accounts
+Content-Type: application/json
+Authorization: Basic dGVzdFgycDp0ZXN0JFgycA==
+
+### Positive test. Authorized user can check list of accounts
+GET http://localhost:4111/api/v1/customer/accounts
+Content-Type: application/json
+Authorization: Basic dGVzdFgycDp0ZXN0JFgycA==
+
+
+// Тесты на пополнение
+
+### Positive test. Authorized user can deposit minimum allowed amount (0.01) into their account
+POST http://localhost:4111/api/v1/accounts/deposit
+Content-Type: application/json
+Authorization: Basic dGVzdFgycDp0ZXN0JFgycA==
+
+{
+  "id": 1,
+  "balance": 0.01
+}
+
+### Positive test. Authorized user can deposit maximum allowed amount (5000) into their account
+POST http://localhost:4111/api/v1/accounts/deposit
+Content-Type: application/json
+Authorization: Basic dGVzdFgycDp0ZXN0JFgycA==
+
+{
+  "id": 1,
+  "balance": 5000
+}
+
+### Negative test. Authorized user cannot deposit zero amount into their account
+POST http://localhost:4111/api/v1/accounts/deposit
+Content-Type: application/json
+Authorization: Basic dGVzdFgycDp0ZXN0JFgycA==
+
+{
+  "id": 1,
+  "balance": 0
+}
+
+### Negative test. Authorized user cannot deposit amount greater than maximum limit (5000)
+POST http://localhost:4111/api/v1/accounts/deposit
+Content-Type: application/json
+Authorization: Basic dGVzdFgycDp0ZXN0JFgycA==
+
+{
+  "id": 1,
+  "balance": 5000.01
+}
+
+### Negative test. Authorized user cannot deposit negative amount into their account
+POST http://localhost:4111/api/v1/accounts/deposit
+Content-Type: application/json
+Authorization: Basic dGVzdFgycDp0ZXN0JFgycA==
+
+{
+  "id": 1,
+  "balance": -0.01
+}
+
+### Negative test. Authorized user cannot deposit into non-existing account
+POST http://localhost:4111/api/v1/accounts/deposit
+Content-Type: application/json
+Authorization: Basic dGVzdFgycDp0ZXN0JFgycA==
+
+{
+  "id": -1,
+  "balance": 100
+}
+
+### Negative test. User cannot deposit into another user's account
+POST http://localhost:4111/api/v1/accounts/deposit
+Content-Type: application/json
+Authorization: Basic dGVzdFgycDp0ZXN0JFgycA==
+
+{
+  "id": 10,
+  "balance": 100
+}
+
+### Negative test. Unauthorized user cannot deposit into account
+POST http://localhost:4111/api/v1/accounts/deposit
+Content-Type: application/json
+
+{
+  "id": 1,
+  "balance": 100
+}
+
+// Тесты на перевод
+
+### Positive test. Authorized user can transfer funds between their own accounts
+POST http://localhost:4111/api/v1/accounts/transfer
+Content-Type: application/json
+Authorization: Basic dGVzdFgycDp0ZXN0JFgycA==
+
+{
+  "senderAccountId": 1,
+  "receiverAccountId": 2,
+  "amount": 1
+}
+
+### Positive test. Authorized user can transfer funds to another user's account
+POST http://localhost:4111/api/v1/accounts/transfer
+Content-Type: application/json
+Authorization: Basic dGVzdFgycDp0ZXN0JFgycA==
+
+{
+  "senderAccountId": 1,
+  "receiverAccountId": 10,
+  "amount": 1
+}
+
+### Positive test. Authorized user can transfer minimum allowed amount
+POST http://localhost:4111/api/v1/accounts/transfer
+Content-Type: application/json
+Authorization: Basic dGVzdFgycDp0ZXN0JFgycA==
+
+{
+  "senderAccountId": 1,
+  "receiverAccountId": 10,
+  "amount": 0.01
+}
+
+### Positive test. Authorized user can transfer maximum allowed amount
+POST http://localhost:4111/api/v1/accounts/transfer
+Content-Type: application/json
+Authorization: Basic dGVzdFgycDp0ZXN0JFgycA==
+
+{
+  "senderAccountId": 1,
+  "receiverAccountId": 10,
+  "amount": 10000
+}
+
+### Negative test. Authorized user cannot transfer funds into non-existing account
+POST http://localhost:4111/api/v1/accounts/transfer
+Content-Type: application/json
+Authorization: Basic dGVzdFgycDp0ZXN0JFgycA==
+
+{
+  "senderAccountId": 1,
+  "receiverAccountId": -1,
+  "amount": 50
+}
+
+### Negative test. Authorized user cannot transfer zero amount
+POST http://localhost:4111/api/v1/accounts/transfer
+Content-Type: application/json
+Authorization: Basic dGVzdFgycDp0ZXN0JFgycA==
+
+{
+  "senderAccountId": 1,
+  "receiverAccountId": 2,
+  "amount": 0
+}
+
+### Negative test. Authorized user cannot transfer negative amount
+POST http://localhost:4111/api/v1/accounts/transfer
+Content-Type: application/json
+Authorization: Basic dGVzdFgycDp0ZXN0JFgycA==
+
+{
+  "senderAccountId": 1,
+  "receiverAccountId": 2,
+  "amount": -0.01
+}
+
+### Negative test. Authorized user cannot transfer amount greater than maximum limit (10000)
+POST http://localhost:4111/api/v1/accounts/transfer
+Content-Type: application/json
+Authorization: Basic dGVzdFgycDp0ZXN0JFgycA==
+
+{
+  "senderAccountId": 1,
+  "receiverAccountId": 2,
+  "amount": 10000.01
+}
+
+### Negative test. Authorized user cannot transfer amount exceeding sender's balance
+POST http://localhost:4111/api/v1/accounts/transfer
+Content-Type: application/json
+Authorization: Basic dGVzdFgycDp0ZXN0JFgycA==
+
+{
+  "senderAccountId": 1,
+  "receiverAccountId": 2,
+  "amount": 7500
+}
+
+// Изменение имени пользователя
+
+### Positive test. Authorized user can set a valid name consisting of two words
+PUT http://localhost:4111/api/v1/customer/profile
+Content-Type: application/json
+Authorization: Basic dGVzdFgycDp0ZXN0JFgycA==
+
+{
+  "name": "Mikhail Nepomnyaschikh"
+}
+
+
+
+### Negative test. Authorized user cannot set a name consisting of one word
+PUT http://localhost:4111/api/v1/customer/profile
+Content-Type: application/json
+Authorization: Basic dGVzdFgycDp0ZXN0JFgycA==
+
+{
+  "name": "Mikhail"
+}
+
+### Negative test. Authorized user cannot set a name consisting of three words
+PUT http://localhost:4111/api/v1/customer/profile
+Content-Type: application/json
+Authorization: Basic dGVzdFgycDp0ZXN0JFgycA==
+
+{
+  "name": "Nepomnyaschikh Mikhail Aleksandrovich"
+}
+
+### Negative test. Authorized user cannot set name containing digits
+PUT http://localhost:4111/api/v1/customer/profile
+Content-Type: application/json
+Authorization: Basic dGVzdFgycDp0ZXN0JFgycA==
+
+{
+  "name": "Mikhail Nepomnyaschikh1"
+}
+
+### Negative test. Authorized user cannot set name containing special characters
+PUT http://localhost:4111/api/v1/customer/profile
+Content-Type: application/json
+Authorization: Basic dGVzdFgycDp0ZXN0JFgycA==
+
+{
+  "name": "Mikhail! Nepomnyaschikh"
+}
+
+### Negative test. Authorized user cannot set name with multiple spaces between words
+PUT http://localhost:4111/api/v1/customer/profile
+Content-Type: application/json
+Authorization: Basic dGVzdFgycDp0ZXN0JFgycA==
+
+{
+  "name": "Mikhail  Nepomnyaschikh"
+}
+
+### Negative test. Authorized user cannot set name with space at the end
+PUT http://localhost:4111/api/v1/customer/profile
+Content-Type: application/json
+Authorization: Basic dGVzdFgycDp0ZXN0JFgycA==
+
+{
+  "name": "Mikhail Nepomnyaschikh "
+}
+
+### Negative test. Authorized user cannot set name with only one word and space at the start
+PUT http://localhost:4111/api/v1/customer/profile
+Content-Type: application/json
+Authorization: Basic dGVzdFgycDp0ZXN0JFgycA==
+
+{
+  "name": " Mikhail"
+}
+
+### Negative test. Unauthorized user cannot change name
+PUT http://localhost:4111/api/v1/customer/profile
+Content-Type: application/json
+
+{
+  "name": "Mikhail Nepomnyaschikh"
+}

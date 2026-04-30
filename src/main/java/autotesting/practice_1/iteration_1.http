@@ -1,0 +1,174 @@
+### Get auth token
+//Admin token: Authorization: Basic YWRtaW46YWRtaW4=
+//testx2p token: Authorization: Basic dGVzdHgycDp0ZXN0JFgycHA=
+POST http://localhost:4111/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "username": "testx2p",
+  "password": "test$X2pp"
+}
+
+### Positive test. Admin can create new user with correct data
+POST http://localhost:4111/api/v1/admin/users
+Content-Type: application/json
+Authorization: Basic YWRtaW46YWRtaW4=
+
+{
+  "username": "testX2p",
+  "password": "test$X2p",
+  "role": "USER"
+}
+
+### Negative test. Admin cannot create new user with blank username
+POST http://localhost:4111/api/v1/admin/users
+Content-Type: application/json
+Authorization: Basic YWRtaW46YWRtaW4=
+
+{
+  "username": " ",
+  "password": "test$X2pp1",
+  "role": "USER"
+}
+
+### Negative test. Admin cannot create new user with username contains 2 characters
+POST http://localhost:4111/api/v1/admin/users
+Content-Type: application/json
+Authorization: Basic YWRtaW46YWRtaW4=
+
+{
+  "username": "ab",
+  "password": "test$X2pp1",
+  "role": "USER"
+}
+
+### Negative test. Admin cannot create new user with username contains 16 characters
+POST http://localhost:4111/api/v1/admin/users
+Content-Type: application/json
+Authorization: Basic YWRtaW46YWRtaW4=
+
+{
+  "username": "abertyuiopasdfgh",
+  "password": "test$X2pp1",
+  "role": "USER"
+}
+
+### Negative test. Admin cannot create new user with username contains invalid characters
+POST http://localhost:4111/api/v1/admin/users
+Content-Type: application/json
+Authorization: Basic YWRtaW46YWRtaW4=
+
+{
+  "username": "$()%^&*?@#",
+  "password": "test$X2pp1",
+  "role": "USER"
+}
+
+### Negative test. Admin cannot create new user with blank password
+POST http://localhost:4111/api/v1/admin/users
+Content-Type: application/json
+Authorization: Basic YWRtaW46YWRtaW4=
+
+{
+  "username": "{{$random.alphabetic(8)}}",
+  "password": " ",
+  "role": "USER"
+}
+
+### Negative test. Admin cannot create new user with password less than 8 characters
+POST http://localhost:4111/api/v1/admin/users
+Content-Type: application/json
+Authorization: Basic YWRtaW46YWRtaW4=
+
+{
+  "username": "{{$random.alphabetic(8)}}",
+  "password": "1234567",
+  "role": "USER"
+}
+
+### Negative test. Admin cannot create new user with password without digits
+POST http://localhost:4111/api/v1/admin/users
+Content-Type: application/json
+Authorization: Basic YWRtaW46YWRtaW4=
+
+{
+  "username": "{{$random.alphabetic(8)}}",
+  "password": "aaaaaaaa",
+  "role": "USER"
+}
+
+### Negative test. Admin cannot create new user with password without one lower case character
+POST http://localhost:4111/api/v1/admin/users
+Content-Type: application/json
+Authorization: Basic YWRtaW46YWRtaW4=
+
+{
+  "username": "{{$random.alphabetic(8)}}",
+  "password": "A1B2C3D4",
+  "role": "USER"
+}
+
+### Negative test. Admin cannot create new user with password without one upper case character
+POST http://localhost:4111/api/v1/admin/users
+Content-Type: application/json
+Authorization: Basic YWRtaW46YWRtaW4=
+
+{
+  "username": "{{$random.alphabetic(8)}}",
+  "password": "a1b2c3d4",
+  "role": "USER"
+}
+
+### Negative test. Admin cannot create new user with password without special character
+POST http://localhost:4111/api/v1/admin/users
+Content-Type: application/json
+Authorization: Basic YWRtaW46YWRtaW4=
+
+{
+  "username": "{{$random.alphabetic(8)}}",
+  "password": "a1b2c3d4",
+  "role": "USER"
+}
+
+### Negative test. Admin cannot create new user with password with spaces
+POST http://localhost:4111/api/v1/admin/users
+Content-Type: application/json
+Authorization: Basic YWRtaW46YWRtaW4=
+
+{
+  "username": "{{$random.alphabetic(8)}}",
+  "password": "   ",
+  "role": "USER"
+}
+
+### Negative test. Admin cannot create new user with role not equals ADMIN or USER
+POST http://localhost:4111/api/v1/admin/users
+Content-Type: application/json
+Authorization: Basic YWRtaW46YWRtaW4=
+
+{
+  "username": "{{$random.alphabetic(8)}}",
+  "password": "test$X2pp1",
+  "role": "EDITOR"
+}
+
+### Negative test. Create user that already exists by admin
+POST http://localhost:4111/api/v1/admin/users
+Content-Type: application/json
+Authorization: Basic YWRtaW46YWRtaW4=
+
+{
+  "username": "testx2p",
+  "password": "test$X2pp",
+  "role": "USER"
+}
+
+### Positive test. Authorized user can create account
+POST http://localhost:4111/api/v1/accounts
+Content-Type: application/json
+Authorization: Basic dGVzdHgycDp0ZXN0JFgycHA=
+
+### Positive test. Authorized user can check list of accounts
+GET http://localhost:4111/api/v1/customer/accounts
+Content-Type: application/json
+Authorization: Basic dGVzdHgycDp0ZXN0JFgycHA=
