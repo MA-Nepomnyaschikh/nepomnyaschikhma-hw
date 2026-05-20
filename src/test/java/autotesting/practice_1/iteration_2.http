@@ -42,6 +42,26 @@ Authorization: Basic dGVzdFgycDp0ZXN0JFgycA==
   "balance": 5000
 }
 
+### Positive test. Authorized user can deposit amount just above minimum boundary (0.02) into their account
+POST http://localhost:4111/api/v1/accounts/deposit
+Content-Type: application/json
+Authorization: Basic dGVzdFgycDp0ZXN0JFgycA==
+
+{
+  "id": 1,
+  "balance": 0.02
+}
+
+### Positive test. Authorized user can deposit amount just below maximum boundary (4999.99) into their account
+POST http://localhost:4111/api/v1/accounts/deposit
+Content-Type: application/json
+Authorization: Basic dGVzdFgycDp0ZXN0JFgycA==
+
+{
+  "id": 1,
+  "balance": 4999.99
+}
+
 ### Negative test. Authorized user cannot deposit zero amount into their account
 POST http://localhost:4111/api/v1/accounts/deposit
 Content-Type: application/json
@@ -132,7 +152,7 @@ Authorization: Basic dGVzdFgycDp0ZXN0JFgycA==
 
 {
   "senderAccountId": 1,
-  "receiverAccountId": 10,
+  "receiverAccountId": 2,
   "amount": 0.01
 }
 
@@ -145,6 +165,28 @@ Authorization: Basic dGVzdFgycDp0ZXN0JFgycA==
   "senderAccountId": 1,
   "receiverAccountId": 10,
   "amount": 10000
+}
+
+### Positive test. Authorized user can transfer amount just above minimum boundary
+POST http://localhost:4111/api/v1/accounts/transfer
+Content-Type: application/json
+Authorization: Basic dGVzdFgycDp0ZXN0JFgycA==
+
+{
+  "senderAccountId": 1,
+  "receiverAccountId": 2,
+  "amount": 0.02
+}
+
+### Positive test. Authorized user can transfer amount just below maximum boundary
+POST http://localhost:4111/api/v1/accounts/transfer
+Content-Type: application/json
+Authorization: Basic dGVzdFgycDp0ZXN0JFgycA==
+
+{
+  "senderAccountId": 1,
+  "receiverAccountId": 10,
+  "amount": 9999.99
 }
 
 ### Negative test. Authorized user cannot transfer funds into non-existing account
@@ -212,8 +254,6 @@ Authorization: Basic dGVzdFgycDp0ZXN0JFgycA==
 {
   "name": "Mikhail Nepomnyaschikh"
 }
-
-
 
 ### Negative test. Authorized user cannot set a name consisting of one word
 PUT http://localhost:4111/api/v1/customer/profile
