@@ -4,6 +4,7 @@ import io.restassured.RestAssured;
 import io.restassured.filter.log.RequestLoggingFilter;
 import io.restassured.filter.log.ResponseLoggingFilter;
 import io.restassured.http.ContentType;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -160,18 +161,15 @@ public class DepositAccountTest {
                 .statusCode(200)
                 .body("transactions[0].amount", equalTo((float) amount));
 
-        // Проверка наличия пополнения
-
         given()
                 .header("Authorization", userAuthHeader)
-                .contentType(ContentType.JSON)
-                .pathParam("id", accountId)
+                .basePath("/api/v1/customer")
         .when()
-                .get("{id}/transactions")
+                .get("/accounts")
         .then()
                 .statusCode(200)
-                .body("[0].amount", equalTo((float) amount))
-                .body("[0].type", equalTo("DEPOSIT"));
+                .body(String.format("find { it.id == %d }.balance", accountId), equalTo((float) amount))
+                .body(String.format("find { it.id == %d }.transactions.findAll { it.type == 'DEPOSIT' }.amount", accountId), hasItem((float) amount));
     }
 
     public static Stream<Arguments> invalidAmountProvider() {
@@ -185,6 +183,8 @@ public class DepositAccountTest {
     @MethodSource("invalidAmountProvider")
     @ParameterizedTest
     public void authorizedUserCannotDepositAccountWithInvalidAmountTest(double amount, String errorMessage) {
+        double expectedBalance = 0.00;
+
         String requestBody = String.format(Locale.US, """
                         {
                           "id": %d,
@@ -202,17 +202,15 @@ public class DepositAccountTest {
                 .statusCode(400)
                 .body(equalTo(errorMessage));
 
-        // Проверка отсутствия пополнения
-
         given()
                 .header("Authorization", userAuthHeader)
-                .contentType(ContentType.JSON)
-                .pathParam("id", accountId)
+                .basePath("/api/v1/customer")
         .when()
-                .get("{id}/transactions")
+                .get("/accounts")
         .then()
                 .statusCode(200)
-                .body("", hasSize(0));
+                .body(String.format("find { it.id == %d }.balance", accountId), equalTo((float) expectedBalance))
+                .body(String.format("find { it.id == %d }.transactions.findAll { it.type == 'DEPOSIT' }", accountId), empty());
     }
 
     @Test
@@ -237,6 +235,9 @@ public class DepositAccountTest {
 
     @Test
     public void authorizedUserCannotDepositIntoAnotherUserAccountTest() {
+        double expectedBalance = 0.00;
+        double amount = 100.00;
+
         // Создание второго пользователя
 
         String secondUsername = "User_" + UUID.randomUUID().toString().replace("-", "").substring(0, 8);
@@ -254,9 +255,9 @@ public class DepositAccountTest {
                 .contentType(ContentType.JSON)
                 .basePath("/api/v1/admin")
                 .body(requestBody)
-                .when()
+        .when()
                 .post("/users")
-                .then()
+        .then()
                 .statusCode(201)
                 .extract()
                 .path("id");
@@ -274,9 +275,9 @@ public class DepositAccountTest {
                 .contentType(ContentType.JSON)
                 .basePath("/api/v1/auth")
                 .body(requestBody)
-                .when()
+        .when()
                 .post("/login")
-                .then()
+        .then()
                 .statusCode(200)
                 .header("Authorization", notNullValue())
                 .extract()
@@ -287,9 +288,9 @@ public class DepositAccountTest {
         int secondAccountId = given()
                 .header("Authorization", secondUserAuthHeader)
                 .contentType(ContentType.JSON)
-                .when()
+        .when()
                 .post()
-                .then()
+        .then()
                 .statusCode(201)
                 .extract()
                 .path("id");
@@ -299,31 +300,29 @@ public class DepositAccountTest {
         requestBody = String.format(Locale.US, """
                         {
                           "id": %d,
-                          "balance": 100
+                          "balance": %.2f
                         }
-                        """, secondAccountId);
+                        """, secondAccountId, amount);
 
         given()
                 .header("Authorization", userAuthHeader)
                 .contentType(ContentType.JSON)
                 .body(requestBody)
-                .when()
+        .when()
                 .post("/deposit")
-                .then()
+        .then()
                 .statusCode(403)
                 .body(equalTo("Unauthorized access to account"));
 
-        // Проверка отсутствия пополнения
-
         given()
                 .header("Authorization", secondUserAuthHeader)
-                .contentType(ContentType.JSON)
-                .pathParam("id", secondAccountId)
+                .basePath("/api/v1/customer")
         .when()
-                .get("{id}/transactions")
+                .get("/accounts")
         .then()
                 .statusCode(200)
-                .body("", hasSize(0));
+                .body(String.format("find { it.id == %d }.balance", secondAccountId), equalTo((float) expectedBalance))
+                .body(String.format("find { it.id == %d }.transactions.findAll { it.type == 'DEPOSIT' }", secondAccountId), empty());
 
         // Удаление второго пользователя
 
@@ -340,12 +339,15 @@ public class DepositAccountTest {
 
     @Test
     public void unauthorizedUserCannotDepositIntoAccountTest() {
+        double expectedBalance = 0.00;
+        double amount = 100.00;
+
         String requestBody = String.format(Locale.US, """
                         {
                           "id": %d,
-                          "balance": 100
+                          "balance": %.2f
                         }
-                        """, accountId);
+                        """, accountId, amount);
 
         given()
                 .contentType(ContentType.JSON)
@@ -355,17 +357,15 @@ public class DepositAccountTest {
         .then()
                 .statusCode(401);
 
-        // Проверка отсутствия пополнения
-
         given()
                 .header("Authorization", userAuthHeader)
-                .contentType(ContentType.JSON)
-                .pathParam("id", accountId)
+                .basePath("/api/v1/customer")
         .when()
-                .get("{id}/transactions")
+                .get("/accounts")
         .then()
                 .statusCode(200)
-                .body("", hasSize(0));
+                .body(String.format("find { it.id == %d }.balance", accountId), equalTo((float) expectedBalance))
+                .body(String.format("find { it.id == %d }.transactions.findAll { it.type == 'DEPOSIT' }", accountId), empty());
     }
 
 }

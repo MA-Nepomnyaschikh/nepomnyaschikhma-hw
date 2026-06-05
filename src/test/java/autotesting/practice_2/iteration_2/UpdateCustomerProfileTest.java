@@ -4,6 +4,7 @@ import io.restassured.RestAssured;
 import io.restassured.filter.log.RequestLoggingFilter;
 import io.restassured.filter.log.ResponseLoggingFilter;
 import io.restassured.http.ContentType;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -139,6 +140,14 @@ public class UpdateCustomerProfileTest {
                 .statusCode(200)
                 .body("customer.name", equalTo(name))
                 .body("message", equalTo("Profile updated successfully"));
+
+        given()
+                .header("Authorization", userAuthHeader)
+        .when()
+                .get("/profile")
+        .then()
+                .statusCode(200)
+                .body("name", equalTo(name));
     }
 
     public static Stream<Arguments> invalidNameProvider() {
@@ -171,6 +180,14 @@ public class UpdateCustomerProfileTest {
         .then()
                 .statusCode(400)
                 .body(equalTo("Name must contain two words with letters only"));
+
+        given()
+                .header("Authorization", userAuthHeader)
+        .when()
+                .get("/profile")
+        .then()
+                .statusCode(200)
+                .body("name", Matchers.nullValue());
     }
 
     @Test
@@ -186,5 +203,13 @@ public class UpdateCustomerProfileTest {
                 .put("/profile")
         .then()
                 .statusCode(401);
+
+        given()
+                .header("Authorization", userAuthHeader)
+        .when()
+                .get("/profile")
+        .then()
+                .statusCode(200)
+                .body("name", Matchers.nullValue());
     }
 }

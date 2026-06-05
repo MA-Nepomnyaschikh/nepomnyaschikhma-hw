@@ -253,6 +253,7 @@ public class TransferFundsTest {
     @MethodSource("validAmountProvider")
     @ParameterizedTest
     public void authorizedUserCanTransferValidAmountBetweenTheirAccountsTest(double amount) {
+        double expectedBalance = 10000.00 - amount;
 
         String requestBody = String.format(Locale.US, """
                 {
@@ -275,23 +276,28 @@ public class TransferFundsTest {
                 .body("message", equalTo("Transfer successful"))
                 .body("amount", equalTo((float) amount));
 
-        // Проверка наличия пополнения
-
         given()
                 .header("Authorization", firstUserAuthHeader)
-                .contentType(ContentType.JSON)
-                .pathParam("id", firstUserSecondAccountId)
+                .basePath("/api/v1/customer")
         .when()
-                .get("{id}/transactions")
+                .get("/accounts")
         .then()
                 .statusCode(200)
-                .body("amount", hasItem((float) amount))
-                .body("type", hasItem("TRANSFER_IN"));
+                .body(String.format("find { it.id == %d }.balance", firstUserFirstAccountId), equalTo((float) expectedBalance))
+                .body(String.format("find { it.id == %d }.transactions.findAll { it.type == 'TRANSFER_OUT' }.amount",
+                                firstUserFirstAccountId),
+                                hasItem((float) amount))
+                .body(String.format("find { it.id == %d }.balance", firstUserSecondAccountId), equalTo((float) amount))
+                .body(String.format("find { it.id == %d }.transactions.findAll { it.type == 'TRANSFER_IN' }.amount",
+                                firstUserSecondAccountId),
+                                hasItem((float) amount));
     }
 
     @MethodSource("validAmountProvider")
     @ParameterizedTest
     public void authorizedUserCanTransferValidAmountToAnotherUserAccountTest(double amount) {
+        double expectedBalance = 10000.00 - amount;
+
         String requestBody = String.format(Locale.US, """
                 {
                   "senderAccountId": %d,
@@ -313,24 +319,35 @@ public class TransferFundsTest {
                 .body("message", equalTo("Transfer successful"))
                 .body("amount", equalTo((float) amount));
 
-        // Проверка наличия пополнения
+        given()
+                .header("Authorization", firstUserAuthHeader)
+                .basePath("/api/v1/customer")
+        .when()
+                .get("/accounts")
+        .then()
+                .statusCode(200)
+                .body(String.format("find { it.id == %d }.balance", firstUserFirstAccountId), equalTo((float) expectedBalance))
+                .body(String.format("find { it.id == %d }.transactions.findAll { it.type == 'TRANSFER_OUT' }.amount",
+                                firstUserFirstAccountId),
+                                hasItem((float) amount));
 
         given()
                 .header("Authorization", secondUserAuthHeader)
-                .contentType(ContentType.JSON)
-                .pathParam("id", secondUserFirstAccountId)
+                .basePath("/api/v1/customer")
         .when()
-                .get("{id}/transactions")
+                .get("/accounts")
         .then()
                 .statusCode(200)
-                .body("amount", hasItem((float) amount))
-                .body("type", hasItem("TRANSFER_IN"));
+                .body(String.format("find { it.id == %d }.balance", secondUserFirstAccountId), equalTo((float) amount))
+                .body(String.format("find { it.id == %d }.transactions.findAll { it.type == 'TRANSFER_IN' }.amount",
+                                secondUserFirstAccountId),
+                                hasItem((float) amount));
     }
 
     public static Stream<Arguments> invalidAmountProvider() {
         return Stream.of(
                 Arguments.of(10000.01, "Transfer amount cannot exceed 10000"),
-                Arguments.of(0, "Transfer amount must be at least 0.01"),
+                Arguments.of(0.00, "Transfer amount must be at least 0.01"),
                 Arguments.of(-0.01, "Transfer amount must be at least 0.01")
         );
     }
@@ -338,6 +355,8 @@ public class TransferFundsTest {
     @MethodSource("invalidAmountProvider")
     @ParameterizedTest
     public void authorizedUserCannotTransferInvalidAmountBetweenTheirAccountsTest(double amount, String errorMessage) {
+        double expectedBalanceFirstAcc = 10000.00;
+        double expectedBalanceSecondAcc = 0.00;
 
         String requestBody = String.format(Locale.US, """
                 {
@@ -357,22 +376,28 @@ public class TransferFundsTest {
                 .statusCode(400)
                 .body(equalTo(errorMessage));
 
-        // Проверка отсутствия пополнения
-
         given()
                 .header("Authorization", firstUserAuthHeader)
-                .contentType(ContentType.JSON)
-                .pathParam("id", firstUserSecondAccountId)
+                .basePath("/api/v1/customer")
         .when()
-                .get("{id}/transactions")
+                .get("/accounts")
         .then()
                 .statusCode(200)
-                .body("", hasSize(0));
+                .body(String.format("find { it.id == %d }.balance", firstUserFirstAccountId), equalTo((float) expectedBalanceFirstAcc))
+                .body(String.format("find { it.id == %d }.transactions.findAll { it.type == 'TRANSFER_OUT' }.amount",
+                                    firstUserFirstAccountId),
+                                    not(hasItem((float) amount)))
+                .body(String.format("find { it.id == %d }.balance", firstUserSecondAccountId), equalTo((float) expectedBalanceSecondAcc))
+                .body(String.format("find { it.id == %d }.transactions.findAll { it.type == 'TRANSFER_IN' }.amount",
+                                    firstUserSecondAccountId),
+                                    not(hasItem((float) amount)));
     }
 
     @MethodSource("invalidAmountProvider")
     @ParameterizedTest
     public void authorizedUserCannotTransferInvalidAmountToAnotherUserAccountTest(double amount, String errorMessage) {
+        double expectedBalanceFirstUserAcc = 10000.00;
+        double expectedBalanceSecondUserAcc = 0.00;
 
         String requestBody = String.format(Locale.US, """
                 {
@@ -392,21 +417,36 @@ public class TransferFundsTest {
                 .statusCode(400)
                 .body(equalTo(errorMessage));
 
-        // Проверка отсутствия пополнения
+        given()
+                .header("Authorization", firstUserAuthHeader)
+                .basePath("/api/v1/customer")
+                .when()
+                .get("/accounts")
+                .then()
+                .statusCode(200)
+                .body(String.format("find { it.id == %d }.balance", firstUserFirstAccountId), equalTo((float) expectedBalanceFirstUserAcc))
+                .body(String.format("find { it.id == %d }.transactions.findAll { it.type == 'TRANSFER_OUT' }.amount",
+                                firstUserFirstAccountId),
+                                not(hasItem((float) amount)));
 
         given()
                 .header("Authorization", secondUserAuthHeader)
-                .contentType(ContentType.JSON)
-                .pathParam("id", secondUserFirstAccountId)
-        .when()
-                .get("{id}/transactions")
-        .then()
+                .basePath("/api/v1/customer")
+                .when()
+                .get("/accounts")
+                .then()
                 .statusCode(200)
-                .body("", hasSize(0));
+                .body(String.format("find { it.id == %d }.balance", secondUserFirstAccountId), equalTo((float) expectedBalanceSecondUserAcc))
+                .body(String.format("find { it.id == %d }.transactions.findAll { it.type == 'TRANSFER_IN' }.amount",
+                                secondUserFirstAccountId),
+                                not(hasItem((float) amount)));
     }
 
     @Test
     public void authorizedUserCannotTransferAmountExceedingAccountBalanceTest() {
+        double amount = 5000.01;
+        double expectedBalanceFirstAcc = 5000.00;
+        double expectedBalanceSecondAcc = 0.00;
 
         // Перевод для снижения баланса
 
@@ -433,9 +473,9 @@ public class TransferFundsTest {
                 {
                   "senderAccountId": %d,
                   "receiverAccountId": %d,
-                  "amount": 5000.01
+                  "amount": %.2f
                 }
-                """, firstUserFirstAccountId, firstUserSecondAccountId);
+                """, firstUserFirstAccountId, firstUserSecondAccountId, amount);
 
         given()
                 .header("Authorization", firstUserAuthHeader)
@@ -447,29 +487,36 @@ public class TransferFundsTest {
                 .statusCode(400)
                 .body(equalTo("Invalid transfer: insufficient funds or invalid accounts"));
 
-        // Проверка отсутствия пополнения
-
         given()
                 .header("Authorization", firstUserAuthHeader)
-                .contentType(ContentType.JSON)
-                .pathParam("id", firstUserSecondAccountId)
+                .basePath("/api/v1/customer")
         .when()
-                .get("{id}/transactions")
+                .get("/accounts")
         .then()
                 .statusCode(200)
-                .body("", hasSize(0));
+                .body(String.format("find { it.id == %d }.balance", firstUserFirstAccountId), equalTo((float) expectedBalanceFirstAcc))
+                .body(String.format("find { it.id == %d }.transactions.findAll { it.type == 'TRANSFER_OUT' }.amount",
+                                firstUserFirstAccountId),
+                                not(hasItem((float) amount)))
+                .body(String.format("find { it.id == %d }.balance", firstUserSecondAccountId), equalTo((float) expectedBalanceSecondAcc))
+                .body(String.format("find { it.id == %d }.transactions.findAll { it.type == 'TRANSFER_IN' }.amount",
+                                firstUserSecondAccountId),
+                                not(hasItem((float) amount)));
     }
 
 
     @Test
     public void authorizedUserCannotTransferFundsIntoNonExistingAccountTest() {
+        double expectedBalance = 10000.00;
+        double amount = 1000.00;
+
         String requestBody = String.format(Locale.US, """
                 {
                   "senderAccountId": %d,
                   "receiverAccountId": %d,
-                  "amount": 1000
+                  "amount": %.2f
                 }
-                """, firstUserFirstAccountId, -1);
+                """, firstUserFirstAccountId, -1, amount);
 
         given()
                 .header("Authorization", firstUserAuthHeader)
@@ -480,15 +527,30 @@ public class TransferFundsTest {
         .then()
                 .statusCode(400)
                 .body(equalTo("Invalid transfer: insufficient funds or invalid accounts"));
+
+        given()
+                .header("Authorization", firstUserAuthHeader)
+                .basePath("/api/v1/customer")
+        .when()
+                .get("/accounts")
+        .then()
+                .statusCode(200)
+                .body(String.format("find { it.id == %d }.balance", firstUserFirstAccountId), equalTo((float) expectedBalance))
+                .body(String.format("find { it.id == %d }.transactions.findAll { it.type == 'TRANSFER_OUT' }.amount",
+                                firstUserFirstAccountId),
+                                not(hasItem((float) amount)));
     }
 
     @Test
     public void authorizedUserCannotTransferFundsFromNonExistingAccountTest() {
+        double expectedBalance = 0.00;
+        double amount = 1000.00;
+
         String requestBody = String.format(Locale.US, """
                 {
                   "senderAccountId": %d,
                   "receiverAccountId": %d,
-                  "amount": 1000
+                  "amount": 1000.00
                 }
                 """, -1, firstUserSecondAccountId);
 
@@ -501,37 +563,57 @@ public class TransferFundsTest {
         .then()
                 .statusCode(403)
                 .body(equalTo("Unauthorized access to account"));
+
+        given()
+                .header("Authorization", firstUserAuthHeader)
+                .basePath("/api/v1/customer")
+        .when()
+                .get("/accounts")
+        .then()
+                .statusCode(200)
+                .body(String.format("find { it.id == %d }.balance", firstUserSecondAccountId), equalTo((float) expectedBalance))
+                .body(String.format("find { it.id == %d }.transactions.findAll { it.type == 'TRANSFER_IN' }.amount",
+                                firstUserSecondAccountId),
+                                not(hasItem((float) amount)));
     }
 
     @Test
     public void unauthorizedUserCannotTransferFundsIntoAnotherAccountTest() {
+        double expectedBalanceFirstAcc = 10000.00;
+        double expectedBalanceSecondAcc = 0.00;
+        double amount = 1000.00;
+
         String requestBody = String.format(Locale.US, """
                 {
                   "senderAccountId": %d,
                   "receiverAccountId": %d,
-                  "amount": 1000
+                  "amount": %.2f
                 }
-                """, firstUserFirstAccountId, firstUserSecondAccountId);
+                """, firstUserFirstAccountId, firstUserSecondAccountId, amount);
 
         given()
                 .contentType(ContentType.JSON)
                 .body(requestBody)
-        .when()
+                .when()
                 .post("/transfer")
-        .then()
+                .then()
                 .statusCode(401);
-
-        // Проверка отсутствия пополнения
 
         given()
                 .header("Authorization", firstUserAuthHeader)
-                .contentType(ContentType.JSON)
-                .pathParam("id", firstUserSecondAccountId)
-        .when()
-                .get("{id}/transactions")
-        .then()
+                .basePath("/api/v1/customer")
+                .when()
+                .get("/accounts")
+                .then()
                 .statusCode(200)
-                .body("", hasSize(0));
+                .body(String.format("find { it.id == %d }.balance", firstUserFirstAccountId), equalTo((float) expectedBalanceFirstAcc))
+                .body(String.format("find { it.id == %d }.transactions.findAll { it.type == 'TRANSFER_OUT' }.amount",
+                                firstUserFirstAccountId),
+                                not(hasItem((float) amount)))
+                .body(String.format("find { it.id == %d }.balance", firstUserSecondAccountId), equalTo((float) expectedBalanceSecondAcc))
+                .body(String.format("find { it.id == %d }.transactions.findAll { it.type == 'TRANSFER_IN' }.amount",
+                                firstUserSecondAccountId),
+                                not(hasItem((float) amount)));
     }
 
 }
