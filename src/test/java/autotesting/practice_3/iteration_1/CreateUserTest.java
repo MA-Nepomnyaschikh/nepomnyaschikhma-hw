@@ -1,5 +1,6 @@
 package autotesting.practice_3.iteration_1;
 
+import autotesting.practice_3.contract.models.request.LoginUserRequestDto;
 import autotesting.practice_3.generators.TestData;
 import autotesting.practice_3.contract.enams.UserRole;
 import autotesting.practice_3.contract.models.request.CreateUserRequestDto;
@@ -7,28 +8,34 @@ import autotesting.practice_3.contract.models.response.CreateUserResponseDto;
 import autotesting.practice_3.contract.models.response.ErrorResponseDto;
 import autotesting.practice_3.BaseTest;
 import autotesting.practice_3.requests.post.CreateUserRequest;
+import autotesting.practice_3.requests.post.LoginUserRequest;
 import autotesting.practice_3.specs.RequestSpecs;
 import autotesting.practice_3.specs.ResponseSpecs;
+import io.restassured.common.mapper.TypeRef;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
+
+import static autotesting.practice_3.specs.ResponseSpecs.AUTH_HEADER;
 
 public class CreateUserTest extends BaseTest {
 
     public static Stream<Arguments> userValidDataProvider() {
         return Stream.of(
-                Arguments.of(TestData.getUsername(), TestData.getPassword(), UserRole.USER),
-                Arguments.of(TestData.getUsername(), TestData.getPassword(), UserRole.ADMIN)
+                Arguments.of(TestData.getUsername(), TestData.getPassword(), UserRole.USER.toString()),
+                Arguments.of(TestData.getUsername(), TestData.getPassword(), UserRole.ADMIN.toString())
                 );
     }
 
     @MethodSource("userValidDataProvider")
     @ParameterizedTest
-    public void adminCanCreateUserWithValidDataTest(String username, String password, UserRole role) {
+    public void adminCanCreateUserWithValidDataTest(String username, String password, String role) {
         CreateUserRequestDto createUserRequestDto = CreateUserRequestDto.builder()
                 .username(username)
                 .password(password)
@@ -54,7 +61,7 @@ public class CreateUserTest extends BaseTest {
         CreateUserRequestDto createUserRequestDto = CreateUserRequestDto.builder()
                 .username(username)
                 .password(TestData.getPassword())
-                .role(UserRole.USER)
+                .role(UserRole.USER.toString())
                 .build();
 
         new CreateUserRequest(
@@ -65,7 +72,7 @@ public class CreateUserTest extends BaseTest {
         CreateUserRequestDto duplicateUsernameRequestDto = CreateUserRequestDto.builder()
                 .username(username)
                 .password(TestData.getPassword())
-                .role(UserRole.USER)
+                .role(UserRole.USER.toString())
                 .build();
 
         String errorResponse = new CreateUserRequest(
@@ -96,34 +103,72 @@ public class CreateUserTest extends BaseTest {
 
     @MethodSource("userInvalidDataProvider")
     @ParameterizedTest
-    public void adminCannotCreateUserWithInvalidDataTest(String username, String password, UserRole role, String errorKey, String errorValue) {
+    public void adminCannotCreateUserWithInvalidDataTest(String username, String password, String role, String errorKey, String errorValue) {
         CreateUserRequestDto createUserRequestDto = CreateUserRequestDto.builder()
                 .username(username)
                 .password(password)
                 .role(role)
                 .build();
 
-        ErrorResponseDto errorResponseDto = new CreateUserRequest(
+        Map<String, List<String>> errors = new CreateUserRequest(
                 RequestSpecs.authAsAdmin(),
                 ResponseSpecs.badRequest())
                 .post(createUserRequestDto)
-                .extract().as(ErrorResponseDto.class);
+                .extract()
+                .as(new TypeRef<Map<String, List<String>>>() {});
 
-        softly.assertThat(errorResponseDto.getErrorKey()).isEqualTo(errorKey);
-        softly.assertThat(errorResponseDto.getErrorValue()).isEqualTo(errorValue);
+        softly.assertThat(errors).containsKey(errorKey);
+
+        softly.assertThat(errors.get(errorKey)).contains(errorValue);
     }
 
     @Test
-    public void userWithoutAdminPermissionsCannotCreateUserTest() {
+    public void unauthorizedUserCannotCreateUserTest() {
         CreateUserRequestDto createUserRequestDto = CreateUserRequestDto.builder()
                 .username(TestData.getUsername())
                 .password(TestData.getPassword())
-                .role(UserRole.USER)
+                .role(UserRole.USER.toString())
                 .build();
 
         new CreateUserRequest(
                 RequestSpecs.unauth(),
                 ResponseSpecs.unauthorized())
+                .post(createUserRequestDto);
+    }
+
+    @Test
+    public void userWithoutAdminPermissionsCannotCreateUserTest() {
+        CreateUserRequestDto user = CreateUserRequestDto.builder()
+                .username(TestData.getUsername())
+                .password(TestData.getPassword())
+                .role(UserRole.USER.toString())
+                .build();
+
+        new CreateUserRequest(
+                RequestSpecs.authAsAdmin(),
+                ResponseSpecs.created())
+                .post(user);
+
+        LoginUserRequestDto loginRequestDto = LoginUserRequestDto.builder()
+                .username(user.getUsername())
+                .password(user.getPassword())
+                .build();
+
+        String userAuthHeader = new LoginUserRequest(
+                RequestSpecs.unauth(),
+                ResponseSpecs.ok())
+                .post(loginRequestDto)
+                .extract().header(AUTH_HEADER);
+
+        CreateUserRequestDto createUserRequestDto = CreateUserRequestDto.builder()
+                .username(TestData.getUsername())
+                .password(TestData.getPassword())
+                .role(UserRole.USER.toString())
+                .build();
+
+        new CreateUserRequest(
+                RequestSpecs.authAsUser(userAuthHeader),
+                ResponseSpecs.forbidden())
                 .post(createUserRequestDto);
     }
 }

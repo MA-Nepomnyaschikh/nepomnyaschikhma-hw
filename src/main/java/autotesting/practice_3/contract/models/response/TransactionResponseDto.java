@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 public class TransactionResponseDto extends BaseModel {
     private int id;
     private double amount;
-    private TransactionType type;
+    private String type;
     private String timestamp;
     private int relatedAccountId;
 }

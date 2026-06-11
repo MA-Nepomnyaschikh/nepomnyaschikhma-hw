@@ -22,6 +22,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import java.util.List;
 import java.util.stream.Stream;
 
+import static autotesting.practice_3.contract.messages.DepositMessages.UNAUTHORIZED_DEPOSIT;
 import static autotesting.practice_3.contract.messages.TransferMessages.*;
 import static autotesting.practice_3.generators.TestData.*;
 import static autotesting.practice_3.specs.ResponseSpecs.AUTH_HEADER;
@@ -45,7 +46,7 @@ public class TransferFundsTest extends BaseTest {
         CreateUserRequestDto user = CreateUserRequestDto.builder()
                 .username(getUsername())
                 .password(getPassword())
-                .role(UserRole.USER)
+                .role(UserRole.USER.toString())
                 .build();
 
         new CreateUserRequest(
@@ -122,7 +123,7 @@ public class TransferFundsTest extends BaseTest {
         softly.assertThat(actualSecondAcc.getBalance()).isEqualTo(transferAmount);
         softly.assertThat(actualSecondAcc.getTransactions()).anySatisfy(actualTransaction -> {
             softly.assertThat(actualTransaction.getAmount()).isEqualTo(transferAmount);
-            softly.assertThat(actualTransaction.getType()).isEqualTo(TransactionType.TRANSFER_IN);
+            softly.assertThat(actualTransaction.getType()).isEqualTo(TransactionType.TRANSFER_IN.toString());
             softly.assertThat(actualTransaction.getRelatedAccountId()).isEqualTo(expectedFirstAcc.getId());
         });
 
@@ -131,7 +132,7 @@ public class TransferFundsTest extends BaseTest {
         softly.assertThat(actualFirstAcc.getBalance()).isEqualTo(expectedFirstAcc.getBalance() - transferAmount, within(0.00001));
         softly.assertThat(actualFirstAcc.getTransactions()).anySatisfy(actualTransaction -> {
             softly.assertThat(actualTransaction.getAmount()).isEqualTo(transferAmount);
-            softly.assertThat(actualTransaction.getType()).isEqualTo(TransactionType.TRANSFER_OUT);
+            softly.assertThat(actualTransaction.getType()).isEqualTo(TransactionType.TRANSFER_OUT.toString());
             softly.assertThat(actualTransaction.getRelatedAccountId()).isEqualTo(expectedSecondAcc.getId());
         });
     }
@@ -142,7 +143,7 @@ public class TransferFundsTest extends BaseTest {
         CreateUserRequestDto firstUser = CreateUserRequestDto.builder()
                 .username(getUsername())
                 .password(getPassword())
-                .role(UserRole.USER)
+                .role(UserRole.USER.toString())
                 .build();
 
         new CreateUserRequest(
@@ -187,7 +188,7 @@ public class TransferFundsTest extends BaseTest {
         CreateUserRequestDto secondUser = CreateUserRequestDto.builder()
                 .username(getUsername())
                 .password(getPassword())
-                .role(UserRole.USER)
+                .role(UserRole.USER.toString())
                 .build();
 
         new CreateUserRequest(
@@ -241,7 +242,7 @@ public class TransferFundsTest extends BaseTest {
         softly.assertThat(actualSecondUserAcc.getBalance()).isEqualTo(transferAmount);
         softly.assertThat(actualSecondUserAcc.getTransactions()).anySatisfy(actualTransaction -> {
             softly.assertThat(actualTransaction.getAmount()).isEqualTo(transferAmount);
-            softly.assertThat(actualTransaction.getType()).isEqualTo(TransactionType.TRANSFER_IN);
+            softly.assertThat(actualTransaction.getType()).isEqualTo(TransactionType.TRANSFER_IN.toString());
             softly.assertThat(actualTransaction.getRelatedAccountId()).isEqualTo(expectedFirstUserAcc.getId());
         });
 
@@ -257,7 +258,7 @@ public class TransferFundsTest extends BaseTest {
         softly.assertThat(actualFirstUserAcc.getBalance()).isEqualTo(expectedFirstUserAcc.getBalance() - transferAmount, within(0.00001));
         softly.assertThat(actualFirstUserAcc.getTransactions()).anySatisfy(actualTransaction -> {
             softly.assertThat(actualTransaction.getAmount()).isEqualTo(transferAmount);
-            softly.assertThat(actualTransaction.getType()).isEqualTo(TransactionType.TRANSFER_OUT);
+            softly.assertThat(actualTransaction.getType()).isEqualTo(TransactionType.TRANSFER_OUT.toString());
             softly.assertThat(actualTransaction.getRelatedAccountId()).isEqualTo(secondUserAccount.getId());
         });
     }
@@ -276,7 +277,7 @@ public class TransferFundsTest extends BaseTest {
         CreateUserRequestDto user = CreateUserRequestDto.builder()
                 .username(getUsername())
                 .password(getPassword())
-                .role(UserRole.USER)
+                .role(UserRole.USER.toString())
                 .build();
 
         new CreateUserRequest(
@@ -355,7 +356,7 @@ public class TransferFundsTest extends BaseTest {
         softly.assertThat(actualFirstAcc.getBalance()).isEqualTo(expectedFirstAcc.getBalance());
         softly.assertThat(actualFirstAcc.getTransactions()).noneSatisfy(actualTransaction -> {
             softly.assertThat(actualTransaction.getAmount()).isEqualTo(transferAmount);
-            softly.assertThat(actualTransaction.getType()).isEqualTo(TransactionType.TRANSFER_OUT);
+            softly.assertThat(actualTransaction.getType()).isEqualTo(TransactionType.TRANSFER_OUT.toString());
         });
     }
 
@@ -365,7 +366,7 @@ public class TransferFundsTest extends BaseTest {
         CreateUserRequestDto firstUser = CreateUserRequestDto.builder()
                 .username(getUsername())
                 .password(getPassword())
-                .role(UserRole.USER)
+                .role(UserRole.USER.toString())
                 .build();
 
         new CreateUserRequest(
@@ -410,7 +411,7 @@ public class TransferFundsTest extends BaseTest {
         CreateUserRequestDto secondUser = CreateUserRequestDto.builder()
                 .username(getUsername())
                 .password(getPassword())
-                .role(UserRole.USER)
+                .role(UserRole.USER.toString())
                 .build();
 
         new CreateUserRequest(
@@ -473,7 +474,7 @@ public class TransferFundsTest extends BaseTest {
         softly.assertThat(actualFirstUserAcc.getBalance()).isEqualTo(expectedFirstUserAcc.getBalance());
         softly.assertThat(actualFirstUserAcc.getTransactions()).noneSatisfy(actualTransaction -> {
             softly.assertThat(actualTransaction.getAmount()).isEqualTo(transferAmount);
-            softly.assertThat(actualTransaction.getType()).isEqualTo(TransactionType.TRANSFER_OUT);
+            softly.assertThat(actualTransaction.getType()).isEqualTo(TransactionType.TRANSFER_OUT.toString());
         });
     }
 
@@ -482,7 +483,7 @@ public class TransferFundsTest extends BaseTest {
         CreateUserRequestDto firstUser = CreateUserRequestDto.builder()
                 .username(getUsername())
                 .password(getPassword())
-                .role(UserRole.USER)
+                .role(UserRole.USER.toString())
                 .build();
 
         new CreateUserRequest(
@@ -522,7 +523,7 @@ public class TransferFundsTest extends BaseTest {
         CreateUserRequestDto secondUser = CreateUserRequestDto.builder()
                 .username(getUsername())
                 .password(getPassword())
-                .role(UserRole.USER)
+                .role(UserRole.USER.toString())
                 .build();
 
         new CreateUserRequest(
@@ -587,7 +588,7 @@ public class TransferFundsTest extends BaseTest {
         softly.assertThat(actualFirstUserAcc.getBalance()).isEqualTo(expectedFirstUserAcc.getBalance());
         softly.assertThat(actualFirstUserAcc.getTransactions()).noneSatisfy(actualTransaction -> {
             softly.assertThat(actualTransaction.getAmount()).isEqualTo(transferAmountExceedingBalance);
-            softly.assertThat(actualTransaction.getType()).isEqualTo(TransactionType.TRANSFER_OUT);
+            softly.assertThat(actualTransaction.getType()).isEqualTo(TransactionType.TRANSFER_OUT.toString());
             softly.assertThat(actualTransaction.getRelatedAccountId()).isEqualTo(expectedSecondUserAccount.getId());
         });
     }
@@ -600,7 +601,7 @@ public class TransferFundsTest extends BaseTest {
         CreateUserRequestDto user = CreateUserRequestDto.builder()
                 .username(getUsername())
                 .password(getPassword())
-                .role(UserRole.USER)
+                .role(UserRole.USER.toString())
                 .build();
 
         new CreateUserRequest(
@@ -663,7 +664,7 @@ public class TransferFundsTest extends BaseTest {
         softly.assertThat(actualUserAcc.getBalance()).isEqualTo(expectedUserAcc.getBalance());
         softly.assertThat(actualUserAcc.getTransactions()).noneSatisfy(actualTransaction -> {
             softly.assertThat(actualTransaction.getAmount()).isEqualTo(transferAmount);
-            softly.assertThat(actualTransaction.getType()).isEqualTo(TransactionType.TRANSFER_OUT);
+            softly.assertThat(actualTransaction.getType()).isEqualTo(TransactionType.TRANSFER_OUT.toString());
         });
     }
 
@@ -674,7 +675,7 @@ public class TransferFundsTest extends BaseTest {
         CreateUserRequestDto firstUser = CreateUserRequestDto.builder()
                 .username(getUsername())
                 .password(getPassword())
-                .role(UserRole.USER)
+                .role(UserRole.USER.toString())
                 .build();
 
         new CreateUserRequest(
@@ -714,7 +715,7 @@ public class TransferFundsTest extends BaseTest {
         CreateUserRequestDto secondUser = CreateUserRequestDto.builder()
                 .username(getUsername())
                 .password(getPassword())
-                .role(UserRole.USER)
+                .role(UserRole.USER.toString())
                 .build();
 
         new CreateUserRequest(
@@ -745,10 +746,13 @@ public class TransferFundsTest extends BaseTest {
                 .amount(transferAmount)
                 .build();
 
-        new TransferRequest(
+        String errorResponse = new TransferRequest(
                 RequestSpecs.authAsUser(firstUserAuthHeader),
                 ResponseSpecs.forbidden())
-                .post(transferRequestDto);
+                .post(transferRequestDto)
+                .extract().asString();
+
+        softly.assertThat(errorResponse).isEqualTo(UNAUTHORIZED_DEPOSIT);
 
         List<AccountResponseDto> secondUserAccountsList = new GetClientAccountsRequest(
                 RequestSpecs.authAsUser(secondUserAuthHeader),
@@ -770,7 +774,7 @@ public class TransferFundsTest extends BaseTest {
         CreateUserRequestDto firstUser = CreateUserRequestDto.builder()
                 .username(getUsername())
                 .password(getPassword())
-                .role(UserRole.USER)
+                .role(UserRole.USER.toString())
                 .build();
 
         new CreateUserRequest(
@@ -810,7 +814,7 @@ public class TransferFundsTest extends BaseTest {
         CreateUserRequestDto secondUser = CreateUserRequestDto.builder()
                 .username(getUsername())
                 .password(getPassword())
-                .role(UserRole.USER)
+                .role(UserRole.USER.toString())
                 .build();
 
         new CreateUserRequest(
@@ -870,7 +874,7 @@ public class TransferFundsTest extends BaseTest {
         softly.assertThat(actualFirstUserAcc.getBalance()).isEqualTo(expectedFirstUserAcc.getBalance());
         softly.assertThat(actualFirstUserAcc.getTransactions()).noneSatisfy(actualTransaction -> {
             softly.assertThat(actualTransaction.getAmount()).isEqualTo(transferAmount);
-            softly.assertThat(actualTransaction.getType()).isEqualTo(TransactionType.TRANSFER_OUT);
+            softly.assertThat(actualTransaction.getType()).isEqualTo(TransactionType.TRANSFER_OUT.toString());
         });
     }
 

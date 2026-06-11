@@ -41,7 +41,6 @@ public class ResponseSpecs {
     public static ResponseSpecification forbidden() {
         return defaultResponseSpecBuilder()
                 .expectStatusCode(403)
-                .expectBody(equalTo("Unauthorized access to account"))
                 .build();
     }
 }

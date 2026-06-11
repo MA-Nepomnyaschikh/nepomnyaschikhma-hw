@@ -31,7 +31,7 @@ public class LoginUserTest extends BaseTest {
 
         LoginUserResponseDto dto = loginUserResponse.extract().as(LoginUserResponseDto.class);
 
-        softly.assertThat(dto.getRole()).isEqualTo(UserRole.ADMIN);
+        softly.assertThat(dto.getRole()).isEqualTo(UserRole.ADMIN.toString());
         softly.assertThat(dto.getUsername()).isEqualTo("admin");
     }
 
@@ -40,7 +40,7 @@ public class LoginUserTest extends BaseTest {
         CreateUserRequestDto createUserRequestDto = CreateUserRequestDto.builder()
                 .username(TestData.getUsername())
                 .password(TestData.getPassword())
-                .role(UserRole.USER)
+                .role(UserRole.USER.toString())
                 .build();
 
         new CreateUserRequest(
@@ -62,7 +62,7 @@ public class LoginUserTest extends BaseTest {
 
         LoginUserResponseDto dto = loginUserResponse.extract().as(LoginUserResponseDto.class);
 
-        softly.assertThat(dto.getRole()).isEqualTo(UserRole.USER);
+        softly.assertThat(dto.getRole()).isEqualTo(UserRole.USER.toString());
         softly.assertThat(dto.getUsername()).isEqualTo(createUserRequestDto.getUsername());
     }
 }

@@ -25,7 +25,7 @@ public class CreateAccountTest extends BaseTest {
         CreateUserRequestDto createUserRequestDto = CreateUserRequestDto.builder()
                 .username(TestData.getUsername())
                 .password(TestData.getPassword())
-                .role(UserRole.USER)
+                .role(UserRole.USER.toString())
                 .build();
 
         new CreateUserRequest(

@@ -24,6 +24,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import java.util.List;
 import java.util.stream.Stream;
 
+import static autotesting.practice_3.contract.messages.DepositMessages.UNAUTHORIZED_DEPOSIT;
 import static autotesting.practice_3.generators.TestData.NON_EXISTING_ACCOUNT_ID;
 import static autotesting.practice_3.generators.TestData.getRandomValidDepositAmount;
 import static autotesting.practice_3.specs.ResponseSpecs.AUTH_HEADER;
@@ -46,7 +47,7 @@ public class DepositAccountTest extends BaseTest {
         CreateUserRequestDto user = CreateUserRequestDto.builder()
                 .username(TestData.getUsername())
                 .password(TestData.getPassword())
-                .role(UserRole.USER)
+                .role(UserRole.USER.toString())
                 .build();
 
         new CreateUserRequest(
@@ -88,7 +89,7 @@ public class DepositAccountTest extends BaseTest {
 
         softly.assertThat(accountResponseDto.getTransactions()).anySatisfy(transaction -> {
             softly.assertThat(transaction.getAmount()).isEqualTo(depositAmount);
-            softly.assertThat(transaction.getType()).isEqualTo(TransactionType.DEPOSIT);
+            softly.assertThat(transaction.getType()).isEqualTo(TransactionType.DEPOSIT.toString());
             softly.assertThat(transaction.getRelatedAccountId()).isEqualTo(expectedAccount.getId());
         });
 
@@ -106,7 +107,7 @@ public class DepositAccountTest extends BaseTest {
 
         softly.assertThat(actualAccount.getTransactions()).anySatisfy(transaction -> {
             softly.assertThat(transaction.getAmount()).isEqualTo(depositAmount);
-            softly.assertThat(transaction.getType()).isEqualTo(TransactionType.DEPOSIT);
+            softly.assertThat(transaction.getType()).isEqualTo(TransactionType.DEPOSIT.toString());
             softly.assertThat(transaction.getRelatedAccountId()).isEqualTo(expectedAccount.getId());
         });
     }
@@ -126,7 +127,7 @@ public class DepositAccountTest extends BaseTest {
         CreateUserRequestDto user = CreateUserRequestDto.builder()
                 .username(TestData.getUsername())
                 .password(TestData.getPassword())
-                .role(UserRole.USER)
+                .role(UserRole.USER.toString())
                 .build();
 
         new CreateUserRequest(
@@ -184,7 +185,7 @@ public class DepositAccountTest extends BaseTest {
         CreateUserRequestDto user = CreateUserRequestDto.builder()
                 .username(TestData.getUsername())
                 .password(TestData.getPassword())
-                .role(UserRole.USER)
+                .role(UserRole.USER.toString())
                 .build();
 
         new CreateUserRequest(
@@ -208,10 +209,13 @@ public class DepositAccountTest extends BaseTest {
                 .balance(depositAmount)
                 .build();
 
-        new DepositRequest(
+        String errorResponse = new DepositRequest(
                 RequestSpecs.authAsUser(userAuthHeader),
                 ResponseSpecs.forbidden())
-                .post(depositRequestDto);
+                .post(depositRequestDto)
+                .extract().asString();
+
+        softly.assertThat(errorResponse).isEqualTo(UNAUTHORIZED_DEPOSIT);
     }
 
     @Test
@@ -221,7 +225,7 @@ public class DepositAccountTest extends BaseTest {
         CreateUserRequestDto firstUser = CreateUserRequestDto.builder()
                 .username(TestData.getUsername())
                 .password(TestData.getPassword())
-                .role(UserRole.USER)
+                .role(UserRole.USER.toString())
                 .build();
 
         new CreateUserRequest(
@@ -243,7 +247,7 @@ public class DepositAccountTest extends BaseTest {
         CreateUserRequestDto secondUser = CreateUserRequestDto.builder()
                 .username(TestData.getUsername())
                 .password(TestData.getPassword())
-                .role(UserRole.USER)
+                .role(UserRole.USER.toString())
                 .build();
 
         new CreateUserRequest(
@@ -273,10 +277,13 @@ public class DepositAccountTest extends BaseTest {
                 .balance(depositAmount)
                 .build();
 
-        new DepositRequest(
+        String errorResponse = new DepositRequest(
                 RequestSpecs.authAsUser(firstUserAuthHeader),
                 ResponseSpecs.forbidden())
-                .post(depositRequestDto);
+                .post(depositRequestDto)
+                .extract().asString();
+
+        softly.assertThat(errorResponse).isEqualTo(UNAUTHORIZED_DEPOSIT);
 
         List<AccountResponseDto> accountsList = new GetClientAccountsRequest(
                 RequestSpecs.authAsUser(secondUserAuthHeader),
@@ -298,7 +305,7 @@ public class DepositAccountTest extends BaseTest {
         CreateUserRequestDto user = CreateUserRequestDto.builder()
                 .username(TestData.getUsername())
                 .password(TestData.getPassword())
-                .role(UserRole.USER)
+                .role(UserRole.USER.toString())
                 .build();
 
         new CreateUserRequest(

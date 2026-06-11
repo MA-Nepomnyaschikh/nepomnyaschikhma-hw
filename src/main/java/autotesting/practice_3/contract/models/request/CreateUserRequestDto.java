@@ -14,5 +14,5 @@ import lombok.NoArgsConstructor;
 public class CreateUserRequestDto extends BaseModel {
     private String username;
     private String password;
-    private UserRole role;
+    private String role;
 }

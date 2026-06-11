@@ -34,7 +34,7 @@ public class UpdateCustomerProfileTest extends BaseTest {
         CreateUserRequestDto user = CreateUserRequestDto.builder()
                 .username(TestData.getUsername())
                 .password(TestData.getPassword())
-                .role(UserRole.USER)
+                .role(UserRole.USER.toString())
                 .build();
 
         new CreateUserRequest(
@@ -95,7 +95,7 @@ public class UpdateCustomerProfileTest extends BaseTest {
         CreateUserRequestDto user = CreateUserRequestDto.builder()
                 .username(TestData.getUsername())
                 .password(TestData.getPassword())
-                .role(UserRole.USER)
+                .role(UserRole.USER.toString())
                 .build();
 
         new CreateUserRequest(
@@ -140,7 +140,7 @@ public class UpdateCustomerProfileTest extends BaseTest {
         CreateUserRequestDto user = CreateUserRequestDto.builder()
                 .username(TestData.getUsername())
                 .password(TestData.getPassword())
-                .role(UserRole.USER)
+                .role(UserRole.USER.toString())
                 .build();
 
         new CreateUserRequest(
