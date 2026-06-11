@@ -1,20 +1,19 @@
 package autotesting.practice_3.iteration_2;
 
-import autotesting.practice_3.generators.RandomData;
-import autotesting.practice_3.models.UserRole;
-import autotesting.practice_3.models.request.CreateUserRequestDto;
-import autotesting.practice_3.models.request.DepositRequestDto;
-import autotesting.practice_3.models.request.LoginUserRequestDto;
-import autotesting.practice_3.models.request.TransferRequestDto;
-import autotesting.practice_3.models.response.AccountResponseDto;
-import autotesting.practice_3.models.response.TransactionResponseDto;
-import autotesting.practice_3.models.response.TransferResponseDto;
 import autotesting.practice_3.BaseTest;
-import autotesting.practice_3.requests.get.GetAccountTransactionsRequest;
+import autotesting.practice_3.contract.enams.TransactionType;
+import autotesting.practice_3.contract.enams.UserRole;
+import autotesting.practice_3.contract.models.request.CreateUserRequestDto;
+import autotesting.practice_3.contract.models.request.DepositRequestDto;
+import autotesting.practice_3.contract.models.request.LoginUserRequestDto;
+import autotesting.practice_3.contract.models.request.TransferRequestDto;
+import autotesting.practice_3.contract.models.response.AccountResponseDto;
+import autotesting.practice_3.contract.models.response.TransferResponseDto;
 import autotesting.practice_3.requests.get.GetClientAccountsRequest;
 import autotesting.practice_3.requests.post.*;
 import autotesting.practice_3.specs.RequestSpecs;
 import autotesting.practice_3.specs.ResponseSpecs;
+import io.restassured.common.mapper.TypeRef;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -23,8 +22,11 @@ import org.junit.jupiter.params.provider.MethodSource;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static io.restassured.RestAssured.given;
-import static org.assertj.core.api.Assertions.*;
+import static autotesting.practice_3.contract.messages.TransferMessages.*;
+import static autotesting.practice_3.generators.TestData.*;
+import static autotesting.practice_3.specs.ResponseSpecs.AUTH_HEADER;
+import static autotesting.practice_3.utils.AccountUtils.findById;
+import static org.assertj.core.api.Assertions.within;
 
 public class TransferFundsTest extends BaseTest {
 
@@ -41,9 +43,9 @@ public class TransferFundsTest extends BaseTest {
     @ParameterizedTest
     public void authorizedUserCanTransferValidAmountBetweenTheirAccountsTest(double transferAmount) {
         CreateUserRequestDto user = CreateUserRequestDto.builder()
-                .username(RandomData.getUsername())
-                .password(RandomData.getPassword())
-                .role(UserRole.USER.toString())
+                .username(getUsername())
+                .password(getPassword())
+                .role(UserRole.USER)
                 .build();
 
         new CreateUserRequest(
@@ -60,17 +62,17 @@ public class TransferFundsTest extends BaseTest {
                 RequestSpecs.unauth(),
                 ResponseSpecs.ok())
                 .post(loginRequestDto)
-                .extract().header("Authorization");
+                .extract().header(AUTH_HEADER);
 
         AccountResponseDto firstAccount = new CreateAccountRequest(
                 RequestSpecs.authAsUser(userAuthHeader),
                 ResponseSpecs.created())
-                .post(null)
+                .post()
                 .extract().as(AccountResponseDto.class);
 
         DepositRequestDto depositRequestDto = DepositRequestDto.builder()
                 .id(firstAccount.getId())
-                .balance(5000)
+                .balance(MAX_DEPOSIT_AMOUNT)
                 .build();
 
         new DepositRequest(
@@ -85,15 +87,15 @@ public class TransferFundsTest extends BaseTest {
                 .extract()
                 .as(AccountResponseDto.class);
 
-        AccountResponseDto secondAccount = new CreateAccountRequest(
+        AccountResponseDto expectedSecondAcc = new CreateAccountRequest(
                 RequestSpecs.authAsUser(userAuthHeader),
                 ResponseSpecs.created())
-                .post(null)
+                .post()
                 .extract().as(AccountResponseDto.class);
 
         TransferRequestDto transferRequestDto = TransferRequestDto.builder()
                 .senderAccountId(firstAccount.getId())
-                .receiverAccountId(secondAccount.getId())
+                .receiverAccountId(expectedSecondAcc.getId())
                 .amount(transferAmount)
                 .build();
 
@@ -104,38 +106,33 @@ public class TransferFundsTest extends BaseTest {
                 .extract().as(TransferResponseDto.class);
 
         softly.assertThat(transferResponseDto.getSenderAccountId()).isEqualTo(expectedFirstAcc.getId());
-        softly.assertThat(transferResponseDto.getReceiverAccountId()).isEqualTo(secondAccount.getId());
+        softly.assertThat(transferResponseDto.getReceiverAccountId()).isEqualTo(expectedSecondAcc.getId());
         softly.assertThat(transferResponseDto.getAmount()).isEqualTo(transferAmount);
-        softly.assertThat(transferResponseDto.getMessage()).isEqualTo("Transfer successful");
+        softly.assertThat(transferResponseDto.getMessage()).isEqualTo(TRANSFER_SUCCESSFUL);
 
-        AccountResponseDto actualSecondAcc = new GetClientAccountsRequest(
+        List<AccountResponseDto> accountsList = new GetClientAccountsRequest(
                 RequestSpecs.authAsUser(userAuthHeader),
                 ResponseSpecs.ok())
                 .get()
                 .extract()
-                .jsonPath()
-                .getObject(String.format("find { it.id == %d }", secondAccount.getId()), AccountResponseDto.class);
+                .as(new TypeRef<List<AccountResponseDto>>() {});
+
+        AccountResponseDto actualSecondAcc = findById(accountsList, expectedSecondAcc.getId());
 
         softly.assertThat(actualSecondAcc.getBalance()).isEqualTo(transferAmount);
         softly.assertThat(actualSecondAcc.getTransactions()).anySatisfy(actualTransaction -> {
             softly.assertThat(actualTransaction.getAmount()).isEqualTo(transferAmount);
-            softly.assertThat(actualTransaction.getType()).isEqualTo("TRANSFER_IN");
+            softly.assertThat(actualTransaction.getType()).isEqualTo(TransactionType.TRANSFER_IN);
             softly.assertThat(actualTransaction.getRelatedAccountId()).isEqualTo(expectedFirstAcc.getId());
         });
 
-        AccountResponseDto actualFirstAcc = new GetClientAccountsRequest(
-                RequestSpecs.authAsUser(userAuthHeader),
-                ResponseSpecs.ok())
-                .get()
-                .extract()
-                .jsonPath()
-                .getObject(String.format("find { it.id == %d }", expectedFirstAcc.getId()), AccountResponseDto.class);
+        AccountResponseDto actualFirstAcc = findById(accountsList, expectedFirstAcc.getId());
 
         softly.assertThat(actualFirstAcc.getBalance()).isEqualTo(expectedFirstAcc.getBalance() - transferAmount, within(0.00001));
         softly.assertThat(actualFirstAcc.getTransactions()).anySatisfy(actualTransaction -> {
             softly.assertThat(actualTransaction.getAmount()).isEqualTo(transferAmount);
-            softly.assertThat(actualTransaction.getType()).isEqualTo("TRANSFER_OUT");
-            softly.assertThat(actualTransaction.getRelatedAccountId()).isEqualTo(secondAccount.getId());
+            softly.assertThat(actualTransaction.getType()).isEqualTo(TransactionType.TRANSFER_OUT);
+            softly.assertThat(actualTransaction.getRelatedAccountId()).isEqualTo(expectedSecondAcc.getId());
         });
     }
 
@@ -143,9 +140,9 @@ public class TransferFundsTest extends BaseTest {
     @ParameterizedTest
     public void authorizedUserCanTransferValidAmountToAnotherUserAccountTest(double transferAmount) {
         CreateUserRequestDto firstUser = CreateUserRequestDto.builder()
-                .username(RandomData.getUsername())
-                .password(RandomData.getPassword())
-                .role(UserRole.USER.toString())
+                .username(getUsername())
+                .password(getPassword())
+                .role(UserRole.USER)
                 .build();
 
         new CreateUserRequest(
@@ -162,17 +159,17 @@ public class TransferFundsTest extends BaseTest {
                 RequestSpecs.unauth(),
                 ResponseSpecs.ok())
                 .post(firstUserLoginRequestDto)
-                .extract().header("Authorization");
+                .extract().header(AUTH_HEADER);
 
         AccountResponseDto firstUserAccount = new CreateAccountRequest(
                 RequestSpecs.authAsUser(firstUserAuthHeader),
                 ResponseSpecs.created())
-                .post(null)
+                .post()
                 .extract().as(AccountResponseDto.class);
 
         DepositRequestDto depositRequestDto = DepositRequestDto.builder()
                 .id(firstUserAccount.getId())
-                .balance(5000)
+                .balance(MAX_DEPOSIT_AMOUNT)
                 .build();
 
         new DepositRequest(
@@ -188,9 +185,9 @@ public class TransferFundsTest extends BaseTest {
                 .as(AccountResponseDto.class);
 
         CreateUserRequestDto secondUser = CreateUserRequestDto.builder()
-                .username(RandomData.getUsername())
-                .password(RandomData.getPassword())
-                .role(UserRole.USER.toString())
+                .username(getUsername())
+                .password(getPassword())
+                .role(UserRole.USER)
                 .build();
 
         new CreateUserRequest(
@@ -207,12 +204,12 @@ public class TransferFundsTest extends BaseTest {
                 RequestSpecs.unauth(),
                 ResponseSpecs.ok())
                 .post(secondUserLoginRequestDto)
-                .extract().header("Authorization");
+                .extract().header(AUTH_HEADER);
 
         AccountResponseDto secondUserAccount = new CreateAccountRequest(
                 RequestSpecs.authAsUser(secondUserAuthHeader),
                 ResponseSpecs.created())
-                .post(null)
+                .post()
                 .extract().as(AccountResponseDto.class);
 
         TransferRequestDto transferRequestDto = TransferRequestDto.builder()
@@ -230,35 +227,37 @@ public class TransferFundsTest extends BaseTest {
         softly.assertThat(transferResponseDto.getSenderAccountId()).isEqualTo(expectedFirstUserAcc.getId());
         softly.assertThat(transferResponseDto.getReceiverAccountId()).isEqualTo(secondUserAccount.getId());
         softly.assertThat(transferResponseDto.getAmount()).isEqualTo(transferAmount);
-        softly.assertThat(transferResponseDto.getMessage()).isEqualTo("Transfer successful");
+        softly.assertThat(transferResponseDto.getMessage()).isEqualTo(TRANSFER_SUCCESSFUL);
 
-        AccountResponseDto actualSecondUserAcc = new GetClientAccountsRequest(
+        List<AccountResponseDto> secondUserAccountsList = new GetClientAccountsRequest(
                 RequestSpecs.authAsUser(secondUserAuthHeader),
                 ResponseSpecs.ok())
                 .get()
                 .extract()
-                .jsonPath()
-                .getObject(String.format("find { it.id == %d }", secondUserAccount.getId()), AccountResponseDto.class);
+                .as(new TypeRef<List<AccountResponseDto>>() {});
+
+        AccountResponseDto actualSecondUserAcc = findById(secondUserAccountsList, secondUserAccount.getId());
 
         softly.assertThat(actualSecondUserAcc.getBalance()).isEqualTo(transferAmount);
         softly.assertThat(actualSecondUserAcc.getTransactions()).anySatisfy(actualTransaction -> {
             softly.assertThat(actualTransaction.getAmount()).isEqualTo(transferAmount);
-            softly.assertThat(actualTransaction.getType()).isEqualTo("TRANSFER_IN");
+            softly.assertThat(actualTransaction.getType()).isEqualTo(TransactionType.TRANSFER_IN);
             softly.assertThat(actualTransaction.getRelatedAccountId()).isEqualTo(expectedFirstUserAcc.getId());
         });
 
-        AccountResponseDto actualFirstUserAcc = new GetClientAccountsRequest(
+        List<AccountResponseDto> firstUserAccountsList = new GetClientAccountsRequest(
                 RequestSpecs.authAsUser(firstUserAuthHeader),
                 ResponseSpecs.ok())
                 .get()
                 .extract()
-                .jsonPath()
-                .getObject(String.format("find { it.id == %d }", firstUserAccount.getId()), AccountResponseDto.class);
+                .as(new TypeRef<List<AccountResponseDto>>() {});
+
+        AccountResponseDto actualFirstUserAcc = findById(firstUserAccountsList, firstUserAccount.getId());
 
         softly.assertThat(actualFirstUserAcc.getBalance()).isEqualTo(expectedFirstUserAcc.getBalance() - transferAmount, within(0.00001));
         softly.assertThat(actualFirstUserAcc.getTransactions()).anySatisfy(actualTransaction -> {
             softly.assertThat(actualTransaction.getAmount()).isEqualTo(transferAmount);
-            softly.assertThat(actualTransaction.getType()).isEqualTo("TRANSFER_OUT");
+            softly.assertThat(actualTransaction.getType()).isEqualTo(TransactionType.TRANSFER_OUT);
             softly.assertThat(actualTransaction.getRelatedAccountId()).isEqualTo(secondUserAccount.getId());
         });
     }
@@ -275,9 +274,9 @@ public class TransferFundsTest extends BaseTest {
     @ParameterizedTest
     public void authorizedUserCannotTransferInvalidAmountBetweenTheirAccountsTest(double transferAmount, String errorMessage) {
         CreateUserRequestDto user = CreateUserRequestDto.builder()
-                .username(RandomData.getUsername())
-                .password(RandomData.getPassword())
-                .role(UserRole.USER.toString())
+                .username(getUsername())
+                .password(getPassword())
+                .role(UserRole.USER)
                 .build();
 
         new CreateUserRequest(
@@ -294,17 +293,17 @@ public class TransferFundsTest extends BaseTest {
                 RequestSpecs.unauth(),
                 ResponseSpecs.ok())
                 .post(loginRequestDto)
-                .extract().header("Authorization");
+                .extract().header(AUTH_HEADER);
 
         AccountResponseDto firstAccount = new CreateAccountRequest(
                 RequestSpecs.authAsUser(userAuthHeader),
                 ResponseSpecs.created())
-                .post(null)
+                .post()
                 .extract().as(AccountResponseDto.class);
 
         DepositRequestDto depositRequestDto = DepositRequestDto.builder()
                 .id(firstAccount.getId())
-                .balance(5000)
+                .balance(MAX_DEPOSIT_AMOUNT)
                 .build();
 
         new DepositRequest(
@@ -322,7 +321,7 @@ public class TransferFundsTest extends BaseTest {
         AccountResponseDto secondAccount = new CreateAccountRequest(
                 RequestSpecs.authAsUser(userAuthHeader),
                 ResponseSpecs.created())
-                .post(null)
+                .post()
                 .extract().as(AccountResponseDto.class);
 
         TransferRequestDto transferRequestDto = TransferRequestDto.builder()
@@ -339,29 +338,24 @@ public class TransferFundsTest extends BaseTest {
 
         softly.assertThat(errorResponse).isEqualTo(errorMessage);
 
-        AccountResponseDto actualSecondAcc = new GetClientAccountsRequest(
+        List<AccountResponseDto> accountsList = new GetClientAccountsRequest(
                 RequestSpecs.authAsUser(userAuthHeader),
                 ResponseSpecs.ok())
                 .get()
                 .extract()
-                .jsonPath()
-                .getObject(String.format("find { it.id == %d }", secondAccount.getId()), AccountResponseDto.class);
+                .as(new TypeRef<List<AccountResponseDto>>() {});
+
+        AccountResponseDto actualSecondAcc = findById(accountsList, secondAccount.getId());
 
         softly.assertThat(actualSecondAcc.getBalance()).isEqualTo(secondAccount.getBalance());
-        softly.assertThat(actualSecondAcc.getTransactions()).hasSize(0);
+        softly.assertThat(actualSecondAcc.getTransactions()).isEmpty();
 
-        AccountResponseDto actualFirstAcc = new GetClientAccountsRequest(
-                RequestSpecs.authAsUser(userAuthHeader),
-                ResponseSpecs.ok())
-                .get()
-                .extract()
-                .jsonPath()
-                .getObject(String.format("find { it.id == %d }", firstAccount.getId()), AccountResponseDto.class);
+        AccountResponseDto actualFirstAcc = findById(accountsList, firstAccount.getId());
 
         softly.assertThat(actualFirstAcc.getBalance()).isEqualTo(expectedFirstAcc.getBalance());
         softly.assertThat(actualFirstAcc.getTransactions()).noneSatisfy(actualTransaction -> {
             softly.assertThat(actualTransaction.getAmount()).isEqualTo(transferAmount);
-            softly.assertThat(actualTransaction.getType()).isEqualTo("TRANSFER_OUT");
+            softly.assertThat(actualTransaction.getType()).isEqualTo(TransactionType.TRANSFER_OUT);
         });
     }
 
@@ -369,9 +363,9 @@ public class TransferFundsTest extends BaseTest {
     @ParameterizedTest
     public void authorizedUserCannotTransferInvalidAmountToAnotherUserAccountTest(double transferAmount, String errorMessage) {
         CreateUserRequestDto firstUser = CreateUserRequestDto.builder()
-                .username(RandomData.getUsername())
-                .password(RandomData.getPassword())
-                .role(UserRole.USER.toString())
+                .username(getUsername())
+                .password(getPassword())
+                .role(UserRole.USER)
                 .build();
 
         new CreateUserRequest(
@@ -388,17 +382,17 @@ public class TransferFundsTest extends BaseTest {
                 RequestSpecs.unauth(),
                 ResponseSpecs.ok())
                 .post(firstUserLoginRequestDto)
-                .extract().header("Authorization");
+                .extract().header(AUTH_HEADER);
 
         AccountResponseDto firstUserAccount = new CreateAccountRequest(
                 RequestSpecs.authAsUser(firstUserAuthHeader),
                 ResponseSpecs.created())
-                .post(null)
+                .post()
                 .extract().as(AccountResponseDto.class);
 
         DepositRequestDto depositRequestDto = DepositRequestDto.builder()
                 .id(firstUserAccount.getId())
-                .balance(5000)
+                .balance(MAX_DEPOSIT_AMOUNT)
                 .build();
 
         new DepositRequest(
@@ -414,9 +408,9 @@ public class TransferFundsTest extends BaseTest {
                 .as(AccountResponseDto.class);
 
         CreateUserRequestDto secondUser = CreateUserRequestDto.builder()
-                .username(RandomData.getUsername())
-                .password(RandomData.getPassword())
-                .role(UserRole.USER.toString())
+                .username(getUsername())
+                .password(getPassword())
+                .role(UserRole.USER)
                 .build();
 
         new CreateUserRequest(
@@ -433,17 +427,17 @@ public class TransferFundsTest extends BaseTest {
                 RequestSpecs.unauth(),
                 ResponseSpecs.ok())
                 .post(secondUserLoginRequestDto)
-                .extract().header("Authorization");
+                .extract().header(AUTH_HEADER);
 
-        AccountResponseDto secondUserAccount = new CreateAccountRequest(
+        AccountResponseDto expectedSecondUserAccount = new CreateAccountRequest(
                 RequestSpecs.authAsUser(secondUserAuthHeader),
                 ResponseSpecs.created())
-                .post(null)
+                .post()
                 .extract().as(AccountResponseDto.class);
 
         TransferRequestDto transferRequestDto = TransferRequestDto.builder()
                 .senderAccountId(firstUserAccount.getId())
-                .receiverAccountId(secondUserAccount.getId())
+                .receiverAccountId(expectedSecondUserAccount.getId())
                 .amount(transferAmount)
                 .build();
 
@@ -455,40 +449,40 @@ public class TransferFundsTest extends BaseTest {
 
         softly.assertThat(errorResponse).isEqualTo(errorMessage);
 
-        AccountResponseDto actualSecondUserAcc = new GetClientAccountsRequest(
+        List<AccountResponseDto> secondUserAccountsList = new GetClientAccountsRequest(
                 RequestSpecs.authAsUser(secondUserAuthHeader),
                 ResponseSpecs.ok())
                 .get()
                 .extract()
-                .jsonPath()
-                .getObject(String.format("find { it.id == %d }", secondUserAccount.getId()), AccountResponseDto.class);
+                .as(new TypeRef<List<AccountResponseDto>>() {});
 
-        softly.assertThat(actualSecondUserAcc.getBalance()).isEqualTo(secondUserAccount.getBalance());
-        softly.assertThat(actualSecondUserAcc.getTransactions()).hasSize(0);
+        AccountResponseDto actualSecondUserAcc = findById(secondUserAccountsList, expectedSecondUserAccount.getId());
 
-        AccountResponseDto actualFirstUserAcc = new GetClientAccountsRequest(
+        softly.assertThat(actualSecondUserAcc.getBalance()).isEqualTo(expectedSecondUserAccount.getBalance());
+        softly.assertThat(actualSecondUserAcc.getTransactions()).isEmpty();
+
+        List<AccountResponseDto> firstUserAccountsList = new GetClientAccountsRequest(
                 RequestSpecs.authAsUser(firstUserAuthHeader),
                 ResponseSpecs.ok())
                 .get()
                 .extract()
-                .jsonPath()
-                .getObject(String.format("find { it.id == %d }", expectedFirstUserAcc.getId()), AccountResponseDto.class);
+                .as(new TypeRef<List<AccountResponseDto>>() {});
+
+        AccountResponseDto actualFirstUserAcc = findById(firstUserAccountsList, expectedFirstUserAcc.getId());
 
         softly.assertThat(actualFirstUserAcc.getBalance()).isEqualTo(expectedFirstUserAcc.getBalance());
         softly.assertThat(actualFirstUserAcc.getTransactions()).noneSatisfy(actualTransaction -> {
             softly.assertThat(actualTransaction.getAmount()).isEqualTo(transferAmount);
-            softly.assertThat(actualTransaction.getType()).isEqualTo("TRANSFER_OUT");
+            softly.assertThat(actualTransaction.getType()).isEqualTo(TransactionType.TRANSFER_OUT);
         });
     }
 
     @Test
     public void authorizedUserCannotTransferAmountExceedingAccountBalanceTest() {
-        double transferAmount = 5000.01;
-
         CreateUserRequestDto firstUser = CreateUserRequestDto.builder()
-                .username(RandomData.getUsername())
-                .password(RandomData.getPassword())
-                .role(UserRole.USER.toString())
+                .username(getUsername())
+                .password(getPassword())
+                .role(UserRole.USER)
                 .build();
 
         new CreateUserRequest(
@@ -505,17 +499,17 @@ public class TransferFundsTest extends BaseTest {
                 RequestSpecs.unauth(),
                 ResponseSpecs.ok())
                 .post(firstUserLoginRequestDto)
-                .extract().header("Authorization");
+                .extract().header(AUTH_HEADER);
 
         AccountResponseDto firstUserAccount = new CreateAccountRequest(
                 RequestSpecs.authAsUser(firstUserAuthHeader),
                 ResponseSpecs.created())
-                .post(null)
+                .post()
                 .extract().as(AccountResponseDto.class);
 
         DepositRequestDto depositRequestDto = DepositRequestDto.builder()
                 .id(firstUserAccount.getId())
-                .balance(5000)
+                .balance(MAX_DEPOSIT_AMOUNT)
                 .build();
 
         AccountResponseDto expectedFirstUserAcc = new DepositRequest(
@@ -526,9 +520,9 @@ public class TransferFundsTest extends BaseTest {
                 .as(AccountResponseDto.class);
 
         CreateUserRequestDto secondUser = CreateUserRequestDto.builder()
-                .username(RandomData.getUsername())
-                .password(RandomData.getPassword())
-                .role(UserRole.USER.toString())
+                .username(getUsername())
+                .password(getPassword())
+                .role(UserRole.USER)
                 .build();
 
         new CreateUserRequest(
@@ -545,18 +539,20 @@ public class TransferFundsTest extends BaseTest {
                 RequestSpecs.unauth(),
                 ResponseSpecs.ok())
                 .post(secondUserLoginRequestDto)
-                .extract().header("Authorization");
+                .extract().header(AUTH_HEADER);
 
-        AccountResponseDto secondUserAccount = new CreateAccountRequest(
+        AccountResponseDto expectedSecondUserAccount = new CreateAccountRequest(
                 RequestSpecs.authAsUser(secondUserAuthHeader),
                 ResponseSpecs.created())
-                .post(null)
+                .post()
                 .extract().as(AccountResponseDto.class);
+
+        double transferAmountExceedingBalance = expectedFirstUserAcc.getBalance() + 0.01;
 
         TransferRequestDto transferRequestDto = TransferRequestDto.builder()
                 .senderAccountId(firstUserAccount.getId())
-                .receiverAccountId(secondUserAccount.getId())
-                .amount(transferAmount)
+                .receiverAccountId(expectedSecondUserAccount.getId())
+                .amount(transferAmountExceedingBalance)
                 .build();
 
         String errorResponse = new TransferRequest(
@@ -565,44 +561,46 @@ public class TransferFundsTest extends BaseTest {
                 .post(transferRequestDto)
                 .extract().asString();
 
-        softly.assertThat(errorResponse).isEqualTo("Invalid transfer: insufficient funds or invalid accounts");
+        softly.assertThat(errorResponse).isEqualTo(TRANSFER_FAILED);
 
-        AccountResponseDto actualSecondUserAcc = new GetClientAccountsRequest(
+        List<AccountResponseDto> secondUserAccountsList = new GetClientAccountsRequest(
                 RequestSpecs.authAsUser(secondUserAuthHeader),
                 ResponseSpecs.ok())
                 .get()
                 .extract()
-                .jsonPath()
-                .getObject(String.format("find { it.id == %d }", secondUserAccount.getId()), AccountResponseDto.class);
+                .as(new TypeRef<List<AccountResponseDto>>() {});
 
-        softly.assertThat(actualSecondUserAcc.getBalance()).isEqualTo(secondUserAccount.getBalance());
-        softly.assertThat(actualSecondUserAcc.getTransactions()).hasSize(0);
+        AccountResponseDto actualSecondUserAcc = findById(secondUserAccountsList, expectedSecondUserAccount.getId());
 
-        AccountResponseDto actualFirstUserAcc = new GetClientAccountsRequest(
+        softly.assertThat(actualSecondUserAcc.getBalance()).isEqualTo(expectedSecondUserAccount.getBalance());
+        softly.assertThat(actualSecondUserAcc.getTransactions()).isEmpty();
+
+        List<AccountResponseDto> firstUserAccountsList = new GetClientAccountsRequest(
                 RequestSpecs.authAsUser(firstUserAuthHeader),
                 ResponseSpecs.ok())
                 .get()
                 .extract()
-                .jsonPath()
-                .getObject(String.format("find { it.id == %d }", expectedFirstUserAcc.getId()), AccountResponseDto.class);
+                .as(new TypeRef<List<AccountResponseDto>>() {});
+
+        AccountResponseDto actualFirstUserAcc = findById(firstUserAccountsList, expectedFirstUserAcc.getId());
 
         softly.assertThat(actualFirstUserAcc.getBalance()).isEqualTo(expectedFirstUserAcc.getBalance());
         softly.assertThat(actualFirstUserAcc.getTransactions()).noneSatisfy(actualTransaction -> {
-            softly.assertThat(actualTransaction.getAmount()).isEqualTo(transferAmount);
-            softly.assertThat(actualTransaction.getType()).isEqualTo("TRANSFER_OUT");
-            softly.assertThat(actualTransaction.getRelatedAccountId()).isEqualTo(secondUserAccount.getId());
+            softly.assertThat(actualTransaction.getAmount()).isEqualTo(transferAmountExceedingBalance);
+            softly.assertThat(actualTransaction.getType()).isEqualTo(TransactionType.TRANSFER_OUT);
+            softly.assertThat(actualTransaction.getRelatedAccountId()).isEqualTo(expectedSecondUserAccount.getId());
         });
     }
 
 
     @Test
     public void authorizedUserCannotTransferFundsIntoNonExistingAccountTest() {
-        double transferAmount = 100;
+        double transferAmount = getRandomValidTransferAmount();
 
         CreateUserRequestDto user = CreateUserRequestDto.builder()
-                .username(RandomData.getUsername())
-                .password(RandomData.getPassword())
-                .role(UserRole.USER.toString())
+                .username(getUsername())
+                .password(getPassword())
+                .role(UserRole.USER)
                 .build();
 
         new CreateUserRequest(
@@ -619,20 +617,20 @@ public class TransferFundsTest extends BaseTest {
                 RequestSpecs.unauth(),
                 ResponseSpecs.ok())
                 .post(userLoginRequestDto)
-                .extract().header("Authorization");
+                .extract().header(AUTH_HEADER);
 
         AccountResponseDto userAccount = new CreateAccountRequest(
                 RequestSpecs.authAsUser(userAuthHeader),
                 ResponseSpecs.created())
-                .post(null)
+                .post()
                 .extract().as(AccountResponseDto.class);
 
         DepositRequestDto depositRequestDto = DepositRequestDto.builder()
                 .id(userAccount.getId())
-                .balance(5000)
+                .balance(MAX_DEPOSIT_AMOUNT)
                 .build();
 
-        AccountResponseDto expectedUserAccount = new DepositRequest(
+        AccountResponseDto expectedUserAcc = new DepositRequest(
                 RequestSpecs.authAsUser(userAuthHeader),
                 ResponseSpecs.ok())
                 .post(depositRequestDto)
@@ -641,7 +639,7 @@ public class TransferFundsTest extends BaseTest {
 
         TransferRequestDto transferRequestDto = TransferRequestDto.builder()
                 .senderAccountId(userAccount.getId())
-                .receiverAccountId(-1)
+                .receiverAccountId(NON_EXISTING_ACCOUNT_ID)
                 .amount(transferAmount)
                 .build();
 
@@ -651,31 +649,32 @@ public class TransferFundsTest extends BaseTest {
                 .post(transferRequestDto)
                 .extract().asString();
 
-        softly.assertThat(errorResponse).isEqualTo("Invalid transfer: insufficient funds or invalid accounts");
+        softly.assertThat(errorResponse).isEqualTo(TRANSFER_FAILED);
 
-        AccountResponseDto actualUserAcc = new GetClientAccountsRequest(
+        List<AccountResponseDto> accountsList = new GetClientAccountsRequest(
                 RequestSpecs.authAsUser(userAuthHeader),
                 ResponseSpecs.ok())
                 .get()
                 .extract()
-                .jsonPath()
-                .getObject(String.format("find { it.id == %d }", expectedUserAccount.getId()), AccountResponseDto.class);
+                .as(new TypeRef<List<AccountResponseDto>>() {});
 
-        softly.assertThat(actualUserAcc.getBalance()).isEqualTo(expectedUserAccount.getBalance());
+        AccountResponseDto actualUserAcc = findById(accountsList, expectedUserAcc.getId());
+
+        softly.assertThat(actualUserAcc.getBalance()).isEqualTo(expectedUserAcc.getBalance());
         softly.assertThat(actualUserAcc.getTransactions()).noneSatisfy(actualTransaction -> {
             softly.assertThat(actualTransaction.getAmount()).isEqualTo(transferAmount);
-            softly.assertThat(actualTransaction.getType()).isEqualTo("TRANSFER_OUT");
+            softly.assertThat(actualTransaction.getType()).isEqualTo(TransactionType.TRANSFER_OUT);
         });
     }
 
     @Test
     public void authorizedUserCannotTransferFundsFromNonExistingAccountTest() {
-        double transferAmount = 100;
+        double transferAmount = getRandomValidTransferAmount();
 
         CreateUserRequestDto firstUser = CreateUserRequestDto.builder()
-                .username(RandomData.getUsername())
-                .password(RandomData.getPassword())
-                .role(UserRole.USER.toString())
+                .username(getUsername())
+                .password(getPassword())
+                .role(UserRole.USER)
                 .build();
 
         new CreateUserRequest(
@@ -692,17 +691,17 @@ public class TransferFundsTest extends BaseTest {
                 RequestSpecs.unauth(),
                 ResponseSpecs.ok())
                 .post(firstUserLoginRequestDto)
-                .extract().header("Authorization");
+                .extract().header(AUTH_HEADER);
 
         AccountResponseDto firstUserAccount = new CreateAccountRequest(
                 RequestSpecs.authAsUser(firstUserAuthHeader),
                 ResponseSpecs.created())
-                .post(null)
+                .post()
                 .extract().as(AccountResponseDto.class);
 
         DepositRequestDto depositRequestDto = DepositRequestDto.builder()
                 .id(firstUserAccount.getId())
-                .balance(5000)
+                .balance(MAX_DEPOSIT_AMOUNT)
                 .build();
 
         new DepositRequest(
@@ -713,9 +712,9 @@ public class TransferFundsTest extends BaseTest {
                 .as(AccountResponseDto.class);
 
         CreateUserRequestDto secondUser = CreateUserRequestDto.builder()
-                .username(RandomData.getUsername())
-                .password(RandomData.getPassword())
-                .role(UserRole.USER.toString())
+                .username(getUsername())
+                .password(getPassword())
+                .role(UserRole.USER)
                 .build();
 
         new CreateUserRequest(
@@ -732,48 +731,46 @@ public class TransferFundsTest extends BaseTest {
                 RequestSpecs.unauth(),
                 ResponseSpecs.ok())
                 .post(secondUserLoginRequestDto)
-                .extract().header("Authorization");
+                .extract().header(AUTH_HEADER);
 
-        AccountResponseDto secondUserAccount = new CreateAccountRequest(
+        AccountResponseDto expectedSecondUserAcc = new CreateAccountRequest(
                 RequestSpecs.authAsUser(secondUserAuthHeader),
                 ResponseSpecs.created())
-                .post(null)
+                .post()
                 .extract().as(AccountResponseDto.class);
 
         TransferRequestDto transferRequestDto = TransferRequestDto.builder()
-                .senderAccountId(-1)
-                .receiverAccountId(secondUserAccount.getId())
+                .senderAccountId(NON_EXISTING_ACCOUNT_ID)
+                .receiverAccountId(expectedSecondUserAcc.getId())
                 .amount(transferAmount)
                 .build();
 
-        String errorResponse = new TransferRequest(
+        new TransferRequest(
                 RequestSpecs.authAsUser(firstUserAuthHeader),
                 ResponseSpecs.forbidden())
-                .post(transferRequestDto)
-                .extract().asString();
+                .post(transferRequestDto);
 
-        softly.assertThat(errorResponse).isEqualTo("Unauthorized access to account");
-
-        AccountResponseDto actualSecondUserAcc = new GetClientAccountsRequest(
+        List<AccountResponseDto> secondUserAccountsList = new GetClientAccountsRequest(
                 RequestSpecs.authAsUser(secondUserAuthHeader),
                 ResponseSpecs.ok())
                 .get()
                 .extract()
-                .jsonPath()
-                .getObject(String.format("find { it.id == %d }", secondUserAccount.getId()), AccountResponseDto.class);
+                .as(new TypeRef<List<AccountResponseDto>>() {});
 
-        softly.assertThat(actualSecondUserAcc.getBalance()).isEqualTo(secondUserAccount.getBalance());
-        softly.assertThat(actualSecondUserAcc.getTransactions()).hasSize(0);
+        AccountResponseDto actualSecondUserAcc = findById(secondUserAccountsList, expectedSecondUserAcc.getId());
+
+        softly.assertThat(actualSecondUserAcc.getBalance()).isEqualTo(expectedSecondUserAcc.getBalance());
+        softly.assertThat(actualSecondUserAcc.getTransactions()).isEmpty();
     }
 
     @Test
     public void unauthorizedUserCannotTransferFundsTest() {
-        double transferAmount = 100;
+        double transferAmount = getRandomValidTransferAmount();
 
         CreateUserRequestDto firstUser = CreateUserRequestDto.builder()
-                .username(RandomData.getUsername())
-                .password(RandomData.getPassword())
-                .role(UserRole.USER.toString())
+                .username(getUsername())
+                .password(getPassword())
+                .role(UserRole.USER)
                 .build();
 
         new CreateUserRequest(
@@ -790,17 +787,17 @@ public class TransferFundsTest extends BaseTest {
                 RequestSpecs.unauth(),
                 ResponseSpecs.ok())
                 .post(firstUserLoginRequestDto)
-                .extract().header("Authorization");
+                .extract().header(AUTH_HEADER);
 
         AccountResponseDto firstUserAccount = new CreateAccountRequest(
                 RequestSpecs.authAsUser(firstUserAuthHeader),
                 ResponseSpecs.created())
-                .post(null)
+                .post()
                 .extract().as(AccountResponseDto.class);
 
         DepositRequestDto depositRequestDto = DepositRequestDto.builder()
                 .id(firstUserAccount.getId())
-                .balance(5000)
+                .balance(MAX_DEPOSIT_AMOUNT)
                 .build();
 
         AccountResponseDto expectedFirstUserAcc = new DepositRequest(
@@ -811,9 +808,9 @@ public class TransferFundsTest extends BaseTest {
                 .as(AccountResponseDto.class);
 
         CreateUserRequestDto secondUser = CreateUserRequestDto.builder()
-                .username(RandomData.getUsername())
-                .password(RandomData.getPassword())
-                .role(UserRole.USER.toString())
+                .username(getUsername())
+                .password(getPassword())
+                .role(UserRole.USER)
                 .build();
 
         new CreateUserRequest(
@@ -830,17 +827,17 @@ public class TransferFundsTest extends BaseTest {
                 RequestSpecs.unauth(),
                 ResponseSpecs.ok())
                 .post(secondUserLoginRequestDto)
-                .extract().header("Authorization");
+                .extract().header(AUTH_HEADER);
 
-        AccountResponseDto secondUserAccount = new CreateAccountRequest(
+        AccountResponseDto expectedSecondUserAcc = new CreateAccountRequest(
                 RequestSpecs.authAsUser(secondUserAuthHeader),
                 ResponseSpecs.created())
-                .post(null)
+                .post()
                 .extract().as(AccountResponseDto.class);
 
         TransferRequestDto transferRequestDto = TransferRequestDto.builder()
                 .senderAccountId(firstUserAccount.getId())
-                .receiverAccountId(secondUserAccount.getId())
+                .receiverAccountId(expectedSecondUserAcc.getId())
                 .amount(transferAmount)
                 .build();
 
@@ -849,30 +846,34 @@ public class TransferFundsTest extends BaseTest {
                 ResponseSpecs.unauthorized())
                 .post(transferRequestDto);
 
-        AccountResponseDto actualSecondUserAcc = new GetClientAccountsRequest(
+        List<AccountResponseDto> secondUserAccountsList = new GetClientAccountsRequest(
                 RequestSpecs.authAsUser(secondUserAuthHeader),
                 ResponseSpecs.ok())
                 .get()
                 .extract()
-                .jsonPath()
-                .getObject(String.format("find { it.id == %d }", secondUserAccount.getId()), AccountResponseDto.class);
+                .as(new TypeRef<List<AccountResponseDto>>() {});
 
-        softly.assertThat(actualSecondUserAcc.getBalance()).isEqualTo(secondUserAccount.getBalance());
-        softly.assertThat(actualSecondUserAcc.getTransactions()).hasSize(0);
+        AccountResponseDto actualSecondUserAcc = findById(secondUserAccountsList, expectedSecondUserAcc.getId());
 
-        AccountResponseDto actualFirstUserAcc = new GetClientAccountsRequest(
+        softly.assertThat(actualSecondUserAcc.getBalance()).isEqualTo(expectedSecondUserAcc.getBalance());
+        softly.assertThat(actualSecondUserAcc.getTransactions()).isEmpty();
+
+        List<AccountResponseDto> firstUserAccountsList = new GetClientAccountsRequest(
                 RequestSpecs.authAsUser(firstUserAuthHeader),
                 ResponseSpecs.ok())
                 .get()
                 .extract()
-                .jsonPath()
-                .getObject(String.format("find { it.id == %d }", expectedFirstUserAcc.getId()), AccountResponseDto.class);
+                .as(new TypeRef<List<AccountResponseDto>>() {});
+
+        AccountResponseDto actualFirstUserAcc = findById(firstUserAccountsList, expectedFirstUserAcc.getId());
 
         softly.assertThat(actualFirstUserAcc.getBalance()).isEqualTo(expectedFirstUserAcc.getBalance());
         softly.assertThat(actualFirstUserAcc.getTransactions()).noneSatisfy(actualTransaction -> {
             softly.assertThat(actualTransaction.getAmount()).isEqualTo(transferAmount);
-            softly.assertThat(actualTransaction.getType()).isEqualTo("TRANSFER_OUT");
+            softly.assertThat(actualTransaction.getType()).isEqualTo(TransactionType.TRANSFER_OUT);
         });
     }
+
+
 
 }

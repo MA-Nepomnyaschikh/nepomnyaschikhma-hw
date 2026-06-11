@@ -1,6 +1,6 @@
-package autotesting.practice_3.models.response;
+package autotesting.practice_3.contract.models.response;
 
-import autotesting.practice_3.models.BaseModel;
+import autotesting.practice_3.contract.models.BaseModel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

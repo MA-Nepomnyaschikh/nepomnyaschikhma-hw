@@ -4,12 +4,21 @@ import net.datafaker.Faker;
 import org.apache.commons.lang3.RandomStringUtils;
 
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 
-public class RandomData {
+public class TestData {
 
     private static final Faker FAKER = new Faker();
 
-    private RandomData() {}
+    public static final int NON_EXISTING_ACCOUNT_ID = Integer.MIN_VALUE;
+
+    public static final double MIN_DEPOSIT_AMOUNT = 0.01;
+    public static final double MAX_DEPOSIT_AMOUNT = 5000.00;
+
+    public static final double MIN_TRANSFER_AMOUNT = 0.01;
+    public static final double MAX_TRANSFER_AMOUNT = 10000.00;
+
+    private TestData() {}
 
     public static String getUsername() {
         return "User_" + UUID.randomUUID().toString().replace("-", "").substring(0, 8);
@@ -29,5 +38,18 @@ public class RandomData {
 
     public static String getName() {
         return FAKER.name().firstName() + " " + FAKER.name().lastName();
+    }
+
+    public static double getRandomValidTransferAmount() {
+        return getRandomDouble(MIN_TRANSFER_AMOUNT, MAX_TRANSFER_AMOUNT);
+    }
+
+    public static double getRandomValidDepositAmount() {
+        return getRandomDouble(MIN_DEPOSIT_AMOUNT, MAX_DEPOSIT_AMOUNT);
+    }
+
+    public static double getRandomDouble(double min, double max) {
+        double value = ThreadLocalRandom.current().nextDouble(min, max);
+        return Math.round(value * 100.0) / 100.0;
     }
 }

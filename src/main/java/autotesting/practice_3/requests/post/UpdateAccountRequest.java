@@ -1,6 +1,6 @@
 package autotesting.practice_3.requests.post;
 
-import autotesting.practice_3.models.BaseModel;
+import autotesting.practice_3.contract.models.BaseModel;
 import autotesting.practice_3.requests.put.PutRequest;
 import io.restassured.response.ValidatableResponse;
 import io.restassured.specification.RequestSpecification;

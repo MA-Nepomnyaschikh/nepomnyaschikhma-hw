@@ -1,6 +1,7 @@
-package autotesting.practice_3.models.response;
+package autotesting.practice_3.contract.models.response;
 
-import autotesting.practice_3.models.BaseModel;
+import autotesting.practice_3.contract.enams.UserRole;
+import autotesting.practice_3.contract.models.BaseModel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,6 +12,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class LoginUserResponseDto extends BaseModel {
-    private String role;
+    private UserRole role;
     private String username;
 }

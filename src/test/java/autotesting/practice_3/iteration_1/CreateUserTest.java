@@ -1,10 +1,10 @@
 package autotesting.practice_3.iteration_1;
 
-import autotesting.practice_3.generators.RandomData;
-import autotesting.practice_3.models.UserRole;
-import autotesting.practice_3.models.request.CreateUserRequestDto;
-import autotesting.practice_3.models.response.CreateUserResponseDto;
-import autotesting.practice_3.models.response.ErrorResponseDto;
+import autotesting.practice_3.generators.TestData;
+import autotesting.practice_3.contract.enams.UserRole;
+import autotesting.practice_3.contract.models.request.CreateUserRequestDto;
+import autotesting.practice_3.contract.models.response.CreateUserResponseDto;
+import autotesting.practice_3.contract.models.response.ErrorResponseDto;
 import autotesting.practice_3.BaseTest;
 import autotesting.practice_3.requests.post.CreateUserRequest;
 import autotesting.practice_3.specs.RequestSpecs;
@@ -21,14 +21,14 @@ public class CreateUserTest extends BaseTest {
 
     public static Stream<Arguments> userValidDataProvider() {
         return Stream.of(
-                Arguments.of(RandomData.getUsername(), RandomData.getPassword(), UserRole.USER.toString()),
-                Arguments.of(RandomData.getUsername(), RandomData.getPassword(), UserRole.ADMIN.toString())
+                Arguments.of(TestData.getUsername(), TestData.getPassword(), UserRole.USER),
+                Arguments.of(TestData.getUsername(), TestData.getPassword(), UserRole.ADMIN)
                 );
     }
 
     @MethodSource("userValidDataProvider")
     @ParameterizedTest
-    public void adminCanCreateUserWithValidDataTest(String username, String password, String role) {
+    public void adminCanCreateUserWithValidDataTest(String username, String password, UserRole role) {
         CreateUserRequestDto createUserRequestDto = CreateUserRequestDto.builder()
                 .username(username)
                 .password(password)
@@ -49,12 +49,12 @@ public class CreateUserTest extends BaseTest {
 
     @Test
     public void adminCannotCreateUserWithExistingUsernameTest() {
-        String username = RandomData.getUsername();
+        String username = TestData.getUsername();
 
         CreateUserRequestDto createUserRequestDto = CreateUserRequestDto.builder()
                 .username(username)
-                .password(RandomData.getPassword())
-                .role(UserRole.USER.toString())
+                .password(TestData.getPassword())
+                .role(UserRole.USER)
                 .build();
 
         new CreateUserRequest(
@@ -64,8 +64,8 @@ public class CreateUserTest extends BaseTest {
 
         CreateUserRequestDto duplicateUsernameRequestDto = CreateUserRequestDto.builder()
                 .username(username)
-                .password(RandomData.getPassword())
-                .role(UserRole.USER.toString())
+                .password(TestData.getPassword())
+                .role(UserRole.USER)
                 .build();
 
         String errorResponse = new CreateUserRequest(
@@ -96,7 +96,7 @@ public class CreateUserTest extends BaseTest {
 
     @MethodSource("userInvalidDataProvider")
     @ParameterizedTest
-    public void adminCannotCreateUserWithInvalidDataTest(String username, String password, String role, String errorKey, String errorValue) {
+    public void adminCannotCreateUserWithInvalidDataTest(String username, String password, UserRole role, String errorKey, String errorValue) {
         CreateUserRequestDto createUserRequestDto = CreateUserRequestDto.builder()
                 .username(username)
                 .password(password)
@@ -116,9 +116,9 @@ public class CreateUserTest extends BaseTest {
     @Test
     public void userWithoutAdminPermissionsCannotCreateUserTest() {
         CreateUserRequestDto createUserRequestDto = CreateUserRequestDto.builder()
-                .username(RandomData.getUsername())
-                .password(RandomData.getPassword())
-                .role(UserRole.USER.toString())
+                .username(TestData.getUsername())
+                .password(TestData.getPassword())
+                .role(UserRole.USER)
                 .build();
 
         new CreateUserRequest(

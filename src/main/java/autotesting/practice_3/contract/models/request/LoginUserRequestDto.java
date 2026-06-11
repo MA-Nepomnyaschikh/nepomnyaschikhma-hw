@@ -1,6 +1,6 @@
-package autotesting.practice_3.models.request;
+package autotesting.practice_3.contract.models.request;
 
-import autotesting.practice_3.models.BaseModel;
+import autotesting.practice_3.contract.models.BaseModel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -10,8 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class CreateUserRequestDto extends BaseModel {
+public class LoginUserRequestDto extends BaseModel {
     private String username;
     private String password;
-    private String role;
 }

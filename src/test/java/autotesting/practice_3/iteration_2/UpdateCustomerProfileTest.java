@@ -1,12 +1,12 @@
 package autotesting.practice_3.iteration_2;
 
-import autotesting.practice_3.generators.RandomData;
-import autotesting.practice_3.models.UserRole;
-import autotesting.practice_3.models.request.CreateUserRequestDto;
-import autotesting.practice_3.models.request.LoginUserRequestDto;
-import autotesting.practice_3.models.request.UpdateAccountRequestDto;
-import autotesting.practice_3.models.response.CreateUserResponseDto;
-import autotesting.practice_3.models.response.UpdateAccountResponseDto;
+import autotesting.practice_3.generators.TestData;
+import autotesting.practice_3.contract.enams.UserRole;
+import autotesting.practice_3.contract.models.request.CreateUserRequestDto;
+import autotesting.practice_3.contract.models.request.LoginUserRequestDto;
+import autotesting.practice_3.contract.models.request.UpdateAccountRequestDto;
+import autotesting.practice_3.contract.models.response.CreateUserResponseDto;
+import autotesting.practice_3.contract.models.response.UpdateAccountResponseDto;
 import autotesting.practice_3.BaseTest;
 import autotesting.practice_3.requests.get.GetCustomerProfileRequest;
 import autotesting.practice_3.requests.post.CreateUserRequest;
@@ -21,6 +21,9 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.stream.Stream;
 
+import static autotesting.practice_3.contract.messages.ProfileUpdateMessages.PROFILE_UPDATE_INVALID_NAME;
+import static autotesting.practice_3.contract.messages.ProfileUpdateMessages.PROFILE_UPDATE_SUCCESS;
+import static autotesting.practice_3.specs.ResponseSpecs.AUTH_HEADER;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.notNullValue;
 
@@ -29,9 +32,9 @@ public class UpdateCustomerProfileTest extends BaseTest {
     @Test
     public void authorizedUserCanSetValidName() {
         CreateUserRequestDto user = CreateUserRequestDto.builder()
-                .username(RandomData.getUsername())
-                .password(RandomData.getPassword())
-                .role(UserRole.USER.toString())
+                .username(TestData.getUsername())
+                .password(TestData.getPassword())
+                .role(UserRole.USER)
                 .build();
 
         new CreateUserRequest(
@@ -48,9 +51,9 @@ public class UpdateCustomerProfileTest extends BaseTest {
                 RequestSpecs.unauth(),
                 ResponseSpecs.ok())
                 .post(loginRequestDto)
-                .extract().header("Authorization");
+                .extract().header(AUTH_HEADER);
 
-        String newName = RandomData.getName();
+        String newName = TestData.getName();
 
         UpdateAccountRequestDto updateAccountRequestDto = UpdateAccountRequestDto.builder()
                 .name(newName)
@@ -62,7 +65,7 @@ public class UpdateCustomerProfileTest extends BaseTest {
                 .put(updateAccountRequestDto)
                 .extract().as(UpdateAccountResponseDto.class);
 
-        softly.assertThat(response.getMessage()).isEqualTo("Profile updated successfully");
+        softly.assertThat(response.getMessage()).isEqualTo(PROFILE_UPDATE_SUCCESS);
         softly.assertThat(response.getCustomer().getName()).isEqualTo(newName);
 
         CreateUserResponseDto customer = new GetCustomerProfileRequest(
@@ -90,9 +93,9 @@ public class UpdateCustomerProfileTest extends BaseTest {
     @ParameterizedTest
     public void authorizedUserCannotSetInvalidName(String name) {
         CreateUserRequestDto user = CreateUserRequestDto.builder()
-                .username(RandomData.getUsername())
-                .password(RandomData.getPassword())
-                .role(UserRole.USER.toString())
+                .username(TestData.getUsername())
+                .password(TestData.getPassword())
+                .role(UserRole.USER)
                 .build();
 
         new CreateUserRequest(
@@ -109,7 +112,7 @@ public class UpdateCustomerProfileTest extends BaseTest {
                 RequestSpecs.unauth(),
                 ResponseSpecs.ok())
                 .post(loginRequestDto)
-                .extract().header("Authorization");
+                .extract().header(AUTH_HEADER);
 
         UpdateAccountRequestDto updateAccountRequestDto = UpdateAccountRequestDto.builder()
                 .name(name)
@@ -121,7 +124,7 @@ public class UpdateCustomerProfileTest extends BaseTest {
                 .put(updateAccountRequestDto)
                 .extract().asString();
 
-        softly.assertThat(errorResponse).isEqualTo("Name must contain two words with letters only");
+        softly.assertThat(errorResponse).isEqualTo(PROFILE_UPDATE_INVALID_NAME);
 
         CreateUserResponseDto customer = new GetCustomerProfileRequest(
                 RequestSpecs.authAsUser(userAuthHeader),
@@ -135,9 +138,9 @@ public class UpdateCustomerProfileTest extends BaseTest {
     @Test
     public void unauthorizedUserCannotChangeName() {
         CreateUserRequestDto user = CreateUserRequestDto.builder()
-                .username(RandomData.getUsername())
-                .password(RandomData.getPassword())
-                .role(UserRole.USER.toString())
+                .username(TestData.getUsername())
+                .password(TestData.getPassword())
+                .role(UserRole.USER)
                 .build();
 
         new CreateUserRequest(
@@ -154,10 +157,10 @@ public class UpdateCustomerProfileTest extends BaseTest {
                 RequestSpecs.unauth(),
                 ResponseSpecs.ok())
                 .post(loginRequestDto)
-                .extract().header("Authorization");
+                .extract().header(AUTH_HEADER);
 
         UpdateAccountRequestDto updateAccountRequestDto = UpdateAccountRequestDto.builder()
-                .name(RandomData.getName())
+                .name(TestData.getName())
                 .build();
 
         new UpdateAccountRequest(

@@ -3,7 +3,10 @@ package autotesting.practice_3.specs;
 import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.specification.ResponseSpecification;
 
+import static org.hamcrest.Matchers.equalTo;
+
 public class ResponseSpecs {
+    public static final String AUTH_HEADER = "Authorization";
 
     private ResponseSpecs() {}
 
@@ -38,6 +41,7 @@ public class ResponseSpecs {
     public static ResponseSpecification forbidden() {
         return defaultResponseSpecBuilder()
                 .expectStatusCode(403)
+                .expectBody(equalTo("Unauthorized access to account"))
                 .build();
     }
 }

@@ -1,10 +1,10 @@
 package autotesting.practice_3.iteration_1;
 
-import autotesting.practice_3.generators.RandomData;
-import autotesting.practice_3.models.UserRole;
-import autotesting.practice_3.models.request.CreateUserRequestDto;
-import autotesting.practice_3.models.request.LoginUserRequestDto;
-import autotesting.practice_3.models.response.AccountResponseDto;
+import autotesting.practice_3.generators.TestData;
+import autotesting.practice_3.contract.enams.UserRole;
+import autotesting.practice_3.contract.models.request.CreateUserRequestDto;
+import autotesting.practice_3.contract.models.request.LoginUserRequestDto;
+import autotesting.practice_3.contract.models.response.AccountResponseDto;
 import autotesting.practice_3.BaseTest;
 import autotesting.practice_3.requests.get.GetClientAccountsRequest;
 import autotesting.practice_3.requests.post.CreateAccountRequest;
@@ -23,9 +23,9 @@ public class CreateAccountTest extends BaseTest {
     @Test
     public void authorizedUserCanCreateAccountTest() {
         CreateUserRequestDto createUserRequestDto = CreateUserRequestDto.builder()
-                .username(RandomData.getUsername())
-                .password(RandomData.getPassword())
-                .role(UserRole.USER.toString())
+                .username(TestData.getUsername())
+                .password(TestData.getPassword())
+                .role(UserRole.USER)
                 .build();
 
         new CreateUserRequest(
@@ -47,7 +47,7 @@ public class CreateAccountTest extends BaseTest {
         AccountResponseDto expectedAccount = new CreateAccountRequest(
                 RequestSpecs.authAsUser(userAuthHeader),
                 ResponseSpecs.created())
-                .post(null)
+                .post()
                 .extract().as(AccountResponseDto.class);
 
         List<AccountResponseDto> clientAccounts =  new GetClientAccountsRequest(
@@ -69,6 +69,6 @@ public class CreateAccountTest extends BaseTest {
         new CreateAccountRequest(
                 RequestSpecs.unauth(),
                 ResponseSpecs.unauthorized())
-                .post(null);
+                .post();
     }
 }

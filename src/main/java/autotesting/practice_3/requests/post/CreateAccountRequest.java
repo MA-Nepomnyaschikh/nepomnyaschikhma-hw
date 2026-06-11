@@ -1,6 +1,6 @@
 package autotesting.practice_3.requests.post;
 
-import autotesting.practice_3.models.BaseModel;
+import autotesting.practice_3.contract.models.BaseModel;
 import io.restassured.response.ValidatableResponse;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
@@ -14,6 +14,14 @@ public class CreateAccountRequest extends PostRequest {
 
     @Override
     public ValidatableResponse post(BaseModel model) {
+        return given()
+                .spec(requestSpecification)
+                .post("api/v1/accounts")
+                .then()
+                .spec(responseSpecification);
+    }
+
+    public ValidatableResponse post() {
         return given()
                 .spec(requestSpecification)
                 .post("api/v1/accounts")

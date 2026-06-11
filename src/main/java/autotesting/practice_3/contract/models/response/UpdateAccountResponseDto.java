@@ -1,4 +1,4 @@
-package autotesting.practice_3.models.response;
+package autotesting.practice_3.contract.models.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

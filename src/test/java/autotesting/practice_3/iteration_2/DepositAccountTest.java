@@ -1,12 +1,12 @@
 package autotesting.practice_3.iteration_2;
 
-import autotesting.practice_3.generators.RandomData;
-import autotesting.practice_3.models.UserRole;
-import autotesting.practice_3.models.request.CreateUserRequestDto;
-import autotesting.practice_3.models.request.DepositRequestDto;
-import autotesting.practice_3.models.request.LoginUserRequestDto;
-import autotesting.practice_3.models.response.AccountResponseDto;
-import autotesting.practice_3.models.response.TransactionResponseDto;
+import autotesting.practice_3.generators.TestData;
+import autotesting.practice_3.contract.enams.TransactionType;
+import autotesting.practice_3.contract.enams.UserRole;
+import autotesting.practice_3.contract.models.request.CreateUserRequestDto;
+import autotesting.practice_3.contract.models.request.DepositRequestDto;
+import autotesting.practice_3.contract.models.request.LoginUserRequestDto;
+import autotesting.practice_3.contract.models.response.AccountResponseDto;
 import autotesting.practice_3.BaseTest;
 import autotesting.practice_3.requests.get.GetClientAccountsRequest;
 import autotesting.practice_3.requests.post.CreateAccountRequest;
@@ -15,7 +15,7 @@ import autotesting.practice_3.requests.post.DepositRequest;
 import autotesting.practice_3.requests.post.LoginUserRequest;
 import autotesting.practice_3.specs.RequestSpecs;
 import autotesting.practice_3.specs.ResponseSpecs;
-import org.assertj.core.api.Assertions;
+import io.restassured.common.mapper.TypeRef;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -23,6 +23,11 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.List;
 import java.util.stream.Stream;
+
+import static autotesting.practice_3.generators.TestData.NON_EXISTING_ACCOUNT_ID;
+import static autotesting.practice_3.generators.TestData.getRandomValidDepositAmount;
+import static autotesting.practice_3.specs.ResponseSpecs.AUTH_HEADER;
+import static autotesting.practice_3.utils.AccountUtils.findById;
 
 public class DepositAccountTest extends BaseTest {
 
@@ -37,11 +42,11 @@ public class DepositAccountTest extends BaseTest {
 
     @MethodSource("validAmountProvider")
     @ParameterizedTest
-    public void authorizedUserCanDepositAccountTest(double amount) {
+    public void authorizedUserCanDepositAccountTest(double depositAmount) {
         CreateUserRequestDto user = CreateUserRequestDto.builder()
-                .username(RandomData.getUsername())
-                .password(RandomData.getPassword())
-                .role(UserRole.USER.toString())
+                .username(TestData.getUsername())
+                .password(TestData.getPassword())
+                .role(UserRole.USER)
                 .build();
 
         new CreateUserRequest(
@@ -58,38 +63,52 @@ public class DepositAccountTest extends BaseTest {
                 RequestSpecs.unauth(),
                 ResponseSpecs.ok())
                 .post(loginRequestDto)
-                .extract().header("Authorization");
+                .extract().header(AUTH_HEADER);
 
-        AccountResponseDto account = new CreateAccountRequest(
+        AccountResponseDto expectedAccount = new CreateAccountRequest(
                 RequestSpecs.authAsUser(userAuthHeader),
                 ResponseSpecs.created())
-                .post(null)
+                .post()
                 .extract().as(AccountResponseDto.class);
 
         DepositRequestDto depositRequestDto = DepositRequestDto.builder()
-                .id(account.getId())
-                .balance(amount)
+                .id(expectedAccount.getId())
+                .balance(depositAmount)
                 .build();
 
-        AccountResponseDto actualAccount = new DepositRequest(
+        AccountResponseDto accountResponseDto = new DepositRequest(
                 RequestSpecs.authAsUser(userAuthHeader),
                 ResponseSpecs.ok())
                 .post(depositRequestDto)
                 .extract()
                 .as(AccountResponseDto.class);
 
-        softly.assertThat(actualAccount.getId()).isEqualTo(account.getId());
-        softly.assertThat(actualAccount.getBalance()).isEqualTo(account.getBalance() + amount);
+        softly.assertThat(accountResponseDto.getId()).isEqualTo(expectedAccount.getId());
+        softly.assertThat(accountResponseDto.getBalance()).isEqualTo(expectedAccount.getBalance() + depositAmount);
 
-        List<TransactionResponseDto> transactions = actualAccount.getTransactions();
+        softly.assertThat(accountResponseDto.getTransactions()).anySatisfy(transaction -> {
+            softly.assertThat(transaction.getAmount()).isEqualTo(depositAmount);
+            softly.assertThat(transaction.getType()).isEqualTo(TransactionType.DEPOSIT);
+            softly.assertThat(transaction.getRelatedAccountId()).isEqualTo(expectedAccount.getId());
+        });
 
-        softly.assertThat(transactions).hasSize(1);
+        List<AccountResponseDto> accountsList = new GetClientAccountsRequest(
+                RequestSpecs.authAsUser(userAuthHeader),
+                ResponseSpecs.ok())
+                .get()
+                .extract()
+                .as(new TypeRef<List<AccountResponseDto>>() {});
 
-        TransactionResponseDto transaction = transactions.getFirst();
+        AccountResponseDto actualAccount = findById(accountsList, expectedAccount.getId());
 
-        softly.assertThat(transaction.getAmount()).isEqualTo(amount);
-        softly.assertThat(transaction.getRelatedAccountId()).isEqualTo(account.getId());
-        softly.assertThat(transaction.getType()).isEqualTo("DEPOSIT");
+        softly.assertThat(actualAccount.getId()).isEqualTo(expectedAccount.getId());
+        softly.assertThat(actualAccount.getBalance()).isEqualTo(expectedAccount.getBalance() + depositAmount);
+
+        softly.assertThat(actualAccount.getTransactions()).anySatisfy(transaction -> {
+            softly.assertThat(transaction.getAmount()).isEqualTo(depositAmount);
+            softly.assertThat(transaction.getType()).isEqualTo(TransactionType.DEPOSIT);
+            softly.assertThat(transaction.getRelatedAccountId()).isEqualTo(expectedAccount.getId());
+        });
     }
 
     public static Stream<Arguments> invalidAmountProvider() {
@@ -102,12 +121,12 @@ public class DepositAccountTest extends BaseTest {
 
     @MethodSource("invalidAmountProvider")
     @ParameterizedTest
-    public void authorizedUserCannotDepositAccountWithInvalidAmountTest(double amount, String errorMessage) {
+    public void authorizedUserCannotDepositAccountWithInvalidAmountTest(double depositAmount, String errorMessage) {
 
         CreateUserRequestDto user = CreateUserRequestDto.builder()
-                .username(RandomData.getUsername())
-                .password(RandomData.getPassword())
-                .role(UserRole.USER.toString())
+                .username(TestData.getUsername())
+                .password(TestData.getPassword())
+                .role(UserRole.USER)
                 .build();
 
         new CreateUserRequest(
@@ -124,17 +143,17 @@ public class DepositAccountTest extends BaseTest {
                 RequestSpecs.unauth(),
                 ResponseSpecs.ok())
                 .post(loginRequestDto)
-                .extract().header("Authorization");
+                .extract().header(AUTH_HEADER);
 
-        AccountResponseDto account = new CreateAccountRequest(
+        AccountResponseDto expectedAccount = new CreateAccountRequest(
                 RequestSpecs.authAsUser(userAuthHeader),
                 ResponseSpecs.created())
-                .post(null)
+                .post()
                 .extract().as(AccountResponseDto.class);
 
         DepositRequestDto depositRequestDto = DepositRequestDto.builder()
-                .id(account.getId())
-                .balance(amount)
+                .id(expectedAccount.getId())
+                .balance(depositAmount)
                 .build();
 
         String errorResponse = new DepositRequest(
@@ -145,24 +164,27 @@ public class DepositAccountTest extends BaseTest {
 
         softly.assertThat(errorResponse).isEqualTo(errorMessage);
 
-        AccountResponseDto actualAccount = new GetClientAccountsRequest(
+        List<AccountResponseDto> accountsList = new GetClientAccountsRequest(
                 RequestSpecs.authAsUser(userAuthHeader),
                 ResponseSpecs.ok())
                 .get()
                 .extract()
-                .jsonPath()
-                .getObject(String.format("find { it.id == %d }", account.getId()), AccountResponseDto.class);
+                .as(new TypeRef<List<AccountResponseDto>>() {});
 
-        softly.assertThat(actualAccount.getBalance()).isEqualTo(account.getBalance());
-        softly.assertThat(actualAccount.getTransactions()).hasSize(0);
+        AccountResponseDto actualAccount = findById(accountsList, expectedAccount.getId());
+
+        softly.assertThat(actualAccount.getBalance()).isEqualTo(expectedAccount.getBalance());
+        softly.assertThat(actualAccount.getTransactions()).isEmpty();
     }
 
     @Test
     public void authorizedUserCannotDepositIntoNonExistingAccountTest() {
+        double depositAmount = getRandomValidDepositAmount();
+
         CreateUserRequestDto user = CreateUserRequestDto.builder()
-                .username(RandomData.getUsername())
-                .password(RandomData.getPassword())
-                .role(UserRole.USER.toString())
+                .username(TestData.getUsername())
+                .password(TestData.getPassword())
+                .role(UserRole.USER)
                 .build();
 
         new CreateUserRequest(
@@ -179,28 +201,27 @@ public class DepositAccountTest extends BaseTest {
                 RequestSpecs.unauth(),
                 ResponseSpecs.ok())
                 .post(loginRequestDto)
-                .extract().header("Authorization");
+                .extract().header(AUTH_HEADER);
 
         DepositRequestDto depositRequestDto = DepositRequestDto.builder()
-                .id(-1)
-                .balance(100)
+                .id(NON_EXISTING_ACCOUNT_ID)
+                .balance(depositAmount)
                 .build();
 
-        String errorResponse = new DepositRequest(
+        new DepositRequest(
                 RequestSpecs.authAsUser(userAuthHeader),
                 ResponseSpecs.forbidden())
-                .post(depositRequestDto)
-                .extract().asString();
-
-        Assertions.assertThat(errorResponse).isEqualTo("Unauthorized access to account");
+                .post(depositRequestDto);
     }
 
     @Test
     public void authorizedUserCannotDepositIntoAnotherUserAccountTest() {
+        double depositAmount = getRandomValidDepositAmount();
+
         CreateUserRequestDto firstUser = CreateUserRequestDto.builder()
-                .username(RandomData.getUsername())
-                .password(RandomData.getPassword())
-                .role(UserRole.USER.toString())
+                .username(TestData.getUsername())
+                .password(TestData.getPassword())
+                .role(UserRole.USER)
                 .build();
 
         new CreateUserRequest(
@@ -217,12 +238,12 @@ public class DepositAccountTest extends BaseTest {
                 RequestSpecs.unauth(),
                 ResponseSpecs.ok())
                 .post(loginRequestDto)
-                .extract().header("Authorization");
+                .extract().header(AUTH_HEADER);
 
         CreateUserRequestDto secondUser = CreateUserRequestDto.builder()
-                .username(RandomData.getUsername())
-                .password(RandomData.getPassword())
-                .role(UserRole.USER.toString())
+                .username(TestData.getUsername())
+                .password(TestData.getPassword())
+                .role(UserRole.USER)
                 .build();
 
         new CreateUserRequest(
@@ -239,45 +260,45 @@ public class DepositAccountTest extends BaseTest {
                 RequestSpecs.unauth(),
                 ResponseSpecs.ok())
                 .post(loginRequestDto)
-                .extract().header("Authorization");
+                .extract().header(AUTH_HEADER);
 
-        AccountResponseDto secondUserAccount = new CreateAccountRequest(
+        AccountResponseDto expectedSecondUserAcc = new CreateAccountRequest(
                 RequestSpecs.authAsUser(secondUserAuthHeader),
                 ResponseSpecs.created())
-                .post(null)
+                .post()
                 .extract().as(AccountResponseDto.class);
 
         DepositRequestDto depositRequestDto = DepositRequestDto.builder()
-                .id(secondUserAccount.getId())
-                .balance(5000)
+                .id(expectedSecondUserAcc.getId())
+                .balance(depositAmount)
                 .build();
 
-        String errorResponse = new DepositRequest(
+        new DepositRequest(
                 RequestSpecs.authAsUser(firstUserAuthHeader),
                 ResponseSpecs.forbidden())
-                .post(depositRequestDto)
-                .extract().asString();
+                .post(depositRequestDto);
 
-        softly.assertThat(errorResponse).isEqualTo("Unauthorized access to account");
-
-        AccountResponseDto actualAccount = new GetClientAccountsRequest(
+        List<AccountResponseDto> accountsList = new GetClientAccountsRequest(
                 RequestSpecs.authAsUser(secondUserAuthHeader),
                 ResponseSpecs.ok())
                 .get()
                 .extract()
-                .jsonPath()
-                .getObject(String.format("find { it.id == %d }", secondUserAccount.getId()), AccountResponseDto.class);
+                .as(new TypeRef<List<AccountResponseDto>>() {});
 
-        softly.assertThat(actualAccount.getBalance()).isEqualTo(secondUserAccount.getBalance());
-        softly.assertThat(actualAccount.getTransactions()).hasSize(0);
+        AccountResponseDto actualSecondUserAcc = findById(accountsList, expectedSecondUserAcc.getId());
+
+        softly.assertThat(actualSecondUserAcc.getBalance()).isEqualTo(expectedSecondUserAcc.getBalance());
+        softly.assertThat(actualSecondUserAcc.getTransactions()).isEmpty();
     }
 
     @Test
     public void unauthorizedUserCannotDepositIntoAccountTest() {
+        double depositAmount = getRandomValidDepositAmount();
+
         CreateUserRequestDto user = CreateUserRequestDto.builder()
-                .username(RandomData.getUsername())
-                .password(RandomData.getPassword())
-                .role(UserRole.USER.toString())
+                .username(TestData.getUsername())
+                .password(TestData.getPassword())
+                .role(UserRole.USER)
                 .build();
 
         new CreateUserRequest(
@@ -294,17 +315,17 @@ public class DepositAccountTest extends BaseTest {
                 RequestSpecs.unauth(),
                 ResponseSpecs.ok())
                 .post(loginRequestDto)
-                .extract().header("Authorization");
+                .extract().header(AUTH_HEADER);
 
-        AccountResponseDto account = new CreateAccountRequest(
+        AccountResponseDto expectedAccount = new CreateAccountRequest(
                 RequestSpecs.authAsUser(userAuthHeader),
                 ResponseSpecs.created())
-                .post(null)
+                .post()
                 .extract().as(AccountResponseDto.class);
 
         DepositRequestDto depositRequestDto = DepositRequestDto.builder()
-                .id(account.getId())
-                .balance(500)
+                .id(expectedAccount.getId())
+                .balance(depositAmount)
                 .build();
 
         new DepositRequest(
@@ -312,16 +333,17 @@ public class DepositAccountTest extends BaseTest {
                 ResponseSpecs.unauthorized())
                 .post(depositRequestDto);
 
-        AccountResponseDto actualAccount = new GetClientAccountsRequest(
+        List<AccountResponseDto> accountsList = new GetClientAccountsRequest(
                 RequestSpecs.authAsUser(userAuthHeader),
                 ResponseSpecs.ok())
                 .get()
                 .extract()
-                .jsonPath()
-                .getObject(String.format("find { it.id == %d }", account.getId()), AccountResponseDto.class);
+                .as(new TypeRef<List<AccountResponseDto>>() {});
 
-        softly.assertThat(actualAccount.getBalance()).isEqualTo(account.getBalance());
-        softly.assertThat(actualAccount.getTransactions()).hasSize(0);
+        AccountResponseDto actualAccount = findById(accountsList, expectedAccount.getId());
+
+        softly.assertThat(actualAccount.getBalance()).isEqualTo(expectedAccount.getBalance());
+        softly.assertThat(actualAccount.getTransactions()).isEmpty();
     }
 
 }
