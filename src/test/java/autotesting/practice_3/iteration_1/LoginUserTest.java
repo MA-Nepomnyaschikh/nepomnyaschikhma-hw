@@ -13,13 +13,17 @@ import autotesting.practice_3.specs.ResponseSpecs;
 import io.restassured.response.ValidatableResponse;
 import org.junit.jupiter.api.Test;
 
+import static autotesting.practice_3.generators.TestData.ADMIN_LOGIN;
+import static autotesting.practice_3.generators.TestData.ADMIN_PASSWORD;
+import static autotesting.practice_3.specs.ResponseSpecs.AUTH_HEADER;
+
 public class LoginUserTest extends BaseTest {
 
     @Test
     public void adminCanGenerateAuthTokenTest() {
         LoginUserRequestDto loginUserRequest = LoginUserRequestDto.builder()
-                .username("admin")
-                .password("admin")
+                .username(ADMIN_LOGIN)
+                .password(ADMIN_PASSWORD)
                 .build();
 
         ValidatableResponse loginUserResponse = new LoginUserRequest(
@@ -27,12 +31,12 @@ public class LoginUserTest extends BaseTest {
                 ResponseSpecs.ok())
                 .post(loginUserRequest);
 
-        softly.assertThat(loginUserResponse.extract().header("Authorization")).isNotNull();
+        softly.assertThat(loginUserResponse.extract().header(AUTH_HEADER)).isNotNull();
 
         LoginUserResponseDto dto = loginUserResponse.extract().as(LoginUserResponseDto.class);
 
         softly.assertThat(dto.getRole()).isEqualTo(UserRole.ADMIN.toString());
-        softly.assertThat(dto.getUsername()).isEqualTo("admin");
+        softly.assertThat(dto.getUsername()).isEqualTo(ADMIN_LOGIN);
     }
 
     @Test
@@ -58,7 +62,7 @@ public class LoginUserTest extends BaseTest {
                 ResponseSpecs.ok())
                 .post(loginUserRequestDto);
 
-        softly.assertThat(loginUserResponse.extract().header("Authorization")).isNotNull();
+        softly.assertThat(loginUserResponse.extract().header(AUTH_HEADER)).isNotNull();
 
         LoginUserResponseDto dto = loginUserResponse.extract().as(LoginUserResponseDto.class);
 

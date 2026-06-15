@@ -9,7 +9,7 @@ import io.restassured.specification.RequestSpecification;
 public class RequestSpecs {
 
     private static final String BASE_URI = "http://localhost:4111";
-    private static final String ADMIN_AUTH_HEADER = "Basic YWRtaW46YWRtaW4=";
+    private static final String ADMIN_AUTH_TOKEN = "Basic YWRtaW46YWRtaW4=";
 
     private RequestSpecs() {}
 
@@ -27,13 +27,13 @@ public class RequestSpecs {
 
     public static RequestSpecification authAsAdmin() {
         return defaultRequestSpecBuilder()
-                .addHeader("Authorization", ADMIN_AUTH_HEADER)
+                .addHeader("Authorization", ADMIN_AUTH_TOKEN)
                 .build();
     }
 
-    public static RequestSpecification authAsUser(String userAuthHeader) {
+    public static RequestSpecification authAsUser(String userAuthToken) {
         return defaultRequestSpecBuilder()
-                .addHeader("Authorization", userAuthHeader)
+                .addHeader("Authorization", userAuthToken)
                 .build();
     }
 }

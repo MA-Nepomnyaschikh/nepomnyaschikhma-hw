@@ -11,6 +11,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class ErrorResponseDto extends BaseModel {
-    private String errorKey;
-    private String errorValue;
+    private String timestamp;
+    private String status;
+    private String error;
+    private String path;
 }

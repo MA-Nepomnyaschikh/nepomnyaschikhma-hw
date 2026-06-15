@@ -10,6 +10,9 @@ public class TestData {
 
     private static final Faker FAKER = new Faker();
 
+    public static final String ADMIN_LOGIN = "admin";
+    public static final String ADMIN_PASSWORD = "admin";
+
     public static final int NON_EXISTING_ACCOUNT_ID = Integer.MIN_VALUE;
 
     public static final double MIN_DEPOSIT_AMOUNT = 0.01;

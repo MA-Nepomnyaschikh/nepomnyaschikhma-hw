@@ -1,5 +1,6 @@
 package autotesting.practice_3.iteration_1;
 
+import autotesting.practice_3.contract.messages.CreateUserMessages;
 import autotesting.practice_3.contract.models.request.LoginUserRequestDto;
 import autotesting.practice_3.generators.TestData;
 import autotesting.practice_3.contract.enams.UserRole;
@@ -22,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static autotesting.practice_3.contract.messages.CreateUserMessages.*;
 import static autotesting.practice_3.specs.ResponseSpecs.AUTH_HEADER;
 
 public class CreateUserTest extends BaseTest {
@@ -166,9 +168,12 @@ public class CreateUserTest extends BaseTest {
                 .role(UserRole.USER.toString())
                 .build();
 
-        new CreateUserRequest(
+        ErrorResponseDto errorResponse =  new CreateUserRequest(
                 RequestSpecs.authAsUser(userAuthHeader),
                 ResponseSpecs.forbidden())
-                .post(createUserRequestDto);
+                .post(createUserRequestDto)
+                .extract().as(ErrorResponseDto.class);
+
+        softly.assertThat(errorResponse.getError()).isEqualTo(CREATE_USER_FORBIDDEN);
     }
 }

@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
+import static autotesting.practice_3.specs.ResponseSpecs.AUTH_HEADER;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class CreateAccountTest extends BaseTest {
@@ -42,7 +43,7 @@ public class CreateAccountTest extends BaseTest {
                 RequestSpecs.unauth(),
                 ResponseSpecs.ok())
                 .post(loginUserRequestDto)
-                .extract().header("Authorization");
+                .extract().header(AUTH_HEADER);
 
         AccountResponseDto expectedAccount = new CreateAccountRequest(
                 RequestSpecs.authAsUser(userAuthHeader),
