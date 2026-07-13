@@ -1,0 +1,90 @@
+package autotesting.practice_4.steps;
+
+import autotesting.practice_4.supports.CleanupManager;
+import autotesting.practice_4.models.request.CreateUserRequestDto;
+import autotesting.practice_4.models.response.CreateUserResponseDto;
+import autotesting.practice_4.requests.Endpoint;
+import autotesting.practice_4.requests.RestRequest;
+import autotesting.practice_4.requests.ValidatableRestRequest;
+import autotesting.practice_4.specs.RequestSpecs;
+import autotesting.practice_4.specs.ResponseSpecs;
+import io.restassured.response.ValidatableResponse;
+import io.restassured.specification.RequestSpecification;
+import io.restassured.specification.ResponseSpecification;
+
+import java.util.List;
+import java.util.NoSuchElementException;
+
+import static autotesting.practice_4.testdata.UserData.generateRandomUserDto;
+
+public class AdminSteps {
+
+    private final CleanupManager cleanupManager;
+
+    public AdminSteps(CleanupManager cleanupManager) {
+        this.cleanupManager = cleanupManager;
+    }
+
+    public CreateUserResponseDto createUser(CreateUserRequestDto userDto) {
+        CreateUserResponseDto createdUser = new ValidatableRestRequest<CreateUserResponseDto>(
+                RequestSpecs.authAsAdmin(),
+                Endpoint.CREATE_USER,
+                ResponseSpecs.created())
+                .post(userDto);
+
+        cleanupManager.register(
+                () -> deleteUser(createdUser.getId())
+        );
+
+        return createdUser;
+    }
+
+    public ValidatableResponse createUser(CreateUserRequestDto userDto, RequestSpecification requestSpec, ResponseSpecification responseSpec) {
+        return new RestRequest(
+                requestSpec,
+                Endpoint.CREATE_USER,
+                responseSpec)
+                .post(userDto);
+    }
+
+    public CreateUserRequestDto createRandomUser() {
+        CreateUserRequestDto userDto = generateRandomUserDto();
+
+        CreateUserResponseDto createdUser = new ValidatableRestRequest<CreateUserResponseDto>(
+                RequestSpecs.authAsAdmin(),
+                Endpoint.CREATE_USER,
+                ResponseSpecs.created())
+                .post(userDto);
+
+        cleanupManager.register(
+                () -> deleteUser(createdUser.getId())
+        );
+
+        return userDto;
+    }
+
+    public List<CreateUserResponseDto> getAllUsers() {
+        return new ValidatableRestRequest<CreateUserResponseDto>(
+                RequestSpecs.authAsAdmin(),
+                Endpoint.GET_ALL_USERS,
+                ResponseSpecs.ok())
+                .getAll();
+    }
+
+    public CreateUserResponseDto getUserById(long id) {
+        List<CreateUserResponseDto> usersList = getAllUsers();
+
+        return usersList.stream()
+                .filter(user -> user.getId() == id)
+                .findFirst()
+                .orElseThrow(() -> new NoSuchElementException("User with id: " + id + " not found"));
+    }
+
+    public ValidatableResponse deleteUser(long id) {
+        return new RestRequest(
+                RequestSpecs.authAsAdmin(),
+                Endpoint.DELETE_USER,
+                ResponseSpecs.ok())
+                .delete(id);
+    }
+}
