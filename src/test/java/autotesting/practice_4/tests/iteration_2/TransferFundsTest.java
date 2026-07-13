@@ -35,20 +35,20 @@ public class TransferFundsTest extends BaseTest {
     @ParameterizedTest
     public void authorizedUserCanTransferValidAmountBetweenTheirAccountsTest(double transferAmount) {
 
-        CreateUserRequestDto userDto = adminSteps.createRandomUser();
+        CreateUserRequestDto userDto = userSteps.createRandomUser();
         String userAuthHeader = authSteps.loginAndGetToken(userDto);
-        CreateAccountResponseDto senderAccount = userSteps.createAccountWithBalance(userAuthHeader, MAX_TRANSFER_AMOUNT);
-        CreateAccountResponseDto receiverAccount = userSteps.createAccount(userAuthHeader);
+        CreateAccountResponseDto senderAccount = accountSteps.createAccountWithBalance(userAuthHeader, MAX_TRANSFER_AMOUNT);
+        CreateAccountResponseDto receiverAccount = accountSteps.createAccount(userAuthHeader);
 
         TransferRequestDto transferDto = generateTransferDto(senderAccount.getId(), receiverAccount.getId(), transferAmount);
-        TransferResponseDto transferResponseDto = userSteps.transfer(userAuthHeader, transferDto);
+        TransferResponseDto transferResponseDto = accountSteps.transfer(userAuthHeader, transferDto);
 
         softly.assertThat(transferResponseDto.getSenderAccountId()).isEqualTo(senderAccount.getId());
         softly.assertThat(transferResponseDto.getReceiverAccountId()).isEqualTo(receiverAccount.getId());
         softly.assertThat(transferResponseDto.getAmount()).isEqualTo(transferAmount);
         softly.assertThat(transferResponseDto.getMessage()).isEqualTo(TRANSFER_SUCCESSFUL);
 
-        CreateAccountResponseDto actualSecondAcc = userSteps.getClientAccountById(userAuthHeader, receiverAccount.getId());
+        CreateAccountResponseDto actualSecondAcc = accountSteps.getClientAccountById(userAuthHeader, receiverAccount.getId());
 
         softly.assertThat(actualSecondAcc.getBalance()).isEqualTo(receiverAccount.getBalance() + transferAmount, within(0.00001));
         softly.assertThat(actualSecondAcc.getTransactions())
@@ -59,7 +59,7 @@ public class TransferFundsTest extends BaseTest {
             softly.assertThat(actualTransaction.getRelatedAccountId()).isEqualTo(senderAccount.getId());
         });
 
-        CreateAccountResponseDto actualFirstAcc = userSteps.getClientAccountById(userAuthHeader, senderAccount.getId());
+        CreateAccountResponseDto actualFirstAcc = accountSteps.getClientAccountById(userAuthHeader, senderAccount.getId());
 
         softly.assertThat(actualFirstAcc.getBalance()).isEqualTo(senderAccount.getBalance() - transferAmount, within(0.00001));
         softly.assertThat(actualFirstAcc.getTransactions())
@@ -74,23 +74,23 @@ public class TransferFundsTest extends BaseTest {
     @MethodSource("validAmountProvider")
     @ParameterizedTest
     public void authorizedUserCanTransferValidAmountToAnotherUserAccountTest(double transferAmount) {
-        CreateUserRequestDto firstUserDto = adminSteps.createRandomUser();
+        CreateUserRequestDto firstUserDto = userSteps.createRandomUser();
         String firstUserAuthHeader = authSteps.loginAndGetToken(firstUserDto);
-        CreateAccountResponseDto senderAccount = userSteps.createAccountWithBalance(firstUserAuthHeader, MAX_TRANSFER_AMOUNT);
+        CreateAccountResponseDto senderAccount = accountSteps.createAccountWithBalance(firstUserAuthHeader, MAX_TRANSFER_AMOUNT);
 
-        CreateUserRequestDto secondUserDto = adminSteps.createRandomUser();
+        CreateUserRequestDto secondUserDto = userSteps.createRandomUser();
         String secondUserAuthHeader = authSteps.loginAndGetToken(secondUserDto);
-        CreateAccountResponseDto receiverAccount = userSteps.createAccount(secondUserAuthHeader);
+        CreateAccountResponseDto receiverAccount = accountSteps.createAccount(secondUserAuthHeader);
 
         TransferRequestDto transferDto = generateTransferDto(senderAccount.getId(), receiverAccount.getId(), transferAmount);
-        TransferResponseDto transferResponseDto = userSteps.transfer(firstUserAuthHeader, transferDto);
+        TransferResponseDto transferResponseDto = accountSteps.transfer(firstUserAuthHeader, transferDto);
 
         softly.assertThat(transferResponseDto.getSenderAccountId()).isEqualTo(senderAccount.getId());
         softly.assertThat(transferResponseDto.getReceiverAccountId()).isEqualTo(receiverAccount.getId());
         softly.assertThat(transferResponseDto.getAmount()).isEqualTo(transferAmount);
         softly.assertThat(transferResponseDto.getMessage()).isEqualTo(TRANSFER_SUCCESSFUL);
 
-        CreateAccountResponseDto actualSecondUserAcc = userSteps.getClientAccountById(secondUserAuthHeader, receiverAccount.getId());
+        CreateAccountResponseDto actualSecondUserAcc = accountSteps.getClientAccountById(secondUserAuthHeader, receiverAccount.getId());
 
         softly.assertThat(actualSecondUserAcc.getBalance()).isEqualTo(receiverAccount.getBalance() + transferAmount, within(0.00001));
         softly.assertThat(actualSecondUserAcc.getTransactions())
@@ -101,7 +101,7 @@ public class TransferFundsTest extends BaseTest {
                     softly.assertThat(actualTransaction.getRelatedAccountId()).isEqualTo(senderAccount.getId());
         });
 
-        CreateAccountResponseDto actualFirstUserAcc = userSteps.getClientAccountById(firstUserAuthHeader, senderAccount.getId());
+        CreateAccountResponseDto actualFirstUserAcc = accountSteps.getClientAccountById(firstUserAuthHeader, senderAccount.getId());
 
         softly.assertThat(actualFirstUserAcc.getBalance()).isEqualTo(senderAccount.getBalance() - transferAmount, within(0.00001));
         softly.assertThat(actualFirstUserAcc.getTransactions())
@@ -124,25 +124,25 @@ public class TransferFundsTest extends BaseTest {
     @MethodSource("invalidAmountProvider")
     @ParameterizedTest
     public void authorizedUserCannotTransferInvalidAmountBetweenTheirAccountsTest(double transferAmount, String errorMessage) {
-        CreateUserRequestDto userDto = adminSteps.createRandomUser();
+        CreateUserRequestDto userDto = userSteps.createRandomUser();
         String userAuthHeader = authSteps.loginAndGetToken(userDto);
-        CreateAccountResponseDto senderAccount = userSteps.createAccountWithBalance(userAuthHeader, MAX_TRANSFER_AMOUNT);
+        CreateAccountResponseDto senderAccount = accountSteps.createAccountWithBalance(userAuthHeader, MAX_TRANSFER_AMOUNT);
 
-        CreateAccountResponseDto receiverAccount = userSteps.createAccount(userAuthHeader);
+        CreateAccountResponseDto receiverAccount = accountSteps.createAccount(userAuthHeader);
 
         TransferRequestDto transferDto = generateTransferDto(senderAccount.getId(), receiverAccount.getId(), transferAmount);
-        String errorResponse = userSteps.transfer(transferDto, RequestSpecs.authAsUser(userAuthHeader), ResponseSpecs.badRequest());
+        String errorResponse = accountSteps.transfer(transferDto, RequestSpecs.authAsUser(userAuthHeader), ResponseSpecs.badRequest());
 
         softly.assertThat(errorResponse).isEqualTo(errorMessage);
 
-        CreateAccountResponseDto actualSecondAcc = userSteps.getClientAccountById(userAuthHeader, receiverAccount.getId());
+        CreateAccountResponseDto actualSecondAcc = accountSteps.getClientAccountById(userAuthHeader, receiverAccount.getId());
 
         softly.assertThat(actualSecondAcc.getBalance()).isEqualTo(receiverAccount.getBalance());
         softly.assertThat(actualSecondAcc.getTransactions())
                 .filteredOn(actualTransaction -> actualTransaction.getType().equals(TRANSFER_IN))
                 .isEmpty();
 
-        CreateAccountResponseDto actualFirstAcc = userSteps.getClientAccountById(userAuthHeader, senderAccount.getId());
+        CreateAccountResponseDto actualFirstAcc = accountSteps.getClientAccountById(userAuthHeader, senderAccount.getId());
 
         softly.assertThat(actualFirstAcc.getBalance()).isEqualTo(senderAccount.getBalance());
         softly.assertThat(actualFirstAcc.getTransactions())
@@ -153,27 +153,27 @@ public class TransferFundsTest extends BaseTest {
     @MethodSource("invalidAmountProvider")
     @ParameterizedTest
     public void authorizedUserCannotTransferInvalidAmountToAnotherUserAccountTest(double transferAmount, String errorMessage) {
-        CreateUserRequestDto firstUserDto = adminSteps.createRandomUser();
+        CreateUserRequestDto firstUserDto = userSteps.createRandomUser();
         String firstUserAuthHeader = authSteps.loginAndGetToken(firstUserDto);
-        CreateAccountResponseDto senderAccount = userSteps.createAccountWithBalance(firstUserAuthHeader, MAX_TRANSFER_AMOUNT);
+        CreateAccountResponseDto senderAccount = accountSteps.createAccountWithBalance(firstUserAuthHeader, MAX_TRANSFER_AMOUNT);
 
-        CreateUserRequestDto secondUserDto = adminSteps.createRandomUser();
+        CreateUserRequestDto secondUserDto = userSteps.createRandomUser();
         String secondUserAuthHeader = authSteps.loginAndGetToken(secondUserDto);
-        CreateAccountResponseDto receiverAccount = userSteps.createAccount(secondUserAuthHeader);
+        CreateAccountResponseDto receiverAccount = accountSteps.createAccount(secondUserAuthHeader);
 
         TransferRequestDto transferDto = generateTransferDto(senderAccount.getId(), receiverAccount.getId(), transferAmount);
-        String errorResponse = userSteps.transfer(transferDto, RequestSpecs.authAsUser(firstUserAuthHeader), ResponseSpecs.badRequest());
+        String errorResponse = accountSteps.transfer(transferDto, RequestSpecs.authAsUser(firstUserAuthHeader), ResponseSpecs.badRequest());
 
         softly.assertThat(errorResponse).isEqualTo(errorMessage);
 
-        CreateAccountResponseDto actualSecondUserAcc = userSteps.getClientAccountById(secondUserAuthHeader, receiverAccount.getId());
+        CreateAccountResponseDto actualSecondUserAcc = accountSteps.getClientAccountById(secondUserAuthHeader, receiverAccount.getId());
 
         softly.assertThat(actualSecondUserAcc.getBalance()).isEqualTo(receiverAccount.getBalance());
         softly.assertThat(actualSecondUserAcc.getTransactions())
                 .filteredOn(actualTransaction -> actualTransaction.getType().equals(TRANSFER_IN))
                 .isEmpty();
 
-        CreateAccountResponseDto actualFirstUserAcc = userSteps.getClientAccountById(firstUserAuthHeader, senderAccount.getId());
+        CreateAccountResponseDto actualFirstUserAcc = accountSteps.getClientAccountById(firstUserAuthHeader, senderAccount.getId());
 
         softly.assertThat(actualFirstUserAcc.getBalance()).isEqualTo(senderAccount.getBalance());
         softly.assertThat(actualFirstUserAcc.getTransactions())
@@ -185,27 +185,27 @@ public class TransferFundsTest extends BaseTest {
     public void authorizedUserCannotTransferAmountExceedingAccountBalanceTest() {
         double transferAmountExceedingBalance = MAX_DEPOSIT_AMOUNT + 0.01;
 
-        CreateUserRequestDto firstUserDto = adminSteps.createRandomUser();
+        CreateUserRequestDto firstUserDto = userSteps.createRandomUser();
         String firstUserAuthHeader = authSteps.loginAndGetToken(firstUserDto);
-        CreateAccountResponseDto senderAccount = userSteps.createAccountWithBalance(firstUserAuthHeader, MAX_DEPOSIT_AMOUNT);
+        CreateAccountResponseDto senderAccount = accountSteps.createAccountWithBalance(firstUserAuthHeader, MAX_DEPOSIT_AMOUNT);
 
-        CreateUserRequestDto secondUserDto = adminSteps.createRandomUser();
+        CreateUserRequestDto secondUserDto = userSteps.createRandomUser();
         String secondUserAuthHeader = authSteps.loginAndGetToken(secondUserDto);
-        CreateAccountResponseDto receiverAccount = userSteps.createAccount(secondUserAuthHeader);
+        CreateAccountResponseDto receiverAccount = accountSteps.createAccount(secondUserAuthHeader);
 
         TransferRequestDto transferDto = generateTransferDto(senderAccount.getId(), receiverAccount.getId(), transferAmountExceedingBalance);
-        String errorResponse = userSteps.transfer(transferDto, RequestSpecs.authAsUser(firstUserAuthHeader), ResponseSpecs.badRequest());
+        String errorResponse = accountSteps.transfer(transferDto, RequestSpecs.authAsUser(firstUserAuthHeader), ResponseSpecs.badRequest());
 
         softly.assertThat(errorResponse).isEqualTo(TRANSFER_FAILED);
 
-        CreateAccountResponseDto actualSecondUserAcc = userSteps.getClientAccountById(secondUserAuthHeader, receiverAccount.getId());
+        CreateAccountResponseDto actualSecondUserAcc = accountSteps.getClientAccountById(secondUserAuthHeader, receiverAccount.getId());
 
         softly.assertThat(actualSecondUserAcc.getBalance()).isEqualTo(receiverAccount.getBalance());
         softly.assertThat(actualSecondUserAcc.getTransactions())
                 .filteredOn(actualTransaction -> actualTransaction.getType().equals(TRANSFER_IN))
                 .isEmpty();
 
-        CreateAccountResponseDto actualFirstUserAcc = userSteps.getClientAccountById(firstUserAuthHeader, senderAccount.getId());
+        CreateAccountResponseDto actualFirstUserAcc = accountSteps.getClientAccountById(firstUserAuthHeader, senderAccount.getId());
 
         softly.assertThat(actualFirstUserAcc.getBalance()).isEqualTo(senderAccount.getBalance());
         softly.assertThat(actualFirstUserAcc.getTransactions())
@@ -218,16 +218,16 @@ public class TransferFundsTest extends BaseTest {
     public void authorizedUserCannotTransferFundsIntoNonExistingAccountTest() {
         double transferAmount = getRandomValidTransferAmount();
 
-        CreateUserRequestDto userDto = adminSteps.createRandomUser();
+        CreateUserRequestDto userDto = userSteps.createRandomUser();
         String userAuthHeader = authSteps.loginAndGetToken(userDto);
-        CreateAccountResponseDto senderAccount = userSteps.createAccountWithBalance(userAuthHeader, MAX_TRANSFER_AMOUNT);
+        CreateAccountResponseDto senderAccount = accountSteps.createAccountWithBalance(userAuthHeader, MAX_TRANSFER_AMOUNT);
 
         TransferRequestDto transferDto = generateTransferDto(senderAccount.getId(), NON_EXISTING_ACCOUNT_ID, transferAmount);
-        String errorResponse = userSteps.transfer(transferDto, RequestSpecs.authAsUser(userAuthHeader), ResponseSpecs.badRequest());
+        String errorResponse = accountSteps.transfer(transferDto, RequestSpecs.authAsUser(userAuthHeader), ResponseSpecs.badRequest());
 
         softly.assertThat(errorResponse).isEqualTo(TRANSFER_FAILED);
 
-        CreateAccountResponseDto actualUserAcc = userSteps.getClientAccountById(userAuthHeader, senderAccount.getId());
+        CreateAccountResponseDto actualUserAcc = accountSteps.getClientAccountById(userAuthHeader, senderAccount.getId());
 
         softly.assertThat(actualUserAcc.getBalance()).isEqualTo(senderAccount.getBalance());
         softly.assertThat(actualUserAcc.getTransactions())
@@ -239,27 +239,27 @@ public class TransferFundsTest extends BaseTest {
     public void authorizedUserCannotTransferFundsFromNonExistingAccountTest() {
         double transferAmount = getRandomValidTransferAmount();
 
-        CreateUserRequestDto firstUserDto = adminSteps.createRandomUser();
+        CreateUserRequestDto firstUserDto = userSteps.createRandomUser();
         String firstUserAuthHeader = authSteps.loginAndGetToken(firstUserDto);
-        CreateAccountResponseDto senderAccount = userSteps.createAccountWithBalance(firstUserAuthHeader, MAX_TRANSFER_AMOUNT);
+        CreateAccountResponseDto senderAccount = accountSteps.createAccountWithBalance(firstUserAuthHeader, MAX_TRANSFER_AMOUNT);
 
-        CreateUserRequestDto secondUserDto = adminSteps.createRandomUser();
+        CreateUserRequestDto secondUserDto = userSteps.createRandomUser();
         String secondUserAuthHeader = authSteps.loginAndGetToken(secondUserDto);
-        CreateAccountResponseDto receiverAccount = userSteps.createAccount(secondUserAuthHeader);
+        CreateAccountResponseDto receiverAccount = accountSteps.createAccount(secondUserAuthHeader);
 
         TransferRequestDto transferDto = generateTransferDto(NON_EXISTING_ACCOUNT_ID, receiverAccount.getId(), transferAmount);
-        String errorResponse = userSteps.transfer(transferDto, RequestSpecs.authAsUser(firstUserAuthHeader), ResponseSpecs.forbidden());
+        String errorResponse = accountSteps.transfer(transferDto, RequestSpecs.authAsUser(firstUserAuthHeader), ResponseSpecs.forbidden());
 
         softly.assertThat(errorResponse).isEqualTo(DEPOSIT_UNAUTHORIZED);
 
-        CreateAccountResponseDto actualSecondUserAcc = userSteps.getClientAccountById(secondUserAuthHeader, receiverAccount.getId());
+        CreateAccountResponseDto actualSecondUserAcc = accountSteps.getClientAccountById(secondUserAuthHeader, receiverAccount.getId());
 
         softly.assertThat(actualSecondUserAcc.getBalance()).isEqualTo(receiverAccount.getBalance());
         softly.assertThat(actualSecondUserAcc.getTransactions())
                 .filteredOn(actualTransaction -> actualTransaction.getType().equals(TRANSFER_IN))
                 .isEmpty();
 
-        CreateAccountResponseDto actualFirstUserAcc = userSteps.getClientAccountById(firstUserAuthHeader, senderAccount.getId());
+        CreateAccountResponseDto actualFirstUserAcc = accountSteps.getClientAccountById(firstUserAuthHeader, senderAccount.getId());
 
         softly.assertThat(actualFirstUserAcc.getBalance()).isEqualTo(senderAccount.getBalance());
         softly.assertThat(actualFirstUserAcc.getTransactions())
@@ -271,25 +271,25 @@ public class TransferFundsTest extends BaseTest {
     public void unauthorizedUserCannotTransferFundsTest() {
         double transferAmount = getRandomValidTransferAmount();
 
-        CreateUserRequestDto firstUserDto = adminSteps.createRandomUser();
+        CreateUserRequestDto firstUserDto = userSteps.createRandomUser();
         String firstUserAuthHeader = authSteps.loginAndGetToken(firstUserDto);
-        CreateAccountResponseDto senderAccount = userSteps.createAccountWithBalance(firstUserAuthHeader, MAX_TRANSFER_AMOUNT);
+        CreateAccountResponseDto senderAccount = accountSteps.createAccountWithBalance(firstUserAuthHeader, MAX_TRANSFER_AMOUNT);
 
-        CreateUserRequestDto secondUserDto = adminSteps.createRandomUser();
+        CreateUserRequestDto secondUserDto = userSteps.createRandomUser();
         String secondUserAuthHeader = authSteps.loginAndGetToken(secondUserDto);
-        CreateAccountResponseDto receiverAccount = userSteps.createAccount(secondUserAuthHeader);
+        CreateAccountResponseDto receiverAccount = accountSteps.createAccount(secondUserAuthHeader);
 
         TransferRequestDto transferDto = generateTransferDto(senderAccount.getId(), receiverAccount.getId(), transferAmount);
-        userSteps.transfer(transferDto, RequestSpecs.unauth(), ResponseSpecs.unauthorized());
+        accountSteps.transfer(transferDto, RequestSpecs.unauth(), ResponseSpecs.unauthorized());
 
-        CreateAccountResponseDto actualSecondUserAcc = userSteps.getClientAccountById(secondUserAuthHeader, receiverAccount.getId());
+        CreateAccountResponseDto actualSecondUserAcc = accountSteps.getClientAccountById(secondUserAuthHeader, receiverAccount.getId());
 
         softly.assertThat(actualSecondUserAcc.getBalance()).isEqualTo(receiverAccount.getBalance());
         softly.assertThat(actualSecondUserAcc.getTransactions())
                 .filteredOn(actualTransaction -> actualTransaction.getType().equals(TRANSFER_IN))
                 .isEmpty();
 
-        CreateAccountResponseDto actualFirstUserAcc = userSteps.getClientAccountById(firstUserAuthHeader, senderAccount.getId());
+        CreateAccountResponseDto actualFirstUserAcc = accountSteps.getClientAccountById(firstUserAuthHeader, senderAccount.getId());
 
         softly.assertThat(actualFirstUserAcc.getBalance()).isEqualTo(senderAccount.getBalance());
         softly.assertThat(actualFirstUserAcc.getTransactions())

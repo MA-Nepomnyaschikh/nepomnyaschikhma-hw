@@ -32,7 +32,7 @@ public class CreateUserTest extends BaseTest {
     @ParameterizedTest
     public void adminCanCreateUserWithValidDataTest(CreateUserRequestDto userDto) {
         CreateUserResponseDto expectedUser = generateExpectedUser(userDto);
-        CreateUserResponseDto createdUser = adminSteps.createUser(userDto);
+        CreateUserResponseDto createdUser = userSteps.createUser(userDto);
 
         softly.assertThat(expectedUser)
                 .usingRecursiveComparison()
@@ -41,7 +41,7 @@ public class CreateUserTest extends BaseTest {
         softly.assertThat(createdUser.getId()).isNotNull();
         softly.assertThat(createdUser.getPassword()).isNotNull().isNotEqualTo(userDto.getPassword());
 
-        CreateUserResponseDto actualUser = adminSteps.getUserById(createdUser.getId());
+        CreateUserResponseDto actualUser = userSteps.getUserById(createdUser.getId());
 
         softly.assertThat(actualUser)
                 .isEqualTo(createdUser);
@@ -67,14 +67,14 @@ public class CreateUserTest extends BaseTest {
     @MethodSource("invalidUserDataProvider")
     @ParameterizedTest
     public void adminCannotCreateUserWithInvalidDataTest(CreateUserRequestDto userDto, String errorKey, String errorValue) {
-        Map<String, List<String>> errors = adminSteps.createUser(
+        Map<String, List<String>> errors = userSteps.createUser(
                 userDto, RequestSpecs.authAsAdmin(), ResponseSpecs.badRequest())
                 .extract().as(new TypeRef<Map<String, List<String>>>() {});
 
         softly.assertThat(errors).containsKey(errorKey);
         softly.assertThat(errors.get(errorKey)).contains(errorValue);
 
-        List<CreateUserResponseDto> allUsers = adminSteps.getAllUsers();
+        List<CreateUserResponseDto> allUsers = userSteps.getAllUsers();
 
         softly.assertThat(allUsers)
                 .filteredOn(actualUser -> actualUser.getUsername().equals(userDto.getUsername()))
@@ -84,16 +84,16 @@ public class CreateUserTest extends BaseTest {
     @Test
     public void adminCannotCreateUserWithExistingUsernameTest() {
         CreateUserRequestDto userDto = generateRandomUserDto();
-        adminSteps.createUser(userDto);
+        userSteps.createUser(userDto);
 
-        String errorResponse = adminSteps.createUser(
+        String errorResponse = userSteps.createUser(
                 userDto, RequestSpecs.authAsAdmin(), ResponseSpecs.badRequest())
                 .extract().asString();
 
         softly.assertThat(errorResponse)
                 .isEqualTo("Error: Username '" + userDto.getUsername() + "' already exists.");
 
-        List<CreateUserResponseDto> allUsers = adminSteps.getAllUsers();
+        List<CreateUserResponseDto> allUsers = userSteps.getAllUsers();
 
         softly.assertThat(allUsers)
                 .filteredOn(actualUser -> actualUser.getUsername().equals(userDto.getUsername()))
@@ -103,10 +103,10 @@ public class CreateUserTest extends BaseTest {
     @Test
     public void unauthorizedUserCannotCreateUserTest() {
         CreateUserRequestDto userDto = generateRandomUserDto();
-        adminSteps.createUser(
+        userSteps.createUser(
                 userDto, RequestSpecs.unauth(), ResponseSpecs.unauthorized());
 
-        List<CreateUserResponseDto> allUsers = adminSteps.getAllUsers();
+        List<CreateUserResponseDto> allUsers = userSteps.getAllUsers();
 
         softly.assertThat(allUsers)
                 .filteredOn(actualUser -> actualUser.getUsername().equals(userDto.getUsername()))
@@ -116,18 +116,18 @@ public class CreateUserTest extends BaseTest {
     @Test
     public void userWithoutAdminPermissionsCannotCreateUserTest() {
         CreateUserRequestDto userWithoutAdminPermissionsDto = generateRandomUserDto();
-        adminSteps.createUser(userWithoutAdminPermissionsDto);
+        userSteps.createUser(userWithoutAdminPermissionsDto);
         String userWithoutAdminPermissionsAuthHeader = authSteps.loginAndGetToken(userWithoutAdminPermissionsDto);
 
         CreateUserRequestDto userDto = generateRandomUserDto();
 
-        ErrorResponseDto errorResponse = adminSteps.createUser(
+        ErrorResponseDto errorResponse = userSteps.createUser(
                 userDto, RequestSpecs.authAsUser(userWithoutAdminPermissionsAuthHeader), ResponseSpecs.forbidden())
                 .extract().as(ErrorResponseDto.class);
 
         softly.assertThat(errorResponse.getError()).isEqualTo(CREATE_USER_FORBIDDEN);
 
-        List<CreateUserResponseDto> allUsers = adminSteps.getAllUsers();
+        List<CreateUserResponseDto> allUsers = userSteps.getAllUsers();
 
         softly.assertThat(allUsers)
                 .filteredOn(actualUser -> actualUser.getUsername().equals(userDto.getUsername()))

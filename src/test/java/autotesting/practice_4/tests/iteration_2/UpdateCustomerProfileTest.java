@@ -23,7 +23,7 @@ public class UpdateCustomerProfileTest extends BaseTest {
 
     @Test
     public void authorizedUserCanSetValidName() {
-        CreateUserRequestDto userDto = adminSteps.createRandomUser();
+        CreateUserRequestDto userDto = userSteps.createRandomUser();
         String userAuthHeader = authSteps.loginAndGetToken(userDto);
 
         UpdateUserRequestDto updateUserDto = UserData.generateRandomUpdateUserDto();
@@ -52,7 +52,7 @@ public class UpdateCustomerProfileTest extends BaseTest {
     @MethodSource("invalidNameProvider")
     @ParameterizedTest
     public void authorizedUserCannotSetInvalidName(UpdateUserRequestDto updateUserDto) {
-        CreateUserRequestDto userDto = adminSteps.createRandomUser();
+        CreateUserRequestDto userDto = userSteps.createRandomUser();
         String userAuthHeader = authSteps.loginAndGetToken(userDto);
 
         String errorResponse = userSteps.updateCustomerProfile(
@@ -68,7 +68,7 @@ public class UpdateCustomerProfileTest extends BaseTest {
 
     @Test
     public void unauthorizedUserCannotChangeName() {
-        CreateUserRequestDto userDto = adminSteps.createRandomUser();
+        CreateUserRequestDto userDto = userSteps.createRandomUser();
         String userAuthHeader = authSteps.loginAndGetToken(userDto);
 
         UpdateUserRequestDto updateUserDto = UserData.generateRandomUpdateUserDto();

@@ -1,8 +1,8 @@
 package autotesting.practice_4.tests;
 
-import autotesting.practice_4.steps.UserSteps;
+import autotesting.practice_4.steps.AccountSteps;
 import autotesting.practice_4.steps.AuthSteps;
-import autotesting.practice_4.steps.AdminSteps;
+import autotesting.practice_4.steps.UserSteps;
 import autotesting.practice_4.supports.CleanupManager;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.AfterEach;
@@ -14,8 +14,8 @@ public class BaseTest {
     protected SoftAssertions softly;
 
     protected AuthSteps authSteps;
-    protected AdminSteps adminSteps;
     protected UserSteps userSteps;
+    protected AccountSteps accountSteps;
 
     @BeforeEach
     public void beforeTests() {
@@ -24,8 +24,8 @@ public class BaseTest {
         softly = new SoftAssertions();
 
         authSteps = new AuthSteps();
-        adminSteps = new AdminSteps(cleanupManager);
-        userSteps = new UserSteps();
+        userSteps = new UserSteps(cleanupManager);
+        accountSteps = new AccountSteps();
     }
 
     @AfterEach

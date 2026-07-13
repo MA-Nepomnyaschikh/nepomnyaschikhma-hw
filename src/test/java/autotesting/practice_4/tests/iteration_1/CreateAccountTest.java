@@ -13,17 +13,17 @@ public class CreateAccountTest extends BaseTest {
 
     @Test
     public void authorizedUserCanCreateAccountTest() {
-        CreateUserRequestDto userDto = adminSteps.createRandomUser();
+        CreateUserRequestDto userDto = userSteps.createRandomUser();
         String userAuthHeader = authSteps.loginAndGetToken(userDto);
 
-        CreateAccountResponseDto createdAccount = userSteps.createAccount(userAuthHeader);
+        CreateAccountResponseDto createdAccount = accountSteps.createAccount(userAuthHeader);
 
         softly.assertThat(createdAccount.getId()).isPositive();
         softly.assertThat(createdAccount.getBalance()).isZero();
         softly.assertThat(createdAccount.getAccountNumber()).isNotNull();
         softly.assertThat(createdAccount.getTransactions()).isEmpty();
 
-        CreateAccountResponseDto actualAccount = userSteps.getClientAccountById(userAuthHeader, createdAccount.getId());
+        CreateAccountResponseDto actualAccount = accountSteps.getClientAccountById(userAuthHeader, createdAccount.getId());
 
         softly.assertThat(actualAccount)
                 .usingRecursiveComparison()
@@ -32,12 +32,12 @@ public class CreateAccountTest extends BaseTest {
 
     @Test
     public void unauthorizedUserCannotCreateAccountTest() {
-        CreateUserRequestDto userDto = adminSteps.createRandomUser();
+        CreateUserRequestDto userDto = userSteps.createRandomUser();
         String userAuthHeader = authSteps.loginAndGetToken(userDto);
 
-        userSteps.createAccount(RequestSpecs.unauth(), ResponseSpecs.unauthorized());
+        accountSteps.createAccount(RequestSpecs.unauth(), ResponseSpecs.unauthorized());
 
-        List<CreateAccountResponseDto> userAccounts = userSteps.getClientAccounts(userAuthHeader);
+        List<CreateAccountResponseDto> userAccounts = accountSteps.getClientAccounts(userAuthHeader);
 
         softly.assertThat(userAccounts).isEmpty();
     }

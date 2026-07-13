@@ -30,7 +30,7 @@ public class LoginUserTest extends BaseTest {
 
     @Test
     public void userCanGenerateAuthTokenTest() {
-        CreateUserRequestDto userDto = adminSteps.createRandomUser();
+        CreateUserRequestDto userDto = userSteps.createRandomUser();
 
         LoginUserRequestDto loginDto = generateLoginDto(userDto);
         ValidatableResponse loginUserResponse = authSteps.login(loginDto);

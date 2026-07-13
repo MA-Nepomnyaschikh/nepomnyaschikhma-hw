@@ -1,12 +1,10 @@
 package autotesting.practice_4.steps;
 
-import autotesting.practice_4.models.request.DepositRequestDto;
-import autotesting.practice_4.models.request.TransferRequestDto;
 import autotesting.practice_4.models.request.UpdateUserRequestDto;
-import autotesting.practice_4.models.response.CreateAccountResponseDto;
-import autotesting.practice_4.models.response.CreateUserResponseDto;
-import autotesting.practice_4.models.response.TransferResponseDto;
 import autotesting.practice_4.models.response.UpdateUserResponseDto;
+import autotesting.practice_4.supports.CleanupManager;
+import autotesting.practice_4.models.request.CreateUserRequestDto;
+import autotesting.practice_4.models.response.CreateUserResponseDto;
 import autotesting.practice_4.requests.Endpoint;
 import autotesting.practice_4.requests.RestRequest;
 import autotesting.practice_4.requests.ValidatableRestRequest;
@@ -18,12 +16,55 @@ import io.restassured.specification.ResponseSpecification;
 
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Objects;
 
-import static autotesting.practice_4.testdata.AccountData.MAX_DEPOSIT_AMOUNT;
-import static autotesting.practice_4.testdata.AccountData.generateDepositDto;
+import static autotesting.practice_4.testdata.UserData.generateRandomUserDto;
 
 public class UserSteps {
+
+    private final CleanupManager cleanupManager;
+
+    public UserSteps(CleanupManager cleanupManager) {
+        this.cleanupManager = cleanupManager;
+    }
+
+    public CreateUserResponseDto createUser(CreateUserRequestDto userDto) {
+        CreateUserResponseDto createdUser = new ValidatableRestRequest<CreateUserResponseDto>(
+                RequestSpecs.authAsAdmin(),
+                Endpoint.CREATE_USER,
+                ResponseSpecs.created())
+                .post(userDto);
+
+        cleanupManager.register(
+                () -> deleteUser(createdUser.getId())
+        );
+
+        return createdUser;
+    }
+
+    public ValidatableResponse createUser(CreateUserRequestDto userDto, RequestSpecification requestSpec, ResponseSpecification responseSpec) {
+        return new RestRequest(
+                requestSpec,
+                Endpoint.CREATE_USER,
+                responseSpec)
+                .post(userDto);
+    }
+
+    public CreateUserRequestDto createRandomUser() {
+        CreateUserRequestDto userDto = generateRandomUserDto();
+
+        CreateUserResponseDto createdUser = new ValidatableRestRequest<CreateUserResponseDto>(
+                RequestSpecs.authAsAdmin(),
+                Endpoint.CREATE_USER,
+                ResponseSpecs.created())
+                .post(userDto);
+
+        cleanupManager.register(
+                () -> deleteUser(createdUser.getId())
+        );
+
+        return userDto;
+    }
+
     public CreateUserResponseDto getCustomerProfile(String token) {
         return new ValidatableRestRequest<CreateUserResponseDto>(
                 RequestSpecs.authAsUser(token),
@@ -48,92 +89,28 @@ public class UserSteps {
                 .put(dto);
     }
 
-    public CreateAccountResponseDto createAccount(String token) {
-        return new ValidatableRestRequest<CreateAccountResponseDto>(
-                RequestSpecs.authAsUser(token),
-                Endpoint.CREATE_ACCOUNT,
-                ResponseSpecs.created())
-                .post();
-    }
-
-    public ValidatableResponse createAccount(RequestSpecification requestSpec, ResponseSpecification responseSpec) {
-        return new RestRequest(
-                requestSpec,
-                Endpoint.CREATE_ACCOUNT,
-                responseSpec)
-                .post();
-    }
-
-    public CreateAccountResponseDto deposit(String token, DepositRequestDto dto) {
-        return new ValidatableRestRequest<CreateAccountResponseDto>(
-                RequestSpecs.authAsUser(token),
-                Endpoint.DEPOSIT,
-                ResponseSpecs.ok())
-                .post(dto);
-    }
-
-    public String deposit(DepositRequestDto dto, RequestSpecification requestSpec, ResponseSpecification responseSpec) {
-        return new RestRequest(
-                requestSpec,
-                Endpoint.DEPOSIT,
-                responseSpec)
-                .post(dto)
-                .extract().asString();
-    }
-
-    public CreateAccountResponseDto deposit(String token, int accountId, double amount) {
-        DepositRequestDto dto = generateDepositDto(accountId, amount);
-        return deposit(token, dto);
-    }
-
-    public CreateAccountResponseDto createAccountWithBalance(String token, double balance) {
-        if (balance <= 0) {
-            throw new IllegalArgumentException("Balance must be positive");
-        }
-        CreateAccountResponseDto account = createAccount(token);
-
-        while (balance > 0) {
-            double depositAmount = Math.min(balance, MAX_DEPOSIT_AMOUNT);
-
-            account = deposit(token, account.getId(), depositAmount);
-
-            balance -= depositAmount;
-        }
-
-        return account;
-    }
-
-    public List<CreateAccountResponseDto> getClientAccounts(String token) {
-        return new ValidatableRestRequest<CreateAccountResponseDto>(
-                RequestSpecs.authAsUser(token),
-                Endpoint.GET_CLIENT_ACCOUNTS,
+    public List<CreateUserResponseDto> getAllUsers() {
+        return new ValidatableRestRequest<CreateUserResponseDto>(
+                RequestSpecs.authAsAdmin(),
+                Endpoint.GET_ALL_USERS,
                 ResponseSpecs.ok())
                 .getAll();
     }
 
-    public CreateAccountResponseDto getClientAccountById(String token, int id) {
-        List<CreateAccountResponseDto> accountsList = getClientAccounts(token);
+    public CreateUserResponseDto getUserById(long id) {
+        List<CreateUserResponseDto> usersList = getAllUsers();
 
-        return accountsList.stream()
-                .filter(acc -> Objects.equals(acc.getId(), id))
+        return usersList.stream()
+                .filter(user -> user.getId() == id)
                 .findFirst()
-                .orElseThrow(() -> new NoSuchElementException("Account with id: " + id + " not found"));
+                .orElseThrow(() -> new NoSuchElementException("User with id: " + id + " not found"));
     }
 
-    public TransferResponseDto transfer(String token, TransferRequestDto dto) {
-        return new ValidatableRestRequest<TransferResponseDto>(
-                RequestSpecs.authAsUser(token),
-                Endpoint.TRANSFER,
-                ResponseSpecs.ok())
-                .post(dto);
-    }
-
-    public String transfer(TransferRequestDto dto, RequestSpecification requestSpec, ResponseSpecification responseSpec) {
+    public ValidatableResponse deleteUser(long id) {
         return new RestRequest(
-                requestSpec,
-                Endpoint.TRANSFER,
-                responseSpec)
-                .post(dto)
-                .extract().asString();
+                RequestSpecs.authAsAdmin(),
+                Endpoint.DELETE_USER,
+                ResponseSpecs.ok())
+                .delete(id);
     }
 }
