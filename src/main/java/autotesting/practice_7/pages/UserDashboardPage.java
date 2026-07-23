@@ -4,6 +4,9 @@ import com.codeborne.selenide.Selectors;
 import com.codeborne.selenide.SelenideElement;
 import lombok.Getter;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import static com.codeborne.selenide.Condition.text;
 import static com.codeborne.selenide.Condition.visible;
 import static com.codeborne.selenide.Selenide.*;
@@ -11,6 +14,9 @@ import static com.codeborne.selenide.WebDriverConditions.urlContaining;
 
 @Getter
 public class UserDashboardPage extends BasePage<UserDashboardPage> {
+    public static final String WELCOME_MESSAGE = "Welcome, %s!";
+    public static final String DEFAULT_WELCOME_MESSAGE = "Welcome, noname!";
+
     private final SelenideElement header = $(".text-center").$("h1");
     private final SelenideElement welcomeText = $(Selectors.byClassName("welcome-text"));
     private final SelenideElement goToProfileButton = $(".profile-header");
@@ -30,8 +36,13 @@ public class UserDashboardPage extends BasePage<UserDashboardPage> {
         return this;
     }
 
-    public UserDashboardPage shouldHaveWelcomeText(String text) {
-        welcomeText.shouldHave(text(text));
+    public UserDashboardPage shouldHaveWelcomeText(String name) {
+        welcomeText.shouldHave(text(WELCOME_MESSAGE.formatted(name)));
+        return this;
+    }
+
+    public UserDashboardPage shouldHaveWelcomeText() {
+        welcomeText.shouldHave(text(DEFAULT_WELCOME_MESSAGE));
         return this;
     }
 
@@ -53,5 +64,22 @@ public class UserDashboardPage extends BasePage<UserDashboardPage> {
     public TransferPage openTransferPage() {
         transferButton.click();
         return new TransferPage();
+    }
+
+    public String extractAccountNumber(String message) {
+        if (message.isBlank()) {
+            throw new IllegalArgumentException(
+                    "Message cannot be blank");
+        }
+
+        Pattern pattern = Pattern.compile("ACC\\d+");
+        Matcher matcher = pattern.matcher(message);
+
+        if (!matcher.find()) {
+            throw new IllegalArgumentException(
+                    "Cannot extract account number from alert: " + message);
+        }
+
+        return matcher.group();
     }
 }

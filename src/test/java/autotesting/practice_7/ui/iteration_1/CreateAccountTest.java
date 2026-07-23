@@ -24,7 +24,7 @@ public class CreateAccountTest extends BaseUiTest {
                 .createAccount();
 
         String alertMessage = userDashboard.getAlertMessageAndAccept();
-        String accountNumber = alertMessage.split(":")[1].trim();
+        String accountNumber = userDashboard.extractAccountNumber(alertMessage);
         softly.assertThat(alertMessage).contains(ACCOUNT_CREATED_SUCCESSFULLY.formatted(accountNumber));
 
         List<CreateAccountResponseDto> userAccounts = accountSteps.getClientAccounts(token);

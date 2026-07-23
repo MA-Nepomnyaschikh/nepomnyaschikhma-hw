@@ -8,7 +8,8 @@ import autotesting.practice_7.testdata.UserData;
 import autotesting.practice_7.ui.BaseUiTest;
 import org.junit.jupiter.api.Test;
 
-import static autotesting.practice_7.validation_messages.ui.UserUiMessages.*;
+import static autotesting.practice_7.validation_messages.ui.UserUiMessages.UPDATE_USER_FAILED;
+import static autotesting.practice_7.validation_messages.ui.UserUiMessages.UPDATE_USER_SUCCESSFULLY;
 
 public class UpdateCustomerProfileTest extends BaseUiTest {
 
@@ -30,7 +31,6 @@ public class UpdateCustomerProfileTest extends BaseUiTest {
                 .saveChanges();
 
         String alertMessage = profilePage.getAlertMessageAndAccept();
-
         softly.assertThat(alertMessage).isEqualTo(UPDATE_USER_SUCCESSFULLY);
 
         CreateUserResponseDto actualUser = userSteps.getCustomerProfile(token);
@@ -41,7 +41,7 @@ public class UpdateCustomerProfileTest extends BaseUiTest {
                 .loginAs(user)
                 .getPage(UserDashboardPage.class)
                 .shouldBeOpened()
-                .shouldHaveWelcomeText(WELCOME_MESSAGE.formatted(newName));
+                .shouldHaveWelcomeText(newName);
     }
 
     @Test
@@ -62,7 +62,6 @@ public class UpdateCustomerProfileTest extends BaseUiTest {
                 .saveChanges();
 
         String alertMessage = profilePage.getAlertMessageAndAccept();
-
         softly.assertThat(alertMessage).isEqualTo(UPDATE_USER_FAILED);
 
         CreateUserResponseDto actualUser = userSteps.getCustomerProfile(token);
@@ -73,6 +72,6 @@ public class UpdateCustomerProfileTest extends BaseUiTest {
                 .loginAs(user)
                 .getPage(UserDashboardPage.class)
                 .shouldBeOpened()
-                .shouldHaveWelcomeText(WELCOME_MESSAGE.formatted("noname"));
+                .shouldHaveWelcomeText();
     }
 }

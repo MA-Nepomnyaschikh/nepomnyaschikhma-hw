@@ -33,7 +33,7 @@ public class LoginUserTest extends BaseUiTest {
                 .login(user.getUsername(), user.getPassword())
                 .getPage(UserDashboardPage.class)
                 .shouldBeOpened()
-                .shouldHaveWelcomeText("Welcome, noname!");
+                .shouldHaveWelcomeText();
     }
 
 }

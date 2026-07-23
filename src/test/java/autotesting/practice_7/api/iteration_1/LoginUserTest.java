@@ -4,6 +4,7 @@ import autotesting.practice_7.models.request.CreateUserRequestDto;
 import autotesting.practice_7.models.request.LoginUserRequestDto;
 import autotesting.practice_7.models.response.LoginUserResponseDto;
 import autotesting.practice_7.BaseTest;
+import autotesting.practice_7.supports.comparisons.UserComparisons;
 import io.restassured.response.ValidatableResponse;
 import org.junit.jupiter.api.Test;
 
@@ -24,8 +25,10 @@ public class LoginUserTest extends BaseTest {
         LoginUserResponseDto loginResponseDto = loginUserResponse.extract().as(LoginUserResponseDto.class);
 
         softly.assertThat(authHeader).isNotBlank();
-        softly.assertThat(loginResponseDto.getRole()).isEqualTo(ADMIN_ROLE);
-        softly.assertThat(loginResponseDto.getUsername()).isEqualTo(loginDto.getUsername());
+        softly.assertThat(loginResponseDto)
+                .usingRecursiveComparison()
+                .comparingOnlyFields(UserComparisons.LOGIN_USER.fields())
+                .isEqualTo(userDto);
     }
 
     @Test
@@ -39,7 +42,9 @@ public class LoginUserTest extends BaseTest {
         LoginUserResponseDto loginResponseDto = loginUserResponse.extract().as(LoginUserResponseDto.class);
 
         softly.assertThat(authHeader).isNotBlank();
-        softly.assertThat(loginResponseDto.getRole()).isEqualTo(USER_ROLE);
-        softly.assertThat(loginResponseDto.getUsername()).isEqualTo(loginDto.getUsername());
+        softly.assertThat(loginResponseDto)
+                .usingRecursiveComparison()
+                .comparingOnlyFields(UserComparisons.LOGIN_USER.fields())
+                .isEqualTo(userDto);
     }
 }

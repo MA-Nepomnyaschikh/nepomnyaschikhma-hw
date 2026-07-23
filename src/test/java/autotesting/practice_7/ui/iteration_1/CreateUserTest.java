@@ -3,6 +3,7 @@ package autotesting.practice_7.ui.iteration_1;
 import autotesting.practice_7.models.request.CreateUserRequestDto;
 import autotesting.practice_7.models.response.CreateUserResponseDto;
 import autotesting.practice_7.pages.AdminPanelPage;
+import autotesting.practice_7.supports.comparisons.UserComparisons;
 import autotesting.practice_7.ui.BaseUiTest;
 import org.junit.jupiter.api.Test;
 
@@ -31,17 +32,17 @@ public class CreateUserTest extends BaseUiTest {
         CreateUserResponseDto actualUser = userSteps.getUserByUsername(user.getUsername());
         softly.assertThat(actualUser)
                 .usingRecursiveComparison()
-                .comparingOnlyFields("username", "role")
+                .comparingOnlyFields(UserComparisons.CREATE_USER.fields())
                 .isEqualTo(user);
 
-        cleanupManager.register(() -> userSteps.deleteUserByUserName(user.getUsername()));
+        cleanupManager.register(() -> userSteps.deleteUserById(actualUser.getId()));
     }
 
     @Test
     public void adminCannotCreateUserWithInvalidDataTest() {
         CreateUserRequestDto admin = generateAdminDto();
         setAuthToken(admin);
-        CreateUserRequestDto user = generateUserDto("a", getPassword(), USER_ROLE);
+        CreateUserRequestDto user = generateUserDto(getName(), getPassword(), USER_ROLE);
 
         AdminPanelPage adminPanel = new AdminPanelPage()
                 .open()
