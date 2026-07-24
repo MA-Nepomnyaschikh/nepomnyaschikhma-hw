@@ -1,6 +1,6 @@
 package autotesting.practice_8.supports.extensions;
 
-import autotesting.practice_8.supports.extensions.annotations.Browsers;
+import autotesting.practice_8.supports.annotations.Browsers;
 import com.codeborne.selenide.Configuration;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.api.extension.ExecutionCondition;

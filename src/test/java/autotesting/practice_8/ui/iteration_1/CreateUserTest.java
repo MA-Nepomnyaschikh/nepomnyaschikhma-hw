@@ -3,15 +3,15 @@ package autotesting.practice_8.ui.iteration_1;
 import autotesting.practice_8.models.request.CreateUserRequestDto;
 import autotesting.practice_8.models.response.CreateUserResponseDto;
 import autotesting.practice_8.pages.AdminPanelPage;
-import autotesting.practice_8.pages.elements.UserBadge;
-import autotesting.practice_8.supports.extensions.annotations.AdminSession;
+import autotesting.practice_8.supports.annotations.AdminSession;
+import autotesting.practice_8.supports.assertions.UserAssertions;
 import autotesting.practice_8.ui.BaseUiTest;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
 import static autotesting.practice_8.testdata.UserData.*;
-import static autotesting.practice_8.expectedmessages.ui.UserUiMessages.*;
+import static autotesting.practice_8.testdata.expectedmessages.ui.UserUiMessages.*;
 
 public class CreateUserTest extends BaseUiTest {
 
@@ -36,10 +36,9 @@ public class CreateUserTest extends BaseUiTest {
                 .singleElement();
 
         CreateUserResponseDto actualUser = userSteps.getUserByUsername(user.getUsername());
-        softly.assertThat(actualUser.getUsername()).isEqualTo(user.getUsername());
-        softly.assertThat(actualUser.getRole()).isEqualTo(user.getRole());
+        UserAssertions.assertUserCreated(softly, actualUser, user);
 
-        cleanupManager.register(() -> userSteps.deleteUserByUserName(user.getUsername()));
+        cleanupManager.register(() -> userSteps.deleteUserById(actualUser.getId()));
     }
 
     @Test

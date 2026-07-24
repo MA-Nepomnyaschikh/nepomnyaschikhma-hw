@@ -1,4 +1,4 @@
-package autotesting.practice_8.supports.extensions.annotations;
+package autotesting.practice_8.supports.annotations;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

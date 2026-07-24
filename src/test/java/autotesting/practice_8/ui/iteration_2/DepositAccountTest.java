@@ -2,8 +2,9 @@ package autotesting.practice_8.ui.iteration_2;
 
 import autotesting.practice_8.models.response.CreateAccountResponseDto;
 import autotesting.practice_8.pages.UserDashboardPage;
-import autotesting.practice_8.supports.extensions.annotations.UserSession;
-import autotesting.practice_8.supports.extensions.models.TestUser;
+import autotesting.practice_8.supports.annotations.UserSession;
+import autotesting.practice_8.supports.assertions.AccountAssertions;
+import autotesting.practice_8.supports.context.TestUser;
 import autotesting.practice_8.ui.BaseUiTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -12,9 +13,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.stream.Stream;
 
-import static autotesting.practice_8.testdata.AccountData.DEPOSIT;
 import static autotesting.practice_8.testdata.AccountData.getRandomValidDepositAmount;
-import static autotesting.practice_8.expectedmessages.ui.AccountUiMessages.*;
+import static autotesting.practice_8.testdata.expectedmessages.ui.AccountUiMessages.*;
 
 public class DepositAccountTest extends BaseUiTest {
 
@@ -35,14 +35,7 @@ public class DepositAccountTest extends BaseUiTest {
         softly.assertThat(alertMessage).isEqualTo(DEPOSIT_SUCCESSFULLY.formatted(depositAmount, userAccount.getAccountNumber()));
 
         CreateAccountResponseDto actualAccount = accountSteps.getClientAccountById(user.getToken(), userAccount.getId());
-        softly.assertThat(actualAccount.getBalance()).isEqualTo(depositAmount);
-        softly.assertThat(actualAccount.getTransactions())
-                .singleElement()
-                .satisfies(transaction -> {
-                    softly.assertThat(transaction.getAmount()).isEqualTo(depositAmount);
-                    softly.assertThat(transaction.getType()).isEqualTo(DEPOSIT);
-                    softly.assertThat(transaction.getRelatedAccountId()).isEqualTo(userAccount.getId());
-                });
+        AccountAssertions.assertDepositCompleted(softly, actualAccount, userAccount, depositAmount);
     }
 
     public static Stream<Arguments> invalidAmountProvider() {

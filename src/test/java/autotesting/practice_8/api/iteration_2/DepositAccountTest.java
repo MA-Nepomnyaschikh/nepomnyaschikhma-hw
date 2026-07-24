@@ -1,11 +1,12 @@
 package autotesting.practice_8.api.iteration_2;
 
+import autotesting.practice_8.BaseTest;
 import autotesting.practice_8.models.request.CreateUserRequestDto;
 import autotesting.practice_8.models.request.DepositRequestDto;
 import autotesting.practice_8.models.response.CreateAccountResponseDto;
 import autotesting.practice_8.specs.RequestSpecs;
 import autotesting.practice_8.specs.ResponseSpecs;
-import autotesting.practice_8.BaseTest;
+import autotesting.practice_8.supports.assertions.AccountAssertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -14,7 +15,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import java.util.stream.Stream;
 
 import static autotesting.practice_8.testdata.AccountData.*;
-import static autotesting.practice_8.expectedmessages.api.AccountApiMessages.DEPOSIT_UNAUTHORIZED;
+import static autotesting.practice_8.testdata.expectedmessages.api.AccountApiMessages.DEPOSIT_UNAUTHORIZED;
 
 public class DepositAccountTest extends BaseTest {
 
@@ -32,27 +33,17 @@ public class DepositAccountTest extends BaseTest {
     public void authorizedUserCanDepositAccountTest(double depositAmount) {
         CreateUserRequestDto userDto = userSteps.createRandomUser();
         String userAuthHeader = authSteps.loginAndGetToken(userDto);
-        CreateAccountResponseDto userAccount = accountSteps.createAccount(userAuthHeader);
+        CreateAccountResponseDto accountBeforeDeposit = accountSteps.createAccount(userAuthHeader);
 
-        DepositRequestDto depositRequestDto = generateDepositDto(userAccount.getId(), depositAmount);
-        CreateAccountResponseDto depositResponse = accountSteps.deposit(userAuthHeader, depositRequestDto);
+        DepositRequestDto depositRequestDto = generateDepositDto(accountBeforeDeposit.getId(), depositAmount);
+        CreateAccountResponseDto accountAfterDeposit = accountSteps.deposit(userAuthHeader, depositRequestDto);
 
-        softly.assertThat(depositResponse.getId()).isEqualTo(userAccount.getId());
-        softly.assertThat(depositResponse.getBalance()).isEqualTo(userAccount.getBalance() + depositAmount);
+        AccountAssertions.assertDepositCompleted(softly, accountAfterDeposit, accountBeforeDeposit, depositAmount);
 
-        softly.assertThat(depositResponse.getTransactions())
-                .singleElement()
-                .satisfies(transaction -> {
-                    softly.assertThat(transaction.getAmount()).isEqualTo(depositAmount);
-                    softly.assertThat(transaction.getType()).isEqualTo(DEPOSIT);
-                    softly.assertThat(transaction.getRelatedAccountId()).isEqualTo(userAccount.getId());
-        });
-
-        CreateAccountResponseDto actualAccount = accountSteps.getClientAccountById(userAuthHeader, userAccount.getId());
-
+        CreateAccountResponseDto actualAccount = accountSteps.getClientAccountById(userAuthHeader, accountBeforeDeposit.getId());
         softly.assertThat(actualAccount)
                 .usingRecursiveComparison()
-                .isEqualTo(depositResponse);
+                .isEqualTo(accountAfterDeposit);
     }
 
     public static Stream<Arguments> invalidAmountProvider() {
@@ -68,16 +59,15 @@ public class DepositAccountTest extends BaseTest {
     public void authorizedUserCannotDepositAccountWithInvalidAmountTest(double depositAmount, String errorMessage) {
         CreateUserRequestDto userDto = userSteps.createRandomUser();
         String userAuthHeader = authSteps.loginAndGetToken(userDto);
-        CreateAccountResponseDto userAccount = accountSteps.createAccount(userAuthHeader);
+        CreateAccountResponseDto accountBeforeDeposit = accountSteps.createAccount(userAuthHeader);
 
-        DepositRequestDto depositRequestDto = generateDepositDto(userAccount.getId(), depositAmount);
+        DepositRequestDto depositRequestDto = generateDepositDto(accountBeforeDeposit.getId(), depositAmount);
         String errorResponse = accountSteps.deposit(depositRequestDto, RequestSpecs.authAsUser(userAuthHeader), ResponseSpecs.badRequest());
 
         softly.assertThat(errorResponse).isEqualTo(errorMessage);
 
-        CreateAccountResponseDto actualAccount = accountSteps.getClientAccountById(userAuthHeader, userAccount.getId());
-
-        softly.assertThat(actualAccount.getBalance()).isEqualTo(userAccount.getBalance());
+        CreateAccountResponseDto actualAccount = accountSteps.getClientAccountById(userAuthHeader, accountBeforeDeposit.getId());
+        softly.assertThat(actualAccount.getBalance()).isEqualTo(accountBeforeDeposit.getBalance());
         softly.assertThat(actualAccount.getTransactions()).isEmpty();
     }
 
@@ -111,7 +101,6 @@ public class DepositAccountTest extends BaseTest {
         softly.assertThat(errorResponse).isEqualTo(DEPOSIT_UNAUTHORIZED);
 
         CreateAccountResponseDto actualSecondUserAcc = accountSteps.getClientAccountById(secondUserAuthHeader, secondUserAccount.getId());
-
         softly.assertThat(actualSecondUserAcc.getBalance()).isEqualTo(secondUserAccount.getBalance());
         softly.assertThat(actualSecondUserAcc.getTransactions()).isEmpty();
     }
@@ -122,14 +111,13 @@ public class DepositAccountTest extends BaseTest {
 
         CreateUserRequestDto userDto = userSteps.createRandomUser();
         String userAuthHeader = authSteps.loginAndGetToken(userDto);
-        CreateAccountResponseDto userAccount = accountSteps.createAccount(userAuthHeader);
+        CreateAccountResponseDto actualReceiverUserAcc = accountSteps.createAccount(userAuthHeader);
 
-        DepositRequestDto depositRequestDto = generateDepositDto(userAccount.getId(), depositAmount);
+        DepositRequestDto depositRequestDto = generateDepositDto(actualReceiverUserAcc.getId(), depositAmount);
         accountSteps.deposit(depositRequestDto, RequestSpecs.unauth(), ResponseSpecs.unauthorized());
 
-        CreateAccountResponseDto actualAccount = accountSteps.getClientAccountById(userAuthHeader, userAccount.getId());
-
-        softly.assertThat(actualAccount.getBalance()).isEqualTo(userAccount.getBalance());
+        CreateAccountResponseDto actualAccount = accountSteps.getClientAccountById(userAuthHeader, actualReceiverUserAcc.getId());
+        softly.assertThat(actualAccount.getBalance()).isEqualTo(actualReceiverUserAcc.getBalance());
         softly.assertThat(actualAccount.getTransactions()).isEmpty();
     }
 

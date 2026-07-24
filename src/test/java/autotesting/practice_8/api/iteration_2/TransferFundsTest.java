@@ -1,12 +1,13 @@
 package autotesting.practice_8.api.iteration_2;
 
+import autotesting.practice_8.BaseTest;
 import autotesting.practice_8.models.request.CreateUserRequestDto;
 import autotesting.practice_8.models.request.TransferRequestDto;
 import autotesting.practice_8.models.response.CreateAccountResponseDto;
 import autotesting.practice_8.models.response.TransferResponseDto;
 import autotesting.practice_8.specs.RequestSpecs;
 import autotesting.practice_8.specs.ResponseSpecs;
-import autotesting.practice_8.BaseTest;
+import autotesting.practice_8.supports.assertions.AccountAssertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -15,7 +16,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import java.util.stream.Stream;
 
 import static autotesting.practice_8.testdata.AccountData.*;
-import static autotesting.practice_8.expectedmessages.api.AccountApiMessages.*;
+import static autotesting.practice_8.testdata.expectedmessages.api.AccountApiMessages.*;
 import static org.assertj.core.api.Assertions.within;
 
 public class TransferFundsTest extends BaseTest {
@@ -41,32 +42,13 @@ public class TransferFundsTest extends BaseTest {
         TransferRequestDto transferDto = generateTransferDto(senderAccount.getId(), receiverAccount.getId(), transferAmount);
         TransferResponseDto transferResponseDto = accountSteps.transfer(userAuthHeader, transferDto);
 
-        softly.assertThat(transferResponseDto.getSenderAccountId()).isEqualTo(senderAccount.getId());
-        softly.assertThat(transferResponseDto.getReceiverAccountId()).isEqualTo(receiverAccount.getId());
-        softly.assertThat(transferResponseDto.getAmount()).isEqualTo(transferAmount);
-        softly.assertThat(transferResponseDto.getMessage()).isEqualTo(TRANSFER_SUCCESSFUL);
+        AccountAssertions.assertTransferCompleted(softly, transferResponseDto, transferDto);
 
-        CreateAccountResponseDto actualSecondAcc = accountSteps.getClientAccountById(userAuthHeader, receiverAccount.getId());
+        CreateAccountResponseDto actualReceiverAcc = accountSteps.getClientAccountById(userAuthHeader, receiverAccount.getId());
+        AccountAssertions.assertTransferInTransaction(softly, receiverAccount, actualReceiverAcc, transferDto);
 
-        softly.assertThat(actualSecondAcc.getBalance()).isEqualTo(receiverAccount.getBalance() + transferAmount, within(0.00001));
-        softly.assertThat(actualSecondAcc.getTransactions())
-                .filteredOn(actualTransaction -> actualTransaction.getType().equals(TRANSFER_IN))
-                .singleElement()
-                .satisfies(actualTransaction -> {
-            softly.assertThat(actualTransaction.getAmount()).isEqualTo(transferAmount);
-            softly.assertThat(actualTransaction.getRelatedAccountId()).isEqualTo(senderAccount.getId());
-        });
-
-        CreateAccountResponseDto actualFirstAcc = accountSteps.getClientAccountById(userAuthHeader, senderAccount.getId());
-
-        softly.assertThat(actualFirstAcc.getBalance()).isEqualTo(senderAccount.getBalance() - transferAmount, within(0.00001));
-        softly.assertThat(actualFirstAcc.getTransactions())
-                .filteredOn(actualTransaction -> actualTransaction.getType().equals(TRANSFER_OUT))
-                .singleElement()
-                .satisfies(actualTransaction -> {
-            softly.assertThat(actualTransaction.getAmount()).isEqualTo(transferAmount);
-            softly.assertThat(actualTransaction.getRelatedAccountId()).isEqualTo(receiverAccount.getId());
-        });
+        CreateAccountResponseDto actualSenderAcc = accountSteps.getClientAccountById(userAuthHeader, senderAccount.getId());
+        AccountAssertions.assertTransferOutTransaction(softly, senderAccount, actualSenderAcc, transferDto);
     }
 
     @MethodSource("validAmountProvider")
@@ -83,32 +65,13 @@ public class TransferFundsTest extends BaseTest {
         TransferRequestDto transferDto = generateTransferDto(senderAccount.getId(), receiverAccount.getId(), transferAmount);
         TransferResponseDto transferResponseDto = accountSteps.transfer(firstUserAuthHeader, transferDto);
 
-        softly.assertThat(transferResponseDto.getSenderAccountId()).isEqualTo(senderAccount.getId());
-        softly.assertThat(transferResponseDto.getReceiverAccountId()).isEqualTo(receiverAccount.getId());
-        softly.assertThat(transferResponseDto.getAmount()).isEqualTo(transferAmount);
-        softly.assertThat(transferResponseDto.getMessage()).isEqualTo(TRANSFER_SUCCESSFUL);
+        AccountAssertions.assertTransferCompleted(softly, transferResponseDto, transferDto);
 
-        CreateAccountResponseDto actualSecondUserAcc = accountSteps.getClientAccountById(secondUserAuthHeader, receiverAccount.getId());
+        CreateAccountResponseDto actualReceiverAcc = accountSteps.getClientAccountById(secondUserAuthHeader, receiverAccount.getId());
+        AccountAssertions.assertTransferInTransaction(softly, receiverAccount, actualReceiverAcc, transferDto);
 
-        softly.assertThat(actualSecondUserAcc.getBalance()).isEqualTo(receiverAccount.getBalance() + transferAmount, within(0.00001));
-        softly.assertThat(actualSecondUserAcc.getTransactions())
-                .filteredOn(actualTransaction -> actualTransaction.getType().equals(TRANSFER_IN))
-                .singleElement()
-                .satisfies(actualTransaction -> {
-                    softly.assertThat(actualTransaction.getAmount()).isEqualTo(transferAmount);
-                    softly.assertThat(actualTransaction.getRelatedAccountId()).isEqualTo(senderAccount.getId());
-        });
-
-        CreateAccountResponseDto actualFirstUserAcc = accountSteps.getClientAccountById(firstUserAuthHeader, senderAccount.getId());
-
-        softly.assertThat(actualFirstUserAcc.getBalance()).isEqualTo(senderAccount.getBalance() - transferAmount, within(0.00001));
-        softly.assertThat(actualFirstUserAcc.getTransactions())
-                .filteredOn(actualTransaction -> actualTransaction.getType().equals(TRANSFER_OUT))
-                .singleElement()
-                .satisfies(actualTransaction -> {
-            softly.assertThat(actualTransaction.getAmount()).isEqualTo(transferAmount);
-            softly.assertThat(actualTransaction.getRelatedAccountId()).isEqualTo(receiverAccount.getId());
-        });
+        CreateAccountResponseDto actualSenderAcc = accountSteps.getClientAccountById(firstUserAuthHeader, senderAccount.getId());
+        AccountAssertions.assertTransferOutTransaction(softly, senderAccount, actualSenderAcc, transferDto);
     }
 
     public static Stream<Arguments> invalidAmountProvider() {
@@ -133,17 +96,15 @@ public class TransferFundsTest extends BaseTest {
 
         softly.assertThat(errorResponse).isEqualTo(errorMessage);
 
-        CreateAccountResponseDto actualSecondAcc = accountSteps.getClientAccountById(userAuthHeader, receiverAccount.getId());
-
-        softly.assertThat(actualSecondAcc.getBalance()).isEqualTo(receiverAccount.getBalance());
-        softly.assertThat(actualSecondAcc.getTransactions())
+        CreateAccountResponseDto actualReceiverAcc = accountSteps.getClientAccountById(userAuthHeader, receiverAccount.getId());
+        softly.assertThat(actualReceiverAcc.getBalance()).isEqualTo(receiverAccount.getBalance());
+        softly.assertThat(actualReceiverAcc.getTransactions())
                 .filteredOn(actualTransaction -> actualTransaction.getType().equals(TRANSFER_IN))
                 .isEmpty();
 
-        CreateAccountResponseDto actualFirstAcc = accountSteps.getClientAccountById(userAuthHeader, senderAccount.getId());
-
-        softly.assertThat(actualFirstAcc.getBalance()).isEqualTo(senderAccount.getBalance());
-        softly.assertThat(actualFirstAcc.getTransactions())
+        CreateAccountResponseDto actualSenderAcc = accountSteps.getClientAccountById(userAuthHeader, senderAccount.getId());
+        softly.assertThat(actualSenderAcc.getBalance()).isEqualTo(senderAccount.getBalance());
+        softly.assertThat(actualSenderAcc.getTransactions())
                 .filteredOn(actualTransaction -> actualTransaction.getType().equals(TRANSFER_OUT))
                 .isEmpty();
     }
@@ -164,17 +125,15 @@ public class TransferFundsTest extends BaseTest {
 
         softly.assertThat(errorResponse).isEqualTo(errorMessage);
 
-        CreateAccountResponseDto actualSecondUserAcc = accountSteps.getClientAccountById(secondUserAuthHeader, receiverAccount.getId());
-
-        softly.assertThat(actualSecondUserAcc.getBalance()).isEqualTo(receiverAccount.getBalance());
-        softly.assertThat(actualSecondUserAcc.getTransactions())
+        CreateAccountResponseDto actualReceiverAcc = accountSteps.getClientAccountById(secondUserAuthHeader, receiverAccount.getId());
+        softly.assertThat(actualReceiverAcc.getBalance()).isEqualTo(receiverAccount.getBalance());
+        softly.assertThat(actualReceiverAcc.getTransactions())
                 .filteredOn(actualTransaction -> actualTransaction.getType().equals(TRANSFER_IN))
                 .isEmpty();
 
-        CreateAccountResponseDto actualFirstUserAcc = accountSteps.getClientAccountById(firstUserAuthHeader, senderAccount.getId());
-
-        softly.assertThat(actualFirstUserAcc.getBalance()).isEqualTo(senderAccount.getBalance());
-        softly.assertThat(actualFirstUserAcc.getTransactions())
+        CreateAccountResponseDto actualSenderAcc = accountSteps.getClientAccountById(firstUserAuthHeader, senderAccount.getId());
+        softly.assertThat(actualSenderAcc.getBalance()).isEqualTo(senderAccount.getBalance());
+        softly.assertThat(actualSenderAcc.getTransactions())
                 .filteredOn(actualTransaction -> actualTransaction.getType().equals(TRANSFER_OUT))
                 .isEmpty();
     }
@@ -196,17 +155,15 @@ public class TransferFundsTest extends BaseTest {
 
         softly.assertThat(errorResponse).isEqualTo(TRANSFER_FAILED);
 
-        CreateAccountResponseDto actualSecondUserAcc = accountSteps.getClientAccountById(secondUserAuthHeader, receiverAccount.getId());
-
-        softly.assertThat(actualSecondUserAcc.getBalance()).isEqualTo(receiverAccount.getBalance());
-        softly.assertThat(actualSecondUserAcc.getTransactions())
+        CreateAccountResponseDto actualReceiverAcc = accountSteps.getClientAccountById(secondUserAuthHeader, receiverAccount.getId());
+        softly.assertThat(actualReceiverAcc.getBalance()).isEqualTo(receiverAccount.getBalance());
+        softly.assertThat(actualReceiverAcc.getTransactions())
                 .filteredOn(actualTransaction -> actualTransaction.getType().equals(TRANSFER_IN))
                 .isEmpty();
 
-        CreateAccountResponseDto actualFirstUserAcc = accountSteps.getClientAccountById(firstUserAuthHeader, senderAccount.getId());
-
-        softly.assertThat(actualFirstUserAcc.getBalance()).isEqualTo(senderAccount.getBalance());
-        softly.assertThat(actualFirstUserAcc.getTransactions())
+        CreateAccountResponseDto actualSenderAcc = accountSteps.getClientAccountById(firstUserAuthHeader, senderAccount.getId());
+        softly.assertThat(actualSenderAcc.getBalance()).isEqualTo(senderAccount.getBalance());
+        softly.assertThat(actualSenderAcc.getTransactions())
                 .filteredOn(actualTransaction -> actualTransaction.getType().equals(TRANSFER_OUT))
                 .isEmpty();
     }
@@ -225,10 +182,9 @@ public class TransferFundsTest extends BaseTest {
 
         softly.assertThat(errorResponse).isEqualTo(TRANSFER_FAILED);
 
-        CreateAccountResponseDto actualUserAcc = accountSteps.getClientAccountById(userAuthHeader, senderAccount.getId());
-
-        softly.assertThat(actualUserAcc.getBalance()).isEqualTo(senderAccount.getBalance());
-        softly.assertThat(actualUserAcc.getTransactions())
+        CreateAccountResponseDto actualSenderAcc = accountSteps.getClientAccountById(userAuthHeader, senderAccount.getId());
+        softly.assertThat(actualSenderAcc.getBalance()).isEqualTo(senderAccount.getBalance());
+        softly.assertThat(actualSenderAcc.getTransactions())
                 .filteredOn(actualTransaction -> actualTransaction.getType().equals(TRANSFER_OUT))
                 .isEmpty();
     }
@@ -250,17 +206,15 @@ public class TransferFundsTest extends BaseTest {
 
         softly.assertThat(errorResponse).isEqualTo(DEPOSIT_UNAUTHORIZED);
 
-        CreateAccountResponseDto actualSecondUserAcc = accountSteps.getClientAccountById(secondUserAuthHeader, receiverAccount.getId());
-
-        softly.assertThat(actualSecondUserAcc.getBalance()).isEqualTo(receiverAccount.getBalance());
-        softly.assertThat(actualSecondUserAcc.getTransactions())
+        CreateAccountResponseDto actualReceiverAcc = accountSteps.getClientAccountById(secondUserAuthHeader, receiverAccount.getId());
+        softly.assertThat(actualReceiverAcc.getBalance()).isEqualTo(receiverAccount.getBalance());
+        softly.assertThat(actualReceiverAcc.getTransactions())
                 .filteredOn(actualTransaction -> actualTransaction.getType().equals(TRANSFER_IN))
                 .isEmpty();
 
-        CreateAccountResponseDto actualFirstUserAcc = accountSteps.getClientAccountById(firstUserAuthHeader, senderAccount.getId());
-
-        softly.assertThat(actualFirstUserAcc.getBalance()).isEqualTo(senderAccount.getBalance());
-        softly.assertThat(actualFirstUserAcc.getTransactions())
+        CreateAccountResponseDto actualSenderAcc = accountSteps.getClientAccountById(firstUserAuthHeader, senderAccount.getId());
+        softly.assertThat(actualSenderAcc.getBalance()).isEqualTo(senderAccount.getBalance());
+        softly.assertThat(actualSenderAcc.getTransactions())
                 .filteredOn(actualTransaction -> actualTransaction.getType().equals(TRANSFER_OUT))
                 .isEmpty();
     }
@@ -280,17 +234,15 @@ public class TransferFundsTest extends BaseTest {
         TransferRequestDto transferDto = generateTransferDto(senderAccount.getId(), receiverAccount.getId(), transferAmount);
         accountSteps.transfer(transferDto, RequestSpecs.unauth(), ResponseSpecs.unauthorized());
 
-        CreateAccountResponseDto actualSecondUserAcc = accountSteps.getClientAccountById(secondUserAuthHeader, receiverAccount.getId());
-
-        softly.assertThat(actualSecondUserAcc.getBalance()).isEqualTo(receiverAccount.getBalance());
-        softly.assertThat(actualSecondUserAcc.getTransactions())
+        CreateAccountResponseDto actualReceiverAcc = accountSteps.getClientAccountById(secondUserAuthHeader, receiverAccount.getId());
+        softly.assertThat(actualReceiverAcc.getBalance()).isEqualTo(receiverAccount.getBalance());
+        softly.assertThat(actualReceiverAcc.getTransactions())
                 .filteredOn(actualTransaction -> actualTransaction.getType().equals(TRANSFER_IN))
                 .isEmpty();
 
-        CreateAccountResponseDto actualFirstUserAcc = accountSteps.getClientAccountById(firstUserAuthHeader, senderAccount.getId());
-
-        softly.assertThat(actualFirstUserAcc.getBalance()).isEqualTo(senderAccount.getBalance());
-        softly.assertThat(actualFirstUserAcc.getTransactions())
+        CreateAccountResponseDto actualSenderAcc = accountSteps.getClientAccountById(firstUserAuthHeader, senderAccount.getId());
+        softly.assertThat(actualSenderAcc.getBalance()).isEqualTo(senderAccount.getBalance());
+        softly.assertThat(actualSenderAcc.getTransactions())
                 .filteredOn(actualTransaction -> actualTransaction.getType().equals(TRANSFER_OUT))
                 .isEmpty();
     }

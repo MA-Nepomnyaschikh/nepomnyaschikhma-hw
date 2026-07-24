@@ -7,7 +7,6 @@ import autotesting.practice_8.pages.UserDashboardPage;
 import autotesting.practice_8.ui.BaseUiTest;
 import org.junit.jupiter.api.Test;
 
-import static autotesting.practice_8.pages.UserDashboardPage.DEFAULT_WELCOME_MESSAGE;
 import static autotesting.practice_8.testdata.AuthData.ADMIN_PASSWORD;
 import static autotesting.practice_8.testdata.AuthData.ADMIN_USERNAME;
 
@@ -34,7 +33,7 @@ public class LoginUserTest extends BaseUiTest {
                 .login(user.getUsername(), user.getPassword())
                 .getPage(UserDashboardPage.class)
                 .shouldBeOpened()
-                .shouldHaveWelcomeText(DEFAULT_WELCOME_MESSAGE);
+                .shouldHaveWelcomeText();
     }
 
 }

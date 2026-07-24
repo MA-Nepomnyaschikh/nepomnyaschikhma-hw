@@ -1,7 +1,7 @@
 package autotesting.practice_8.ui;
 
-import autotesting.practice_8.configs.Config;
 import autotesting.practice_8.BaseTest;
+import autotesting.practice_8.configs.Config;
 import autotesting.practice_8.supports.extensions.AdminSessionExtension;
 import autotesting.practice_8.supports.extensions.UserSessionExtension;
 import com.codeborne.selenide.Configuration;

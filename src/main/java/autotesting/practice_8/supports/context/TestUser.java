@@ -1,4 +1,4 @@
-package autotesting.practice_8.supports.extensions.models;
+package autotesting.practice_8.supports.context;
 
 import autotesting.practice_8.models.request.CreateUserRequestDto;
 import autotesting.practice_8.models.response.CreateUserResponseDto;

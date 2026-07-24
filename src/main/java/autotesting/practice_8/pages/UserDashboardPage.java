@@ -67,6 +67,11 @@ public class UserDashboardPage extends BasePage<UserDashboardPage> {
     }
 
     public String extractAccountNumber(String message) {
+        if (message.isBlank()) {
+            throw new IllegalArgumentException(
+                    "Message cannot be blank");
+        }
+
         Pattern pattern = Pattern.compile("ACC\\d+");
         Matcher matcher = pattern.matcher(message);
 

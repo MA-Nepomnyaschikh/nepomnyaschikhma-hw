@@ -1,5 +1,6 @@
 package autotesting.practice_8.api.iteration_2;
 
+import autotesting.practice_8.BaseTest;
 import autotesting.practice_8.models.request.CreateUserRequestDto;
 import autotesting.practice_8.models.request.UpdateUserRequestDto;
 import autotesting.practice_8.models.response.CreateUserResponseDto;
@@ -7,7 +8,6 @@ import autotesting.practice_8.models.response.UpdateUserResponseDto;
 import autotesting.practice_8.specs.RequestSpecs;
 import autotesting.practice_8.specs.ResponseSpecs;
 import autotesting.practice_8.testdata.UserData;
-import autotesting.practice_8.BaseTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -16,8 +16,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 import java.util.stream.Stream;
 
 import static autotesting.practice_8.testdata.UserData.generateUpdateUserDto;
-import static autotesting.practice_8.expectedmessages.api.UserApiMessages.PROFILE_UPDATE_INVALID_NAME;
-import static autotesting.practice_8.expectedmessages.api.UserApiMessages.PROFILE_UPDATE_SUCCESS;
+import static autotesting.practice_8.testdata.expectedmessages.api.UserApiMessages.PROFILE_UPDATE_INVALID_NAME;
+import static autotesting.practice_8.testdata.expectedmessages.api.UserApiMessages.PROFILE_UPDATE_SUCCESS;
 
 public class UpdateCustomerProfileTest extends BaseTest {
 
@@ -33,7 +33,6 @@ public class UpdateCustomerProfileTest extends BaseTest {
         softly.assertThat(updatedUser.getCustomer().getName()).isEqualTo(updateUserDto.getName());
 
         CreateUserResponseDto actualUser = userSteps.getCustomerProfile(userAuthHeader);
-
         softly.assertThat(actualUser.getName()).isEqualTo(updateUserDto.getName());
     }
 
@@ -62,7 +61,6 @@ public class UpdateCustomerProfileTest extends BaseTest {
         softly.assertThat(errorResponse).isEqualTo(PROFILE_UPDATE_INVALID_NAME);
 
         CreateUserResponseDto actualUser = userSteps.getCustomerProfile(userAuthHeader);
-
         softly.assertThat(actualUser.getName()).isNull();
     }
 
@@ -75,7 +73,6 @@ public class UpdateCustomerProfileTest extends BaseTest {
         userSteps.updateCustomerProfile(updateUserDto, RequestSpecs.unauth(), ResponseSpecs.unauthorized());
 
         CreateUserResponseDto actualUser = userSteps.getCustomerProfile(userAuthHeader);
-
         softly.assertThat(actualUser.getName()).isNull();
     }
 }

@@ -1,11 +1,12 @@
 package autotesting.practice_8.api.iteration_1;
 
+import autotesting.practice_8.BaseTest;
 import autotesting.practice_8.models.request.CreateUserRequestDto;
 import autotesting.practice_8.models.response.CreateUserResponseDto;
 import autotesting.practice_8.models.response.ErrorResponseDto;
 import autotesting.practice_8.specs.RequestSpecs;
 import autotesting.practice_8.specs.ResponseSpecs;
-import autotesting.practice_8.BaseTest;
+import autotesting.practice_8.supports.assertions.UserAssertions;
 import io.restassured.common.mapper.TypeRef;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -17,7 +18,8 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static autotesting.practice_8.testdata.UserData.*;
-import static autotesting.practice_8.expectedmessages.api.UserApiMessages.USER_CREATE_FORBIDDEN;
+import static autotesting.practice_8.testdata.expectedmessages.api.UserApiMessages.CREATE_USER_DUPLICATE_USERNAME;
+import static autotesting.practice_8.testdata.expectedmessages.api.UserApiMessages.USER_CREATE_FORBIDDEN;
 
 public class CreateUserTest extends BaseTest {
 
@@ -33,15 +35,11 @@ public class CreateUserTest extends BaseTest {
     public void adminCanCreateUserWithValidDataTest(CreateUserRequestDto userDto) {
         CreateUserResponseDto createdUser = userSteps.createUser(userDto);
 
-        softly.assertThat(createdUser.getId()).isNotNull().isPositive();
-        softly.assertThat(createdUser.getUsername()).isEqualTo(userDto.getUsername());
-        softly.assertThat(createdUser.getPassword()).isNotNull().isNotEqualTo(userDto.getPassword());
-        softly.assertThat(createdUser.getRole()).isEqualTo(userDto.getRole());
-        softly.assertThat(createdUser.getAccounts()).isEmpty();
+        UserAssertions.assertUserCreated(softly, createdUser, userDto);
 
         CreateUserResponseDto actualUser = userSteps.getUserById(createdUser.getId());
-
         softly.assertThat(actualUser)
+                .usingRecursiveComparison()
                 .isEqualTo(createdUser);
     }
 
@@ -89,7 +87,7 @@ public class CreateUserTest extends BaseTest {
                 .extract().asString();
 
         softly.assertThat(errorResponse)
-                .isEqualTo("Error: Username '" + userDto.getUsername() + "' already exists.");
+                .isEqualTo(CREATE_USER_DUPLICATE_USERNAME.formatted(userDto.getUsername()));
 
         List<CreateUserResponseDto> allUsers = userSteps.getAllUsers();
 

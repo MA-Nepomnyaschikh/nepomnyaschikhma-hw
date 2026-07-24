@@ -8,8 +8,8 @@ import autotesting.practice_8.requests.RestRequest;
 import autotesting.practice_8.requests.ValidatableRestRequest;
 import autotesting.practice_8.specs.RequestSpecs;
 import autotesting.practice_8.specs.ResponseSpecs;
-import autotesting.practice_8.supports.extensions.annotations.UserSession;
-import autotesting.practice_8.supports.extensions.models.TestUser;
+import autotesting.practice_8.supports.annotations.UserSession;
+import autotesting.practice_8.supports.context.TestUser;
 import autotesting.practice_8.testdata.UserData;
 import org.junit.jupiter.api.extension.*;
 

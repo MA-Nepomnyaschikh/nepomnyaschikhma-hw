@@ -1,4 +1,4 @@
-package autotesting.practice_8.supports.extensions.annotations;
+package autotesting.practice_8.supports.annotations;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -7,7 +7,5 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD})
-public @interface UserSession {
-    int usersCount() default 1;
-    int authUserNumber() default 1;
+public @interface AdminSession {
 }

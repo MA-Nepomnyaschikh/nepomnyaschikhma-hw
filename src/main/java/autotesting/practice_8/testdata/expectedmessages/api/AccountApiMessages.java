@@ -1,4 +1,4 @@
-package autotesting.practice_8.expectedmessages.api;
+package autotesting.practice_8.testdata.expectedmessages.api;
 
 public class AccountApiMessages {
 

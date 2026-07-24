@@ -122,10 +122,4 @@ public class UserSteps {
                 ResponseSpecs.ok())
                 .delete(id);
     }
-
-    public ValidatableResponse deleteUserByUserName(String username) {
-        CreateUserResponseDto userDto = getUserByUsername(username);
-
-        return deleteUserById(userDto.getId());
-    }
 }

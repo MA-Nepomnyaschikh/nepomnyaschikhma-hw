@@ -1,4 +1,4 @@
-package autotesting.practice_8.expectedmessages.ui;
+package autotesting.practice_8.testdata.expectedmessages.ui;
 
 public class UserUiMessages {
 

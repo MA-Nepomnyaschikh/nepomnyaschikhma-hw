@@ -1,6 +1,6 @@
 package autotesting.practice_8.supports.extensions;
 
-import autotesting.practice_8.supports.extensions.annotations.AdminSession;
+import autotesting.practice_8.supports.annotations.AdminSession;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
