@@ -2,6 +2,7 @@ package autotesting.practice_8.ui.iteration_2;
 
 import autotesting.practice_8.models.response.CreateAccountResponseDto;
 import autotesting.practice_8.pages.UserDashboardPage;
+import autotesting.practice_8.supports.annotations.Browsers;
 import autotesting.practice_8.supports.annotations.UserSession;
 import autotesting.practice_8.supports.context.TestUser;
 import autotesting.practice_8.ui.BaseUiTest;
@@ -14,6 +15,7 @@ import static autotesting.practice_8.testdata.expectedmessages.ui.AccountUiMessa
 public class TransferFundsTest extends BaseUiTest {
 
     @Test
+    @Browsers(values = {"chrome"})
     @UserSession
     public void userCanTransferFundsBetweenTheirAccountsTest(TestUser user) {
         CreateAccountResponseDto senderAccount = accountSteps.createAccountWithBalance(user.getToken(), MAX_TRANSFER_AMOUNT);
@@ -38,6 +40,7 @@ public class TransferFundsTest extends BaseUiTest {
     }
 
     @Test
+    @Browsers(values = {"chrome"})
     @UserSession(usersCount = 2)
     public void userCanTransferFundsToAnotherUserAccountTest(TestUser sender, TestUser receiver) {
         CreateAccountResponseDto senderAccount = accountSteps.createAccountWithBalance(sender.getToken(), MAX_TRANSFER_AMOUNT);
@@ -62,6 +65,7 @@ public class TransferFundsTest extends BaseUiTest {
     }
 
     @Test
+    @Browsers(values = {"chrome"})
     @UserSession(usersCount = 2)
     public void userCannotTransferFundsWithoutSenderAccountNumberTest(TestUser sender, TestUser receiver) {
         CreateAccountResponseDto senderAccount = accountSteps.createAccountWithBalance(sender.getToken(), MAX_TRANSFER_AMOUNT);
@@ -89,6 +93,7 @@ public class TransferFundsTest extends BaseUiTest {
     }
 
     @Test
+    @Browsers(values = {"chrome"})
     @UserSession(usersCount = 2)
     public void userCannotTransferFundsWithoutReceiverAccountNumberTest(TestUser sender, TestUser receiver) {
         CreateAccountResponseDto senderAccount = accountSteps.createAccountWithBalance(sender.getToken(), MAX_TRANSFER_AMOUNT);
@@ -116,6 +121,7 @@ public class TransferFundsTest extends BaseUiTest {
     }
 
     @Test
+    @Browsers(values = {"chrome"})
     @UserSession(usersCount = 2)
     public void userCannotTransferFundsWithoutAmountTest(TestUser sender, TestUser receiver) {
         CreateAccountResponseDto senderAccount = accountSteps.createAccountWithBalance(sender.getToken(), MAX_TRANSFER_AMOUNT);
@@ -142,6 +148,7 @@ public class TransferFundsTest extends BaseUiTest {
     }
 
     @Test
+    @Browsers(values = {"chrome"})
     @UserSession(usersCount = 2)
     public void userCannotTransferFundsWithoutConfirmTest(TestUser sender, TestUser receiver) {
         CreateAccountResponseDto senderAccount = accountSteps.createAccountWithBalance(sender.getToken(), MAX_TRANSFER_AMOUNT);
@@ -169,6 +176,7 @@ public class TransferFundsTest extends BaseUiTest {
     }
 
     @Test
+    @Browsers(values = {"chrome"})
     @UserSession(usersCount = 2)
     public void userCannotTransferFundsWithInvalidAmountTest(TestUser sender, TestUser receiver) {
         CreateAccountResponseDto senderAccount = accountSteps.createAccountWithBalance(sender.getToken(), MAX_TRANSFER_AMOUNT);

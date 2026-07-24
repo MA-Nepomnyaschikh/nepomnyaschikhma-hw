@@ -3,6 +3,7 @@ package autotesting.practice_8.ui.iteration_2;
 import autotesting.practice_8.models.response.CreateUserResponseDto;
 import autotesting.practice_8.pages.ProfilePage;
 import autotesting.practice_8.pages.UserDashboardPage;
+import autotesting.practice_8.supports.annotations.Browsers;
 import autotesting.practice_8.supports.annotations.UserSession;
 import autotesting.practice_8.supports.context.TestUser;
 import autotesting.practice_8.testdata.UserData;
@@ -15,6 +16,7 @@ import static autotesting.practice_8.testdata.expectedmessages.ui.UserUiMessages
 public class UpdateCustomerProfileTest extends BaseUiTest {
 
     @Test
+    @Browsers(values = {"chrome"})
     @UserSession
     public void userCanSetValidNameInProfileTest(TestUser user) {
         String newName = UserData.getName();
@@ -42,6 +44,7 @@ public class UpdateCustomerProfileTest extends BaseUiTest {
     }
 
     @Test
+    @Browsers(values = {"chrome"})
     @UserSession
     public void userCannotSetInvalidNameInProfileTest(TestUser user) {
         String newName = UserData.getUsername();

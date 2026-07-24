@@ -4,6 +4,7 @@ import autotesting.practice_8.models.request.CreateUserRequestDto;
 import autotesting.practice_8.models.response.CreateUserResponseDto;
 import autotesting.practice_8.pages.AdminPanelPage;
 import autotesting.practice_8.supports.annotations.AdminSession;
+import autotesting.practice_8.supports.annotations.Browsers;
 import autotesting.practice_8.supports.assertions.UserAssertions;
 import autotesting.practice_8.ui.BaseUiTest;
 import org.junit.jupiter.api.Test;
@@ -16,6 +17,7 @@ import static autotesting.practice_8.testdata.expectedmessages.ui.UserUiMessages
 public class CreateUserTest extends BaseUiTest {
 
     @Test
+    @Browsers(values = {"chrome"})
     @AdminSession
     public void adminCanCreateUserTest() {
         CreateUserRequestDto user = generateRandomUserDto();
@@ -42,6 +44,7 @@ public class CreateUserTest extends BaseUiTest {
     }
 
     @Test
+    @Browsers(values = {"chrome"})
     @AdminSession
     public void adminCannotCreateUserWithInvalidDataTest() {
         CreateUserRequestDto user = generateUserDto(getName(), getPassword(), USER_ROLE);

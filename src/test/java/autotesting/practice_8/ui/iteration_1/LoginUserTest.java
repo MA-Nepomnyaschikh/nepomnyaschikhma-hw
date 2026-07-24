@@ -4,6 +4,7 @@ import autotesting.practice_8.models.request.CreateUserRequestDto;
 import autotesting.practice_8.pages.AdminPanelPage;
 import autotesting.practice_8.pages.LoginPage;
 import autotesting.practice_8.pages.UserDashboardPage;
+import autotesting.practice_8.supports.annotations.Browsers;
 import autotesting.practice_8.ui.BaseUiTest;
 import org.junit.jupiter.api.Test;
 
@@ -13,6 +14,7 @@ import static autotesting.practice_8.testdata.AuthData.ADMIN_USERNAME;
 public class LoginUserTest extends BaseUiTest {
 
     @Test
+    @Browsers(values = {"chrome"})
     public void adminCanLoginWithCorrectDataTest() {
 
         new LoginPage()
@@ -24,6 +26,7 @@ public class LoginUserTest extends BaseUiTest {
     }
 
     @Test
+    @Browsers(values = {"chrome"})
     public void userCanLoginWithCorrectDataTest() {
         CreateUserRequestDto user = userSteps.createRandomUser();
 

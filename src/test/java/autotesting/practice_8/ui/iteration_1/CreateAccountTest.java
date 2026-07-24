@@ -2,6 +2,7 @@ package autotesting.practice_8.ui.iteration_1;
 
 import autotesting.practice_8.models.response.CreateAccountResponseDto;
 import autotesting.practice_8.pages.UserDashboardPage;
+import autotesting.practice_8.supports.annotations.Browsers;
 import autotesting.practice_8.supports.annotations.UserSession;
 import autotesting.practice_8.supports.assertions.AccountAssertions;
 import autotesting.practice_8.supports.context.TestUser;
@@ -15,6 +16,7 @@ import static autotesting.practice_8.testdata.expectedmessages.ui.AccountUiMessa
 public class CreateAccountTest extends BaseUiTest {
 
     @Test
+    @Browsers(values = {"chrome"})
     @UserSession
     public void userCanCreateAccountTest(TestUser user) {
         UserDashboardPage userDashboard = new UserDashboardPage()

@@ -2,6 +2,7 @@ package autotesting.practice_8.ui.iteration_2;
 
 import autotesting.practice_8.models.response.CreateAccountResponseDto;
 import autotesting.practice_8.pages.UserDashboardPage;
+import autotesting.practice_8.supports.annotations.Browsers;
 import autotesting.practice_8.supports.annotations.UserSession;
 import autotesting.practice_8.supports.assertions.AccountAssertions;
 import autotesting.practice_8.supports.context.TestUser;
@@ -19,6 +20,7 @@ import static autotesting.practice_8.testdata.expectedmessages.ui.AccountUiMessa
 public class DepositAccountTest extends BaseUiTest {
 
     @Test
+    @Browsers(values = {"chrome"})
     @UserSession
     public void userCanDepositAccountTest(TestUser user) {
         CreateAccountResponseDto userAccount = accountSteps.createAccount(user.getToken());
@@ -48,6 +50,7 @@ public class DepositAccountTest extends BaseUiTest {
 
     @MethodSource("invalidAmountProvider")
     @ParameterizedTest
+    @Browsers(values = {"chrome"})
     @UserSession
     public void userCannotDepositAccountWithInvalidAmountTest(double invalidAmount, String errorMessage, TestUser user) {
         CreateAccountResponseDto userAccount = accountSteps.createAccount(user.getToken());
@@ -68,6 +71,7 @@ public class DepositAccountTest extends BaseUiTest {
     }
 
     @Test
+    @Browsers(values = {"chrome"})
     @UserSession
     public void userCannotDepositAccountWithoutAccountNumberTest(TestUser user) {
         CreateAccountResponseDto userAccount = accountSteps.createAccount(user.getToken());
@@ -90,6 +94,7 @@ public class DepositAccountTest extends BaseUiTest {
     }
 
     @Test
+    @Browsers(values = {"chrome"})
     @UserSession
     public void userCannotDepositAccountWithoutAmountTest(TestUser user) {
         CreateAccountResponseDto userAccount = accountSteps.createAccount(user.getToken());
