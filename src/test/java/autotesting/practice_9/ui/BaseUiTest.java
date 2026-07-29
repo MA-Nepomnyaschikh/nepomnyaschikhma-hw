@@ -1,9 +1,9 @@
 package autotesting.practice_9.ui;
 
-import autotesting.practice_8.configs.Config;
-import autotesting.practice_8.supports.extensions.AdminSessionExtension;
-import autotesting.practice_8.supports.extensions.BrowserMatchExtension;
-import autotesting.practice_8.supports.extensions.UserSessionExtension;
+import autotesting.practice_9.configs.Config;
+import autotesting.practice_9.supports.extensions.AdminSessionExtension;
+import autotesting.practice_9.supports.extensions.BrowserMatchExtension;
+import autotesting.practice_9.supports.extensions.UserSessionExtension;
 import autotesting.practice_9.BaseTest;
 import com.codeborne.selenide.Configuration;
 import com.codeborne.selenide.Selenide;

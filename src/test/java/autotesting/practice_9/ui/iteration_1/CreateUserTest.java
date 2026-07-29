@@ -1,18 +1,18 @@
 package autotesting.practice_9.ui.iteration_1;
 
-import autotesting.practice_8.models.request.CreateUserRequestDto;
-import autotesting.practice_8.models.response.CreateUserResponseDto;
-import autotesting.practice_8.pages.AdminPanelPage;
-import autotesting.practice_8.supports.annotations.AdminSession;
-import autotesting.practice_8.supports.annotations.Browsers;
-import autotesting.practice_8.supports.assertions.UserAssertions;
+import autotesting.practice_9.models.request.CreateUserRequestDto;
+import autotesting.practice_9.models.response.CreateUserResponseDto;
+import autotesting.practice_9.pages.AdminPanelPage;
+import autotesting.practice_9.supports.annotations.AdminSession;
+import autotesting.practice_9.supports.annotations.Browsers;
+import autotesting.practice_9.supports.assertions.UserAssertions;
 import autotesting.practice_9.ui.BaseUiTest;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static autotesting.practice_8.testdata.UserData.*;
-import static autotesting.practice_8.testdata.expectedmessages.ui.UserUiMessages.*;
+import static autotesting.practice_9.testdata.UserData.*;
+import static autotesting.practice_9.testdata.expectedmessages.ui.UserUiMessages.*;
 
 public class CreateUserTest extends BaseUiTest {
 

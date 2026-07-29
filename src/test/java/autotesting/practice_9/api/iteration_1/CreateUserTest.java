@@ -1,11 +1,11 @@
 package autotesting.practice_9.api.iteration_1;
 
-import autotesting.practice_8.models.request.CreateUserRequestDto;
-import autotesting.practice_8.models.response.CreateUserResponseDto;
-import autotesting.practice_8.models.response.ErrorResponseDto;
-import autotesting.practice_8.specs.RequestSpecs;
-import autotesting.practice_8.specs.ResponseSpecs;
-import autotesting.practice_8.supports.assertions.UserAssertions;
+import autotesting.practice_9.models.request.CreateUserRequestDto;
+import autotesting.practice_9.models.response.CreateUserResponseDto;
+import autotesting.practice_9.models.response.ErrorResponseDto;
+import autotesting.practice_9.specs.RequestSpecs;
+import autotesting.practice_9.specs.ResponseSpecs;
+import autotesting.practice_9.supports.assertions.UserAssertions;
 import autotesting.practice_9.BaseTest;
 import io.restassured.common.mapper.TypeRef;
 import org.junit.jupiter.api.Test;
@@ -17,9 +17,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static autotesting.practice_8.testdata.UserData.*;
-import static autotesting.practice_8.testdata.expectedmessages.api.UserApiMessages.CREATE_USER_DUPLICATE_USERNAME;
-import static autotesting.practice_8.testdata.expectedmessages.api.UserApiMessages.USER_CREATE_FORBIDDEN;
+import static autotesting.practice_9.testdata.UserData.*;
+import static autotesting.practice_9.testdata.expectedmessages.api.UserApiMessages.CREATE_USER_DUPLICATE_USERNAME;
+import static autotesting.practice_9.testdata.expectedmessages.api.UserApiMessages.USER_CREATE_FORBIDDEN;
 
 public class CreateUserTest extends BaseTest {
 

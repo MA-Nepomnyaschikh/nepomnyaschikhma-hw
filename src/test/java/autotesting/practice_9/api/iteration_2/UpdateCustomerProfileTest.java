@@ -1,12 +1,12 @@
 package autotesting.practice_9.api.iteration_2;
 
-import autotesting.practice_8.models.request.CreateUserRequestDto;
-import autotesting.practice_8.models.request.UpdateUserRequestDto;
-import autotesting.practice_8.models.response.CreateUserResponseDto;
-import autotesting.practice_8.models.response.UpdateUserResponseDto;
-import autotesting.practice_8.specs.RequestSpecs;
-import autotesting.practice_8.specs.ResponseSpecs;
-import autotesting.practice_8.testdata.UserData;
+import autotesting.practice_9.models.request.CreateUserRequestDto;
+import autotesting.practice_9.models.request.UpdateUserRequestDto;
+import autotesting.practice_9.models.response.CreateUserResponseDto;
+import autotesting.practice_9.models.response.UpdateUserResponseDto;
+import autotesting.practice_9.specs.RequestSpecs;
+import autotesting.practice_9.specs.ResponseSpecs;
+import autotesting.practice_9.testdata.UserData;
 import autotesting.practice_9.BaseTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -15,9 +15,9 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.stream.Stream;
 
-import static autotesting.practice_8.testdata.UserData.generateUpdateUserDto;
-import static autotesting.practice_8.testdata.expectedmessages.api.UserApiMessages.PROFILE_UPDATE_INVALID_NAME;
-import static autotesting.practice_8.testdata.expectedmessages.api.UserApiMessages.PROFILE_UPDATE_SUCCESS;
+import static autotesting.practice_9.testdata.UserData.generateUpdateUserDto;
+import static autotesting.practice_9.testdata.expectedmessages.api.UserApiMessages.PROFILE_UPDATE_INVALID_NAME;
+import static autotesting.practice_9.testdata.expectedmessages.api.UserApiMessages.PROFILE_UPDATE_SUCCESS;
 
 public class UpdateCustomerProfileTest extends BaseTest {
 

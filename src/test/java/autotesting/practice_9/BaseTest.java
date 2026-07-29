@@ -1,9 +1,9 @@
 package autotesting.practice_9;
 
-import autotesting.practice_8.steps.AccountSteps;
-import autotesting.practice_8.steps.AuthSteps;
-import autotesting.practice_8.steps.UserSteps;
-import autotesting.practice_8.supports.CleanupManager;
+import autotesting.practice_9.steps.AccountSteps;
+import autotesting.practice_9.steps.AuthSteps;
+import autotesting.practice_9.steps.UserSteps;
+import autotesting.practice_9.supports.CleanupManager;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;

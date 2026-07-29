@@ -1,15 +1,15 @@
 package autotesting.practice_9.api.iteration_1;
 
-import autotesting.practice_8.models.request.CreateUserRequestDto;
-import autotesting.practice_8.models.request.LoginUserRequestDto;
-import autotesting.practice_8.supports.assertions.UserAssertions;
+import autotesting.practice_9.models.request.CreateUserRequestDto;
+import autotesting.practice_9.models.request.LoginUserRequestDto;
+import autotesting.practice_9.supports.assertions.UserAssertions;
 import autotesting.practice_9.BaseTest;
 import io.restassured.response.ValidatableResponse;
 import org.junit.jupiter.api.Test;
 
-import static autotesting.practice_8.testdata.AuthData.*;
-import static autotesting.practice_8.testdata.UserData.ADMIN_ROLE;
-import static autotesting.practice_8.testdata.UserData.generateUserDto;
+import static autotesting.practice_9.testdata.AuthData.*;
+import static autotesting.practice_9.testdata.UserData.ADMIN_ROLE;
+import static autotesting.practice_9.testdata.UserData.generateUserDto;
 
 public class LoginUserTest extends BaseTest {
 
