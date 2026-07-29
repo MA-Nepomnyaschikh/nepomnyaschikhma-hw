@@ -1,11 +1,11 @@
 package autotesting.practice_9.ui.iteration_2;
 
-import autotesting.practice_8.models.response.CreateAccountResponseDto;
-import autotesting.practice_8.pages.UserDashboardPage;
-import autotesting.practice_8.supports.annotations.Browsers;
-import autotesting.practice_8.supports.annotations.UserSession;
-import autotesting.practice_8.supports.assertions.AccountAssertions;
-import autotesting.practice_8.supports.context.TestUser;
+import autotesting.practice_9.models.response.CreateAccountResponseDto;
+import autotesting.practice_9.pages.UserDashboardPage;
+import autotesting.practice_9.supports.annotations.Browsers;
+import autotesting.practice_9.supports.annotations.UserSession;
+import autotesting.practice_9.supports.assertions.AccountAssertions;
+import autotesting.practice_9.supports.context.TestUser;
 import autotesting.practice_9.ui.BaseUiTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -14,8 +14,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.stream.Stream;
 
-import static autotesting.practice_8.testdata.AccountData.getRandomValidDepositAmount;
-import static autotesting.practice_8.testdata.expectedmessages.ui.AccountUiMessages.*;
+import static autotesting.practice_9.testdata.AccountData.getRandomValidDepositAmount;
+import static autotesting.practice_9.testdata.expectedmessages.ui.AccountUiMessages.*;
 
 public class DepositAccountTest extends BaseUiTest {
 

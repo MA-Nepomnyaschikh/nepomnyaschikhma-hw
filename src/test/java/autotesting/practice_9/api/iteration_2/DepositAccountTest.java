@@ -1,11 +1,11 @@
 package autotesting.practice_9.api.iteration_2;
 
-import autotesting.practice_8.models.request.CreateUserRequestDto;
-import autotesting.practice_8.models.request.DepositRequestDto;
-import autotesting.practice_8.models.response.CreateAccountResponseDto;
-import autotesting.practice_8.specs.RequestSpecs;
-import autotesting.practice_8.specs.ResponseSpecs;
-import autotesting.practice_8.supports.assertions.AccountAssertions;
+import autotesting.practice_9.models.request.CreateUserRequestDto;
+import autotesting.practice_9.models.request.DepositRequestDto;
+import autotesting.practice_9.models.response.CreateAccountResponseDto;
+import autotesting.practice_9.specs.RequestSpecs;
+import autotesting.practice_9.specs.ResponseSpecs;
+import autotesting.practice_9.supports.assertions.AccountAssertions;
 import autotesting.practice_9.BaseTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -14,8 +14,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.stream.Stream;
 
-import static autotesting.practice_8.testdata.AccountData.*;
-import static autotesting.practice_8.testdata.expectedmessages.api.AccountApiMessages.DEPOSIT_UNAUTHORIZED;
+import static autotesting.practice_9.testdata.AccountData.*;
+import static autotesting.practice_9.testdata.expectedmessages.api.AccountApiMessages.DEPOSIT_UNAUTHORIZED;
 
 public class DepositAccountTest extends BaseTest {
 

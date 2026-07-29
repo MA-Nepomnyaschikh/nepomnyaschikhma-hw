@@ -1,10 +1,10 @@
 package autotesting.practice_9.api.iteration_1;
 
-import autotesting.practice_8.models.request.CreateUserRequestDto;
-import autotesting.practice_8.models.response.CreateAccountResponseDto;
-import autotesting.practice_8.specs.RequestSpecs;
-import autotesting.practice_8.specs.ResponseSpecs;
-import autotesting.practice_8.supports.assertions.AccountAssertions;
+import autotesting.practice_9.models.request.CreateUserRequestDto;
+import autotesting.practice_9.models.response.CreateAccountResponseDto;
+import autotesting.practice_9.specs.RequestSpecs;
+import autotesting.practice_9.specs.ResponseSpecs;
+import autotesting.practice_9.supports.assertions.AccountAssertions;
 import autotesting.practice_9.BaseTest;
 import org.junit.jupiter.api.Test;
 
