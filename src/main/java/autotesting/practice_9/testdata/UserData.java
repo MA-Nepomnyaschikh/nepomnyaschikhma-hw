@@ -3,11 +3,9 @@ package autotesting.practice_9.testdata;
 import autotesting.practice_9.models.enams.UserRole;
 import autotesting.practice_9.models.request.CreateUserRequestDto;
 import autotesting.practice_9.models.request.UpdateUserRequestDto;
-import autotesting.practice_9.models.response.CreateUserResponseDto;
 import net.datafaker.Faker;
 import org.apache.commons.lang3.RandomStringUtils;
 
-import java.util.Collections;
 import java.util.UUID;
 
 public class UserData {
@@ -50,34 +48,11 @@ public class UserData {
         return firstName + " " + lastName;
     }
 
-    public static CreateUserRequestDto generateRandomUserDto() {
-        return CreateUserRequestDto.builder()
-                .username(getUsername())
-                .password(getPassword())
-                .role(USER_ROLE)
-                .build();
-    }
-
     public static CreateUserRequestDto generateUserDto(String username, String password, String role) {
         return CreateUserRequestDto.builder()
                 .username(username)
                 .password(password)
                 .role(role)
-                .build();
-    }
-
-    public static CreateUserResponseDto generateExpectedUser(CreateUserRequestDto userDto) {
-        return CreateUserResponseDto.builder()
-                        .username(userDto.getUsername())
-                        .role(userDto.getRole())
-                        .name(null)
-                        .accounts(Collections.emptyList())
-                        .build();
-    }
-
-    public static UpdateUserRequestDto generateRandomUpdateUserDto() {
-        return UpdateUserRequestDto.builder()
-                .name(getValidName())
                 .build();
     }
 
