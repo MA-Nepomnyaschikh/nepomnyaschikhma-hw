@@ -38,34 +38,11 @@ public class UserData {
         return FAKER.name().firstName() + " " + FAKER.name().lastName();
     }
 
-    public static CreateUserRequestDto generateRandomUserDto() {
-        return CreateUserRequestDto.builder()
-                .username(getUsername())
-                .password(getPassword())
-                .role(USER_ROLE)
-                .build();
-    }
-
     public static CreateUserRequestDto generateUserDto(String username, String password, String role) {
         return CreateUserRequestDto.builder()
                 .username(username)
                 .password(password)
                 .role(role)
-                .build();
-    }
-
-    public static CreateUserResponseDto generateExpectedUser(CreateUserRequestDto userDto) {
-        return CreateUserResponseDto.builder()
-                        .username(userDto.getUsername())
-                        .role(userDto.getRole())
-                        .name(null)
-                        .accounts(Collections.emptyList())
-                        .build();
-    }
-
-    public static UpdateUserRequestDto generateRandomUpdateUserDto() {
-        return UpdateUserRequestDto.builder()
-                .name(getName())
                 .build();
     }
 
