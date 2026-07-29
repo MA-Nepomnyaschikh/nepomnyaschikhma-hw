@@ -10,14 +10,13 @@ import autotesting.practice_8.requests.ValidatableRestRequest;
 import autotesting.practice_8.specs.RequestSpecs;
 import autotesting.practice_8.specs.ResponseSpecs;
 import autotesting.practice_8.supports.CleanupManager;
+import autotesting.practice_8.testdata.randommodelgenerator.RandomModelGenerator;
 import io.restassured.response.ValidatableResponse;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 
 import java.util.List;
 import java.util.NoSuchElementException;
-
-import static autotesting.practice_8.testdata.UserData.generateRandomUserDto;
 
 public class UserSteps {
 
@@ -50,7 +49,7 @@ public class UserSteps {
     }
 
     public CreateUserRequestDto createRandomUser() {
-        CreateUserRequestDto userDto = generateRandomUserDto();
+        CreateUserRequestDto userDto = RandomModelGenerator.generate(CreateUserRequestDto.class);
 
         CreateUserResponseDto createdUser = new ValidatableRestRequest<CreateUserResponseDto>(
                 RequestSpecs.authAsAdmin(),
