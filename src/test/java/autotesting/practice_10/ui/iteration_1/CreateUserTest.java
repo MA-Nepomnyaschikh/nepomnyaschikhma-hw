@@ -6,6 +6,7 @@ import autotesting.practice_10.pages.AdminPanelPage;
 import autotesting.practice_10.supports.annotations.AdminSession;
 import autotesting.practice_10.supports.annotations.Browsers;
 import autotesting.practice_10.supports.assertions.UserAssertions;
+import autotesting.practice_10.testdata.randommodelgenerator.RandomModelGenerator;
 import autotesting.practice_10.ui.BaseUiTest;
 import org.junit.jupiter.api.Test;
 
@@ -20,7 +21,7 @@ public class CreateUserTest extends BaseUiTest {
     @Browsers(values = {"chrome"})
     @AdminSession
     public void adminCanCreateUserTest() {
-        CreateUserRequestDto user = generateRandomUserDto();
+        CreateUserRequestDto user = RandomModelGenerator.generate(CreateUserRequestDto.class);
 
         AdminPanelPage adminPanel = new AdminPanelPage()
                 .open()
