@@ -9,7 +9,7 @@ import io.restassured.specification.RequestSpecification;
 
 public class RequestSpecs {
 
-    private static final String BASE_URI = Config.getProperty("server") + Config.getProperty("apiVersion");
+    private static final String BASE_URI = Config.getProperty("apiBaseUrl") + Config.getProperty("apiVersion");
     private static final String ADMIN_AUTH_TOKEN = "Basic YWRtaW46YWRtaW4=";
 
     private RequestSpecs() {}

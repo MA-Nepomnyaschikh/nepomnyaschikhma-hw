@@ -1,6 +1,6 @@
-package autotesting.practice_6.specs;
+package autotesting.practice_7.specs;
 
-import autotesting.practice_6.configs.Config;
+import autotesting.practice_7.configs.Config;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.filter.log.RequestLoggingFilter;
 import io.restassured.filter.log.ResponseLoggingFilter;
