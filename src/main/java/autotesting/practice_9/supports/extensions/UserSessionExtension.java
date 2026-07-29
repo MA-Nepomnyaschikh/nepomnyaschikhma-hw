@@ -10,7 +10,7 @@ import autotesting.practice_9.specs.RequestSpecs;
 import autotesting.practice_9.specs.ResponseSpecs;
 import autotesting.practice_9.supports.annotations.UserSession;
 import autotesting.practice_9.supports.context.TestUser;
-import autotesting.practice_9.testdata.UserData;
+import autotesting.practice_9.testdata.randommodelgenerator.RandomModelGenerator;
 import org.junit.jupiter.api.extension.*;
 
 import java.lang.reflect.Parameter;
@@ -93,7 +93,7 @@ public class UserSessionExtension implements BeforeEachCallback, AfterEachCallba
     }
 
     private TestUser createUser() {
-        CreateUserRequestDto requestDto = UserData.generateRandomUserDto();
+        CreateUserRequestDto requestDto = RandomModelGenerator.generate(CreateUserRequestDto.class);
         CreateUserResponseDto responseDto = new ValidatableRestRequest<CreateUserResponseDto>(
                 RequestSpecs.authAsAdmin(),
                 Endpoint.CREATE_USER,

@@ -1,12 +1,13 @@
 package autotesting.practice_9.api.iteration_1;
 
+import autotesting.practice_9.BaseTest;
 import autotesting.practice_9.models.request.CreateUserRequestDto;
 import autotesting.practice_9.models.response.CreateUserResponseDto;
 import autotesting.practice_9.models.response.ErrorResponseDto;
 import autotesting.practice_9.specs.RequestSpecs;
 import autotesting.practice_9.specs.ResponseSpecs;
 import autotesting.practice_9.supports.assertions.UserAssertions;
-import autotesting.practice_9.BaseTest;
+import autotesting.practice_9.testdata.randommodelgenerator.RandomModelGenerator;
 import io.restassured.common.mapper.TypeRef;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -79,7 +80,7 @@ public class CreateUserTest extends BaseTest {
 
     @Test
     public void adminCannotCreateUserWithExistingUsernameTest() {
-        CreateUserRequestDto userDto = generateRandomUserDto();
+        CreateUserRequestDto userDto = RandomModelGenerator.generate(CreateUserRequestDto.class);
         userSteps.createUser(userDto);
 
         String errorResponse = userSteps.createUser(
@@ -98,7 +99,7 @@ public class CreateUserTest extends BaseTest {
 
     @Test
     public void unauthorizedUserCannotCreateUserTest() {
-        CreateUserRequestDto userDto = generateRandomUserDto();
+        CreateUserRequestDto userDto = RandomModelGenerator.generate(CreateUserRequestDto.class);
         userSteps.createUser(
                 userDto, RequestSpecs.unauth(), ResponseSpecs.unauthorized());
 
@@ -111,11 +112,11 @@ public class CreateUserTest extends BaseTest {
 
     @Test
     public void userWithoutAdminPermissionsCannotCreateUserTest() {
-        CreateUserRequestDto userWithoutAdminPermissionsDto = generateRandomUserDto();
+        CreateUserRequestDto userWithoutAdminPermissionsDto = RandomModelGenerator.generate(CreateUserRequestDto.class);
         userSteps.createUser(userWithoutAdminPermissionsDto);
         String userWithoutAdminPermissionsAuthHeader = authSteps.loginAndGetToken(userWithoutAdminPermissionsDto);
 
-        CreateUserRequestDto userDto = generateRandomUserDto();
+        CreateUserRequestDto userDto = RandomModelGenerator.generate(CreateUserRequestDto.class);
 
         ErrorResponseDto errorResponse = userSteps.createUser(
                 userDto, RequestSpecs.authAsUser(userWithoutAdminPermissionsAuthHeader), ResponseSpecs.forbidden())

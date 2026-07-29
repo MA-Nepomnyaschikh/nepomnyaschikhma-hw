@@ -1,13 +1,13 @@
 package autotesting.practice_9.api.iteration_2;
 
+import autotesting.practice_9.BaseTest;
 import autotesting.practice_9.models.request.CreateUserRequestDto;
 import autotesting.practice_9.models.request.UpdateUserRequestDto;
 import autotesting.practice_9.models.response.CreateUserResponseDto;
 import autotesting.practice_9.models.response.UpdateUserResponseDto;
 import autotesting.practice_9.specs.RequestSpecs;
 import autotesting.practice_9.specs.ResponseSpecs;
-import autotesting.practice_9.testdata.UserData;
-import autotesting.practice_9.BaseTest;
+import autotesting.practice_9.testdata.randommodelgenerator.RandomModelGenerator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -26,7 +26,7 @@ public class UpdateCustomerProfileTest extends BaseTest {
         CreateUserRequestDto userDto = userSteps.createRandomUser();
         String userAuthHeader = authSteps.loginAndGetToken(userDto);
 
-        UpdateUserRequestDto updateUserDto = UserData.generateRandomUpdateUserDto();
+        UpdateUserRequestDto updateUserDto = RandomModelGenerator.generate(UpdateUserRequestDto.class);
         UpdateUserResponseDto updatedUser = userSteps.updateCustomerProfile(userAuthHeader, updateUserDto);
 
         softly.assertThat(updatedUser.getMessage()).isEqualTo(PROFILE_UPDATE_SUCCESS);
@@ -69,7 +69,7 @@ public class UpdateCustomerProfileTest extends BaseTest {
         CreateUserRequestDto userDto = userSteps.createRandomUser();
         String userAuthHeader = authSteps.loginAndGetToken(userDto);
 
-        UpdateUserRequestDto updateUserDto = UserData.generateRandomUpdateUserDto();
+        UpdateUserRequestDto updateUserDto = RandomModelGenerator.generate(UpdateUserRequestDto.class);
         userSteps.updateCustomerProfile(updateUserDto, RequestSpecs.unauth(), ResponseSpecs.unauthorized());
 
         CreateUserResponseDto actualUser = userSteps.getCustomerProfile(userAuthHeader);
