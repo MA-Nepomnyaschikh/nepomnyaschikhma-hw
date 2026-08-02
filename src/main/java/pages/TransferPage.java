@@ -2,6 +2,7 @@ package pages;
 
 import models.response.CreateAccountResponseDto;
 import com.codeborne.selenide.SelenideElement;
+import supports.StepLogger;
 
 import static com.codeborne.selenide.Condition.*;
 import static com.codeborne.selenide.Selenide.*;

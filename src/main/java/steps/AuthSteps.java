@@ -7,6 +7,7 @@ import requests.RestRequest;
 import specs.RequestSpecs;
 import specs.ResponseSpecs;
 import io.restassured.response.ValidatableResponse;
+import supports.StepLogger;
 
 import static specs.ResponseSpecs.AUTH_HEADER;
 import static testdata.AuthData.generateLoginDto;
@@ -14,7 +15,6 @@ import static testdata.AuthData.generateLoginDto;
 public class AuthSteps {
 
     public ValidatableResponse login(LoginUserRequestDto loginDto) {
-
         return new RestRequest(
                 RequestSpecs.unauth(),
                 Endpoint.LOGIN,

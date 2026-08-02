@@ -1,6 +1,7 @@
 package specs;
 
 import configs.Config;
+import io.qameta.allure.restassured.AllureRestAssured;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.filter.log.RequestLoggingFilter;
 import io.restassured.filter.log.ResponseLoggingFilter;
@@ -19,7 +20,8 @@ public class RequestSpecs {
                 .setBaseUri(BASE_URI)
                 .setContentType(ContentType.JSON)
                 .addFilter(new RequestLoggingFilter())
-                .addFilter(new ResponseLoggingFilter());
+                .addFilter(new ResponseLoggingFilter())
+                .addFilter(new AllureRestAssured());
     }
 
     public static RequestSpecification unauth() {

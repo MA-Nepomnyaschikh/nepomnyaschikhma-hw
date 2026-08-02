@@ -12,6 +12,7 @@ import specs.ResponseSpecs;
 import io.restassured.response.ValidatableResponse;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+import supports.StepLogger;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -61,17 +62,20 @@ public class AccountSteps {
     }
 
     public CreateAccountResponseDto createAccountWithBalance(String token, double balance) {
-        if (balance <= 0) {
+        double remainingBalance = balance;
+
+        if (remainingBalance <= 0) {
             throw new IllegalArgumentException("Balance must be positive");
         }
+
         CreateAccountResponseDto account = createAccount(token);
 
-        while (balance > 0) {
-            double depositAmount = Math.min(balance, MAX_DEPOSIT_AMOUNT);
+        while (remainingBalance > 0) {
+            double depositAmount = Math.min(remainingBalance, MAX_DEPOSIT_AMOUNT);
 
             account = deposit(token, account.getId(), depositAmount);
 
-            balance -= depositAmount;
+            remainingBalance -= depositAmount;
         }
 
         return account;
@@ -87,7 +91,6 @@ public class AccountSteps {
 
     public CreateAccountResponseDto getClientAccountById(String token, int id) {
         List<CreateAccountResponseDto> accountsList = getClientAccounts(token);
-
         return accountsList.stream()
                 .filter(acc -> Objects.equals(acc.getId(), id))
                 .findFirst()

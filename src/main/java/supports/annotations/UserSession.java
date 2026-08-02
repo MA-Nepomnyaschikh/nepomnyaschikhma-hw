@@ -9,5 +9,6 @@ import java.lang.annotation.Target;
 @Target({ElementType.METHOD})
 public @interface UserSession {
     int usersCount() default 1;
+    boolean needBrowserLogin() default false;
     int authUserNumber() default 1;
 }

@@ -1,6 +1,7 @@
 package pages;
 
 import com.codeborne.selenide.SelenideElement;
+import supports.StepLogger;
 
 import static com.codeborne.selenide.Condition.text;
 import static com.codeborne.selenide.Condition.visible;
@@ -33,6 +34,12 @@ public class ProfilePage extends BasePage<ProfilePage> {
     public ProfilePage saveChanges() {
         saveChangeButton.click();
         return this;
+    }
+
+    public ProfilePage changeUserName(String name) {
+            setNewName(name);
+            saveChanges();
+            return this;
     }
 
     public LoginPage logout() {

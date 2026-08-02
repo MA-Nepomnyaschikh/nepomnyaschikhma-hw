@@ -6,6 +6,7 @@ import com.codeborne.selenide.ElementsCollection;
 import com.codeborne.selenide.Selectors;
 import com.codeborne.selenide.SelenideElement;
 import lombok.Getter;
+import supports.StepLogger;
 
 import java.util.List;
 
@@ -34,19 +35,42 @@ public class AdminPanelPage extends BasePage<AdminPanelPage> {
         return this;
     }
 
-    public AdminPanelPage createUser(String username, String password) {
+    public AdminPanelPage setUsername(String username) {
         usernameInput.setValue(username);
+        return this;
+    }
+
+    public AdminPanelPage setPassword(String password) {
         passwordInput.setValue(password);
-        createUserButton.click();
+        return this;
+    }
+
+    public AdminPanelPage createUser() {
+        createUserButton.shouldBe(enabled).click();
+        return this;
+    }
+
+    public AdminPanelPage createUser(String username, String password) {
+        setUsername(username);
+        setPassword(password);
+        createUser();
         return this;
     }
 
     public List<UserBadge> getAllUserBadges() {
-        return mapToElementsList(getAllUsers(), UserBadge::new);
+        return StepLogger.log("Get all users from Admin Panel", () -> {
+
+            return mapToElementsList(getAllUsers(), UserBadge::new);
+
+        });
     }
 
     public UserBadge getUserBadge(CreateUserRequestDto userDto) {
-        SelenideElement root = allUsers.findBy(ownText(userDto.getUsername()));
-        return new UserBadge(root);
+        return StepLogger.log("Get user from Admin Panel", () -> {
+
+            SelenideElement root = allUsers.findBy(ownText(userDto.getUsername()));
+            return new UserBadge(root);
+
+        });
     }
 }
