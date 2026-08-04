@@ -22,6 +22,9 @@ public class DepositPage extends BasePage<DepositPage> {
     public DepositPage shouldBeOpened() {
         webdriver().shouldHave(urlContaining(url()));
         header.shouldBe(visible).shouldHave(text("\uD83D\uDCB0 Deposit Money"));
+        accountSelector.shouldBe(visible,enabled);
+        amountInput.shouldBe(visible,enabled);
+        depositButton.shouldBe(visible,enabled);
         return this;
     }
 

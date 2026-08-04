@@ -24,6 +24,11 @@ public class TransferPage extends BasePage<TransferPage> {
     public TransferPage shouldBeOpened() {
         webdriver().shouldHave(urlContaining(url()));
         header.shouldBe(visible).shouldHave(text("\uD83D\uDD04 Make a Transfer"));
+        senderAccountSelector.shouldBe(visible, enabled);
+        receiverAccountNumber.shouldBe(visible, enabled);
+        amountInput.shouldBe(visible, enabled);
+        confirmCheckbox.shouldBe(visible, enabled);
+        transferButton.shouldBe(visible, enabled);
         return this;
     }
 

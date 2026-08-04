@@ -21,6 +21,9 @@ public class LoginPage extends BasePage<LoginPage> {
     public LoginPage shouldBeOpened() {
         webdriver().shouldHave(urlContaining(url()));
         header.shouldBe(visible).shouldHave(text("Login"));
+        usernameInput.shouldBe(visible, enabled);
+        passwordInput.shouldBe(visible, enabled);
+        loginButton.shouldBe(visible, enabled);
         return this;
     }
 

@@ -23,6 +23,7 @@ public class ProfilePage extends BasePage<ProfilePage> {
         header.shouldBe(visible).shouldHave(text("✏\uFE0F Edit Profile"));
         nameInput.shouldBe(visible, enabled);
         saveChangeButton.shouldBe(visible, enabled);
+        logoutButton.shouldBe(visible, enabled);
         return this;
     }
 

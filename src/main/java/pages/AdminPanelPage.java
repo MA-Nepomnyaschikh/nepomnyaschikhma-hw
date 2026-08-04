@@ -32,6 +32,9 @@ public class AdminPanelPage extends BasePage<AdminPanelPage> {
     public AdminPanelPage shouldBeOpened() {
         webdriver().shouldHave(urlContaining(url()));
         header.shouldBe(visible).shouldHave(text("Admin Panel"));
+        usernameInput.shouldBe(visible, enabled);
+        passwordInput.shouldBe(visible, enabled);
+        createUserButton.shouldBe(visible, enabled);
         return this;
     }
 
