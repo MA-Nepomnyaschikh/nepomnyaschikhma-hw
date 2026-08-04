@@ -2,9 +2,6 @@ name: Build and Push Tests
 
 on:
   push:
-    paths:
-      - "src/**"
-
   workflow_dispatch:
 
 jobs:
