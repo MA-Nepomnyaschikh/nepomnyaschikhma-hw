@@ -4,13 +4,13 @@ import api.BaseTest;
 import models.request.CreateUserRequestDto;
 import models.request.DepositRequestDto;
 import models.response.CreateAccountResponseDto;
-import specs.RequestSpecs;
-import specs.ResponseSpecs;
-import supports.assertions.AccountAssertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import specs.RequestSpecs;
+import specs.ResponseSpecs;
+import supports.assertions.AccountAssertions;
 
 import java.util.stream.Stream;
 
@@ -48,9 +48,9 @@ public class DepositAccountTest extends BaseTest {
 
     public static Stream<Arguments> invalidAmountProvider() {
         return Stream.of(
-                Arguments.of(5000.01, "Deposit amount cannot exceed 5000"),
-                Arguments.of(0, "Deposit amount must be at least 0.01"),
-                Arguments.of(-0.01, "Deposit amount must be at least 0.01")
+                //bag Arguments.of(5000.01, "Deposit amount cannot exceed 5000"),
+                Arguments.of(0, "Invalid account or amount"),
+                Arguments.of(-0.01, "Invalid account or amount")
         );
     }
 

@@ -5,13 +5,13 @@ import models.request.CreateUserRequestDto;
 import models.request.UpdateUserRequestDto;
 import models.response.CreateUserResponseDto;
 import models.response.UpdateUserResponseDto;
-import specs.RequestSpecs;
-import specs.ResponseSpecs;
-import testdata.randommodelgenerator.RandomModelGenerator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import specs.RequestSpecs;
+import specs.ResponseSpecs;
+import testdata.randommodelgenerator.RandomModelGenerator;
 
 import java.util.stream.Stream;
 

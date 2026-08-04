@@ -3,10 +3,10 @@ package api.iteration_1;
 import api.BaseTest;
 import models.request.CreateUserRequestDto;
 import models.response.CreateAccountResponseDto;
+import org.junit.jupiter.api.Test;
 import specs.RequestSpecs;
 import specs.ResponseSpecs;
 import supports.assertions.AccountAssertions;
-import org.junit.jupiter.api.Test;
 
 import java.util.List;
 

@@ -1,6 +1,7 @@
 package ui.iteration_2;
 
 import models.response.CreateUserResponseDto;
+import org.junit.jupiter.api.Test;
 import pages.ProfilePage;
 import pages.UserDashboardPage;
 import supports.annotations.Browsers;
@@ -8,7 +9,6 @@ import supports.annotations.UserSession;
 import supports.context.TestUser;
 import testdata.UserData;
 import ui.BaseUiTest;
-import org.junit.jupiter.api.Test;
 
 import static testdata.expectedmessages.ui.UserUiMessages.UPDATE_USER_FAILED;
 import static testdata.expectedmessages.ui.UserUiMessages.UPDATE_USER_SUCCESSFULLY;

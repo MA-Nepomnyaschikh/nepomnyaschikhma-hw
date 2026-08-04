@@ -1,8 +1,8 @@
 package supports.extensions;
 
-import supports.annotations.AdminSession;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
+import supports.annotations.AdminSession;
 
 import static pages.BasePage.setAuthToken;
 import static testdata.AuthData.ADMIN_TOKEN;

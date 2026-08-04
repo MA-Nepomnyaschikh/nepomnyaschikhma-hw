@@ -1,18 +1,18 @@
 package api.iteration_1;
 
 import api.BaseTest;
+import io.restassured.common.mapper.TypeRef;
 import models.request.CreateUserRequestDto;
 import models.response.CreateUserResponseDto;
 import models.response.ErrorResponseDto;
-import specs.RequestSpecs;
-import specs.ResponseSpecs;
-import supports.assertions.UserAssertions;
-import testdata.randommodelgenerator.RandomModelGenerator;
-import io.restassured.common.mapper.TypeRef;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import specs.RequestSpecs;
+import specs.ResponseSpecs;
+import supports.assertions.UserAssertions;
+import testdata.randommodelgenerator.RandomModelGenerator;
 
 import java.util.List;
 import java.util.Map;

@@ -1,12 +1,12 @@
 package ui.iteration_1;
 
 import models.request.CreateUserRequestDto;
+import org.junit.jupiter.api.Test;
 import pages.AdminPanelPage;
 import pages.LoginPage;
 import pages.UserDashboardPage;
 import supports.annotations.Browsers;
 import ui.BaseUiTest;
-import org.junit.jupiter.api.Test;
 
 import static testdata.AuthData.ADMIN_PASSWORD;
 import static testdata.AuthData.ADMIN_USERNAME;
