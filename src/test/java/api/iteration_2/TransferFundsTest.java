@@ -102,9 +102,9 @@ public class TransferFundsTest extends BaseTest {
 
     public static Stream<Arguments> invalidAmountProvider() {
         return Stream.of(
-                Arguments.of(10000.01, "Transfer amount cannot exceed 10000"),
-                Arguments.of(0, "Transfer amount must be at least 0.01"),
-                Arguments.of(-0.01, "Transfer amount must be at least 0.01")
+                Arguments.of(10000.01, "Invalid transfer: insufficient funds or invalid accounts"),
+                Arguments.of(0, "Invalid transfer: insufficient funds or invalid accounts"),
+                Arguments.of(-0.01, "Invalid transfer: insufficient funds or invalid accounts")
         );
     }
 

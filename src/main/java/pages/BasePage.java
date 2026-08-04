@@ -1,12 +1,12 @@
 package pages;
 
-import pages.elements.BaseElement;
-import supports.utils.WaitUtils;
 import com.codeborne.selenide.ElementsCollection;
 import com.codeborne.selenide.Selenide;
 import com.codeborne.selenide.SelenideElement;
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.support.ui.ExpectedConditions;
+import pages.elements.BaseElement;
+import supports.utils.WaitUtils;
 
 import java.util.List;
 import java.util.function.Function;
