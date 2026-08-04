@@ -2,6 +2,8 @@ name: Build and Push Tests
 
 on:
   push:
+    paths:
+      - "src/**"
   workflow_dispatch:
 
 jobs:
@@ -33,6 +35,7 @@ jobs:
           UIBASEURL: http://frontend
 
       - name: Tear down services
+        if: always()
         run: bash infra/docker_compose/stop_nbank.sh
 
       - name: Checkstyle
