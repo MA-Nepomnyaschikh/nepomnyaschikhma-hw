@@ -6,6 +6,7 @@ import com.codeborne.selenide.ElementsCollection;
 import com.codeborne.selenide.Selectors;
 import com.codeborne.selenide.SelenideElement;
 import lombok.Getter;
+import supports.StepLogger;
 
 import java.util.List;
 
@@ -31,22 +32,48 @@ public class AdminPanelPage extends BasePage<AdminPanelPage> {
     public AdminPanelPage shouldBeOpened() {
         webdriver().shouldHave(urlContaining(url()));
         header.shouldBe(visible).shouldHave(text("Admin Panel"));
+        usernameInput.shouldBe(visible, enabled);
+        passwordInput.shouldBe(visible, enabled);
+        createUserButton.shouldBe(visible, enabled);
+        return this;
+    }
+
+    public AdminPanelPage setUsername(String username) {
+        usernameInput.shouldBe(enabled)
+                .setValue(username)
+                .shouldHave(value(username));
+        return this;
+    }
+
+    public AdminPanelPage setPassword(String password) {
+        passwordInput.shouldBe(enabled)
+                .setValue(password)
+                .shouldHave(value(password));
+        return this;
+    }
+
+    public AdminPanelPage createUser() {
+        createUserButton.shouldBe(enabled).click();
         return this;
     }
 
     public AdminPanelPage createUser(String username, String password) {
-        usernameInput.setValue(username);
-        passwordInput.setValue(password);
-        createUserButton.click();
+        setUsername(username);
+        setPassword(password);
+        createUser();
         return this;
     }
 
     public List<UserBadge> getAllUserBadges() {
-        return mapToElementsList(getAllUsers(), UserBadge::new);
+        return StepLogger.log("Get all users from Admin Panel", () -> {
+            return mapToElementsList(getAllUsers(), UserBadge::new);
+        });
     }
 
     public UserBadge getUserBadge(CreateUserRequestDto userDto) {
-        SelenideElement root = allUsers.findBy(ownText(userDto.getUsername()));
-        return new UserBadge(root);
+        return StepLogger.log("Get user from Admin Panel", () -> {
+            SelenideElement root = allUsers.findBy(ownText(userDto.getUsername()));
+            return new UserBadge(root);
+        });
     }
 }

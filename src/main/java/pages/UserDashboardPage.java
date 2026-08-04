@@ -32,6 +32,10 @@ public class UserDashboardPage extends BasePage<UserDashboardPage> {
     public UserDashboardPage shouldBeOpened() {
         webdriver().shouldHave(urlContaining(url()));
         header.shouldBe(visible).shouldHave(text("User Dashboard"));
+        goToProfileButton.shouldBe(visible, enabled);
+        depositButton.shouldBe(visible, enabled);
+        transferButton.shouldBe(visible, enabled);
+        createAccountButton.shouldBe(visible, enabled);
         return this;
     }
 

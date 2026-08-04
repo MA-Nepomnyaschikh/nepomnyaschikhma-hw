@@ -1,39 +1,49 @@
 package api.iteration_1;
 
 import api.BaseTest;
-import models.request.CreateUserRequestDto;
 import models.response.CreateAccountResponseDto;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import specs.RequestSpecs;
 import specs.ResponseSpecs;
+import supports.StepLogger;
+import supports.annotations.UserSession;
 import supports.assertions.AccountAssertions;
-import org.junit.jupiter.api.Test;
+import supports.context.TestUser;
 
 import java.util.List;
 
 public class CreateAccountTest extends BaseTest {
 
+    @DisplayName("API. Авторизованный пользователь может создать аккаунт")
     @Test
-    public void authorizedUserCanCreateAccountTest() {
-        CreateUserRequestDto userDto = userSteps.createRandomUser();
-        String userAuthHeader = authSteps.loginAndGetToken(userDto);
+    @UserSession
+    public void authorizedUserCanCreateAccountTest(TestUser user) {
+        CreateAccountResponseDto createdAccount = StepLogger.log("Создать аккаунт", () -> {
+            return accountSteps.createAccount(user.getToken());
+        });
 
-        CreateAccountResponseDto createdAccount = accountSteps.createAccount(userAuthHeader);
-        AccountAssertions.assertAccountCreated(softly, createdAccount);
-
-        CreateAccountResponseDto actualAccount = accountSteps.getClientAccountById(userAuthHeader, createdAccount.getId());
-        softly.assertThat(actualAccount)
-                .usingRecursiveComparison()
-                .isEqualTo(createdAccount);
+        StepLogger.log("Проверить создание аккаунта", () -> {
+            AccountAssertions.assertAccountCreated(softly, createdAccount);
+            CreateAccountResponseDto actualAccount = accountSteps.getClientAccountById(user.getToken(), createdAccount.getId());
+            softly.assertThat(actualAccount)
+                    .usingRecursiveComparison()
+                    .isEqualTo(createdAccount);
+        });
     }
 
+    @DisplayName("API. Неавторизованный пользователь не может создать аккаунт")
     @Test
-    public void unauthorizedUserCannotCreateAccountTest() {
-        CreateUserRequestDto userDto = userSteps.createRandomUser();
-        String userAuthHeader = authSteps.loginAndGetToken(userDto);
+    @UserSession
+    public void unauthorizedUserCannotCreateAccountTest(TestUser user) {
 
-        accountSteps.createAccount(RequestSpecs.unauth(), ResponseSpecs.unauthorized());
+        StepLogger.log("Создать аккаунт", () -> {
+            accountSteps.createAccount(RequestSpecs.unauth(), ResponseSpecs.unauthorized());
+        });
 
-        List<CreateAccountResponseDto> userAccounts = accountSteps.getClientAccounts(userAuthHeader);
-        softly.assertThat(userAccounts).isEmpty();
+        StepLogger.log("Проверить отсутствие аккаунта", () -> {
+            List<CreateAccountResponseDto> userAccounts = accountSteps.getClientAccounts(user.getToken());
+            softly.assertThat(userAccounts).isEmpty();
+        });
     }
 }

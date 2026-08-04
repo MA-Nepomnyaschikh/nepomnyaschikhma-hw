@@ -1,7 +1,7 @@
 package pages;
 
-import models.response.CreateAccountResponseDto;
 import com.codeborne.selenide.SelenideElement;
+import models.response.CreateAccountResponseDto;
 
 import static com.codeborne.selenide.Condition.*;
 import static com.codeborne.selenide.Selenide.*;
@@ -24,6 +24,11 @@ public class TransferPage extends BasePage<TransferPage> {
     public TransferPage shouldBeOpened() {
         webdriver().shouldHave(urlContaining(url()));
         header.shouldBe(visible).shouldHave(text("\uD83D\uDD04 Make a Transfer"));
+        senderAccountSelector.shouldBe(visible, enabled);
+        receiverAccountNumber.shouldBe(visible, enabled);
+        amountInput.shouldBe(visible, enabled);
+        confirmCheckbox.shouldBe(visible, enabled);
+        transferButton.shouldBe(visible, enabled);
         return this;
     }
 
@@ -33,16 +38,22 @@ public class TransferPage extends BasePage<TransferPage> {
         shouldHaveOptionWithText(senderAccountSelector, accountNumber);
 
         senderAccountSelector.selectOptionContainingText(accountNumber);
+        senderAccountSelector.getSelectedOption()
+                .shouldHave(text(accountNumber));
         return this;
     }
 
     public TransferPage setReceiverAccount(CreateAccountResponseDto receiverAccount) {
-        receiverAccountNumber.setValue(receiverAccount.getAccountNumber());
+        receiverAccountNumber.shouldBe(enabled)
+                .setValue(receiverAccount.getAccountNumber())
+                .shouldHave(value(receiverAccount.getAccountNumber()));
         return this;
     }
 
     public TransferPage setAmount(double amount) {
-        amountInput.setValue(String.valueOf(amount));
+        amountInput.shouldBe(enabled)
+                .setValue(String.valueOf(amount))
+                .shouldHave(value(String.valueOf(amount)));
         return this;
     }
 
