@@ -28,6 +28,9 @@ jobs:
 
       - name: Build
         run: ./mvnw clean package
+        env:
+          APIBASEURL: http://localhost:4111
+          UIBASEURL: http://frontend
 
       - name: Tear down services
         run: bash infra/docker_compose/stop_nbank.sh

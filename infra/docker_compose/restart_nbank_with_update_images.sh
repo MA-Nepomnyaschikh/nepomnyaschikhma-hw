@@ -16,7 +16,7 @@ echo "Docker Compose успешно остановлен"
 
 echo ""
 echo "======================================"
-echo "Загрузка необходимых образов..."
+echo "Обновление Docker образов..."
 
 # Проверяем, что jq установлен
 if ! command -v jq &> /dev/null; then
@@ -33,6 +33,8 @@ for image in $images; do
     docker pull "$image"
 done
 
+docker compose -f "$COMPOSE_FILE" pull
+
 echo ""
 echo "Необходимые образы успешно загружены"
 
@@ -42,9 +44,12 @@ echo "Запуск Docker  Compose..."
 docker compose -f "$COMPOSE_FILE" up -d
 
 echo ""
-echo "Ожидание запуска сервисов..."
+echo "Запущенные контейнеры:"
+docker compose -f "$COMPOSE_FILE" ps
 
-sleep 5
+echo ""
+echo "Используемые образы:"
+docker compose -f "$COMPOSE_FILE" images
 
 echo ""
 echo "Docker Compose успешно запущен"
