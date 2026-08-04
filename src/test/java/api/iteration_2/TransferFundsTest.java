@@ -5,13 +5,13 @@ import models.request.CreateUserRequestDto;
 import models.request.TransferRequestDto;
 import models.response.CreateAccountResponseDto;
 import models.response.TransferResponseDto;
-import specs.RequestSpecs;
-import specs.ResponseSpecs;
-import supports.assertions.AccountAssertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import specs.RequestSpecs;
+import specs.ResponseSpecs;
+import supports.assertions.AccountAssertions;
 
 import java.util.stream.Stream;
 

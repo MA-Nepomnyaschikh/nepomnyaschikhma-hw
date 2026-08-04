@@ -1,15 +1,15 @@
 package ui;
 
 import api.BaseTest;
-import configs.Config;
-import supports.extensions.AdminSessionExtension;
-import supports.extensions.BrowserMatchExtension;
-import supports.extensions.UserSessionExtension;
 import com.codeborne.selenide.Configuration;
 import com.codeborne.selenide.Selenide;
+import configs.Config;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.extension.ExtendWith;
+import supports.extensions.AdminSessionExtension;
+import supports.extensions.BrowserMatchExtension;
+import supports.extensions.UserSessionExtension;
 
 import java.util.Map;
 

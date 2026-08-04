@@ -2,13 +2,13 @@ package ui.iteration_1;
 
 import models.request.CreateUserRequestDto;
 import models.response.CreateUserResponseDto;
+import org.junit.jupiter.api.Test;
 import pages.AdminPanelPage;
 import supports.annotations.AdminSession;
 import supports.annotations.Browsers;
 import supports.assertions.UserAssertions;
 import testdata.randommodelgenerator.RandomModelGenerator;
 import ui.BaseUiTest;
-import org.junit.jupiter.api.Test;
 
 import java.util.List;
 

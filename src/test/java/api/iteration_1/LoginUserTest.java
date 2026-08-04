@@ -1,11 +1,11 @@
 package api.iteration_1;
 
 import api.BaseTest;
+import io.restassured.response.ValidatableResponse;
 import models.request.CreateUserRequestDto;
 import models.request.LoginUserRequestDto;
-import supports.assertions.UserAssertions;
-import io.restassured.response.ValidatableResponse;
 import org.junit.jupiter.api.Test;
+import supports.assertions.UserAssertions;
 
 import static testdata.AuthData.*;
 import static testdata.UserData.ADMIN_ROLE;
