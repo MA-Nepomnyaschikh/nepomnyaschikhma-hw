@@ -1,13 +1,6 @@
 name: Run tests
 
-on:
-  pull_request:
-    branches:
-      - master
-    paths:
-      - "src/**"
-
-  workflow_dispatch:
+on: [ push, workflow_dispatch ]
 
 jobs:
   run-tests:

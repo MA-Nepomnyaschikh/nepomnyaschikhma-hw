@@ -1,9 +1,7 @@
 name: Build and Push Tests
 
 on:
-  pull_request:
-    branches:
-      - master
+  push:
     paths:
       - "src/**"
 

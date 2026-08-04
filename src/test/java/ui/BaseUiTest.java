@@ -30,8 +30,7 @@ public class BaseUiTest extends BaseTest {
                 "selenoid:options",
                 Map.of(
                         "enableVNC", true,
-                        "enableLog", true,
-                        "enableVideo", true)
+                        "enableLog", true)
         );
     }
 
