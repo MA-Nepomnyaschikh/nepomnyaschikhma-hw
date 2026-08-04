@@ -21,12 +21,13 @@ public class ProfilePage extends BasePage<ProfilePage> {
     public ProfilePage shouldBeOpened() {
         webdriver().shouldHave(urlContaining(url()));
         header.shouldBe(visible).shouldHave(text("✏\uFE0F Edit Profile"));
+        nameInput.shouldBe(visible, enabled);
+        saveChangeButton.shouldBe(visible, enabled);
         return this;
     }
 
     public ProfilePage setNewName(String name) {
-        nameInput.shouldBe(enabled)
-                .setValue(name)
+        nameInput.setValue(name)
                 .shouldHave(value(name));
         return this;
     }
