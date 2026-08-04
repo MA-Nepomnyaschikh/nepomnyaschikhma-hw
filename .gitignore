@@ -1,6 +1,7 @@
 ### IntelliJ IDEA ###
 out/
 /target/
+/allure-report/
 /build/
 /.idea/
 *.iml

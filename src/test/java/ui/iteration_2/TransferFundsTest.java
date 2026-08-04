@@ -279,9 +279,8 @@ public class TransferFundsTest extends BaseUiTest {
                     .getAlertMessageAndAccept();
         });
 
-        softly.assertThat(alertMessage).isEqualTo(TRANSFER_AMOUNT_IS_INVALID);
         StepLogger.log("Проверить ошибку перевода через UI", () -> {
-            softly.assertThat(alertMessage).isEqualTo(TRANSFER_AMOUNT_BELOW_MIN_LIMIT);
+            softly.assertThat(alertMessage).isEqualTo(TRANSFER_AMOUNT_IS_INVALID);
         });
 
         StepLogger.log("Проверить отсутствие перевода через API", () -> {
