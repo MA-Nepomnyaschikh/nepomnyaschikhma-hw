@@ -1,5 +1,6 @@
 package specs;
 
+import com.github.viclovsky.swagger.coverage.SwaggerCoverageRestAssured;
 import configs.Config;
 import io.qameta.allure.restassured.AllureRestAssured;
 import io.restassured.builder.RequestSpecBuilder;
@@ -21,7 +22,8 @@ public class RequestSpecs {
                 .setContentType(ContentType.JSON)
                 .addFilter(new RequestLoggingFilter())
                 .addFilter(new ResponseLoggingFilter())
-                .addFilter(new AllureRestAssured());
+                .addFilter(new AllureRestAssured())
+                .addFilter(new SwaggerCoverageRestAssured());
     }
 
     public static RequestSpecification unauth() {
