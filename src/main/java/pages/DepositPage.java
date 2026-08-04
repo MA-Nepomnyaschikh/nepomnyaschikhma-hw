@@ -36,6 +36,7 @@ public class DepositPage extends BasePage<DepositPage> {
 
     public DepositPage setAmount(double amount) {
         amountInput.setValue(String.valueOf(amount));
+        amountInput.shouldHave(value(String.valueOf(amount)));
         return this;
     }
 

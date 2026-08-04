@@ -1,10 +1,8 @@
 package pages;
 
 import com.codeborne.selenide.SelenideElement;
-import supports.StepLogger;
 
-import static com.codeborne.selenide.Condition.text;
-import static com.codeborne.selenide.Condition.visible;
+import static com.codeborne.selenide.Condition.*;
 import static com.codeborne.selenide.Selenide.*;
 import static com.codeborne.selenide.WebDriverConditions.urlContaining;
 
@@ -28,6 +26,7 @@ public class ProfilePage extends BasePage<ProfilePage> {
 
     public ProfilePage setNewName(String name) {
         nameInput.setValue(name);
+        nameInput.shouldHave(value(name));
         return this;
     }
 
@@ -37,9 +36,9 @@ public class ProfilePage extends BasePage<ProfilePage> {
     }
 
     public ProfilePage changeUserName(String name) {
-            setNewName(name);
-            saveChanges();
-            return this;
+        setNewName(name);
+        saveChanges();
+        return this;
     }
 
     public LoginPage logout() {

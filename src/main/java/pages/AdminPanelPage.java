@@ -37,11 +37,13 @@ public class AdminPanelPage extends BasePage<AdminPanelPage> {
 
     public AdminPanelPage setUsername(String username) {
         usernameInput.setValue(username);
+        usernameInput.shouldHave(value(username));
         return this;
     }
 
     public AdminPanelPage setPassword(String password) {
         passwordInput.setValue(password);
+        usernameInput.shouldHave(value(password));
         return this;
     }
 

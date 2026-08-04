@@ -34,16 +34,20 @@ public class TransferPage extends BasePage<TransferPage> {
         shouldHaveOptionWithText(senderAccountSelector, accountNumber);
 
         senderAccountSelector.selectOptionContainingText(accountNumber);
+        senderAccountSelector.getSelectedOption()
+                .shouldHave(text(accountNumber));
         return this;
     }
 
     public TransferPage setReceiverAccount(CreateAccountResponseDto receiverAccount) {
         receiverAccountNumber.setValue(receiverAccount.getAccountNumber());
+        receiverAccountNumber.shouldHave(value(receiverAccount.getAccountNumber()));
         return this;
     }
 
     public TransferPage setAmount(double amount) {
         amountInput.setValue(String.valueOf(amount));
+        amountInput.shouldHave(value(String.valueOf(amount)));
         return this;
     }
 
