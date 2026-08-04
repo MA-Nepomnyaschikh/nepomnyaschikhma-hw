@@ -26,13 +26,15 @@ public class LoginPage extends BasePage<LoginPage> {
     }
 
     public LoginPage setUsername(String username) {
-        usernameInput.setValue(username);
+        usernameInput.clear();
+        usernameInput.sendKeys(username);
         usernameInput.shouldHave(value(username));
         return this;
     }
 
     public LoginPage setPassword(String password) {
-        passwordInput.setValue(password);
+        passwordInput.clear();
+        passwordInput.sendKeys(password);
         passwordInput.shouldHave(value(password));
         return this;
     }

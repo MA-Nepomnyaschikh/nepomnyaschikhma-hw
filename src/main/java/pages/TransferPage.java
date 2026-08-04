@@ -40,13 +40,15 @@ public class TransferPage extends BasePage<TransferPage> {
     }
 
     public TransferPage setReceiverAccount(CreateAccountResponseDto receiverAccount) {
-        receiverAccountNumber.setValue(receiverAccount.getAccountNumber());
+        receiverAccountNumber.clear();
+        receiverAccountNumber.sendKeys(receiverAccount.getAccountNumber());
         receiverAccountNumber.shouldHave(value(receiverAccount.getAccountNumber()));
         return this;
     }
 
     public TransferPage setAmount(double amount) {
-        amountInput.setValue(String.valueOf(amount));
+        amountInput.clear();
+        amountInput.sendKeys(String.valueOf(amount));
         amountInput.shouldHave(value(String.valueOf(amount)));
         return this;
     }

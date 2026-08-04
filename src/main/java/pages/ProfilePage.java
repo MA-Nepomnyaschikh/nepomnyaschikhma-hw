@@ -25,7 +25,8 @@ public class ProfilePage extends BasePage<ProfilePage> {
     }
 
     public ProfilePage setNewName(String name) {
-        nameInput.setValue(name);
+        nameInput.clear();
+        nameInput.sendKeys(name);
         nameInput.shouldHave(value(name));
         return this;
     }
