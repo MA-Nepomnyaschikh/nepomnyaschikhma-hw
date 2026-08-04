@@ -11,6 +11,7 @@
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
+        <test.pattern>**/*Test.java</test.pattern>
     </properties>
 
     <build>
@@ -19,6 +20,11 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.2.5</version>
+                <configuration>
+                    <includes>
+                        <include>${test.pattern}</include>
+                    </includes>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -80,38 +86,21 @@
 
     <profiles>
         <profile>
-            <id>api</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-surefire-plugin</artifactId>
-                        <version>3.2.5</version>
-                        <configuration>
-                            <includes>
-                                <include>**/api/**/*Test.java</include>
-                            </includes>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
+            <id>all</id>
         </profile>
+
+        <profile>
+            <id>api</id>
+            <properties>
+                <test.pattern>**/api/**/*Test.java</test.pattern>
+            </properties>
+        </profile>
+
         <profile>
             <id>ui</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-surefire-plugin</artifactId>
-                        <version>3.2.5</version>
-                        <configuration>
-                            <includes>
-                                <include>**/ui/**/*Test.java</include>
-                            </includes>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
+            <properties>
+                <test.pattern>**/ui/**/*Test.java</test.pattern>
+            </properties>
         </profile>
     </profiles>
 

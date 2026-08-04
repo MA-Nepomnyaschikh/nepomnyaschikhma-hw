@@ -16,6 +16,16 @@ mkdir -p "$TEST_OUTPUT_DIR/report"
 
 echo ""
 echo "======================================"
+echo "Сборка Docker образа $IMAGE_NAME:$TAG..."
+echo ""
+
+docker build -t "$IMAGE_NAME:$TAG" -q .
+
+echo ""
+echo "Образ успешно собран"
+
+echo ""
+echo "======================================"
 echo "Запуск тестового контейнера..."
 echo "Образ: $IMAGE_NAME:$TAG"
 
