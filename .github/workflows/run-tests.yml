@@ -35,3 +35,7 @@ jobs:
         env:
           APIBASEURL: http://localhost:4111
           UIBASEURL: http://frontend
+
+      - name: Tear down services
+        if: always()
+        run: bash infra/docker_compose/stop_nbank.sh
