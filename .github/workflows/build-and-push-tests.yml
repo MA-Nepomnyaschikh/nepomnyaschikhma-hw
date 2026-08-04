@@ -1,10 +1,13 @@
 name: Build and Push Tests
+
 on:
-  push:
+  pull_request:
     branches:
-      - main
+      - master
     paths:
       - "src/**"
+
+  workflow_dispatch:
 
 jobs:
   build-tests:
