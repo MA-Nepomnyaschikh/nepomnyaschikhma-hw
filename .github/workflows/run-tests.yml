@@ -34,6 +34,9 @@ jobs:
       - name: Set up services
         run: bash infra/docker_compose/restart_nbank_with_update_images.sh
 
+      - name: Make mvnw executable
+        run: chmod +x mvnw
+
       - name: Run tests
         run: ./mvnw clean test -q
         env:

@@ -25,11 +25,14 @@ jobs:
           java-version: '21'
           cache: maven
 
+      - name: Make mvnw executable
+        run: chmod +x mvnw
+
       - name: Build
-        run: mvn clean test-compile
+        run: ./mvnw clean test-compile
 
       - name: Checkstyle
-        run: mvn checkstyle:check
+        run: ./mvnw checkstyle:check
 
       - name: Login
         uses: docker/login-action@v3
