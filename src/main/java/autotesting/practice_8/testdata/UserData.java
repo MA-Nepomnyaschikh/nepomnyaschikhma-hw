@@ -1,0 +1,54 @@
+package autotesting.practice_8.testdata;
+
+import autotesting.practice_8.models.enams.UserRole;
+import autotesting.practice_8.models.request.CreateUserRequestDto;
+import autotesting.practice_8.models.request.UpdateUserRequestDto;
+import autotesting.practice_8.models.response.CreateUserResponseDto;
+import net.datafaker.Faker;
+import org.apache.commons.lang3.RandomStringUtils;
+
+import java.util.Collections;
+import java.util.UUID;
+
+public class UserData {
+
+    private static final Faker FAKER = new Faker();
+    public static final String USER_ROLE = UserRole.USER.toString();
+    public static final String ADMIN_ROLE = UserRole.ADMIN.toString();
+
+    private UserData() {}
+
+    public static String getUsername() {
+        return "User_" + UUID.randomUUID().toString().replace("-", "").substring(0, 8);
+    }
+
+    public static String getPassword() {
+        String upper = RandomStringUtils.secure().next(1, "ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+        String lower = RandomStringUtils.secure().next(1, "abcdefghijklmnopqrstuvwxyz");
+        String digit = RandomStringUtils.secure().next(1, "0123456789");
+        String special = RandomStringUtils.secure().next(1, "!@#$%^&");
+
+        String other = RandomStringUtils.secure()
+                .next(8, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*");
+
+        return upper + lower + digit + special + other;
+    }
+
+    public static String getName() {
+        return FAKER.name().firstName() + " " + FAKER.name().lastName();
+    }
+
+    public static CreateUserRequestDto generateUserDto(String username, String password, String role) {
+        return CreateUserRequestDto.builder()
+                .username(username)
+                .password(password)
+                .role(role)
+                .build();
+    }
+
+    public static UpdateUserRequestDto generateUpdateUserDto(String newName) {
+        return UpdateUserRequestDto.builder()
+                .name(newName)
+                .build();
+    }
+}
