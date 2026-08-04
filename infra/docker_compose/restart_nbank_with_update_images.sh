@@ -42,4 +42,9 @@ echo "Запуск Docker  Compose..."
 docker compose -f "$COMPOSE_FILE" up -d
 
 echo ""
+echo "Ожидание запуска сервисов..."
+
+sleep 5
+
+echo ""
 echo "Docker Compose успешно запущен"
