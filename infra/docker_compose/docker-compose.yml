@@ -1,7 +1,7 @@
 services:
   backend:
     image: nobugsme/nbank:with_validation_fix
-    expose:
+    ports:
       - "4111:4111"
     networks:
       - nbank-network
