@@ -36,16 +36,16 @@ public class AdminPanelPage extends BasePage<AdminPanelPage> {
     }
 
     public AdminPanelPage setUsername(String username) {
-        usernameInput.clear();
-        usernameInput.sendKeys(username);
-        usernameInput.shouldHave(value(username));
+        usernameInput.shouldBe(enabled)
+                .setValue(username)
+                .shouldHave(value(username));
         return this;
     }
 
     public AdminPanelPage setPassword(String password) {
-        passwordInput.clear();
-        passwordInput.sendKeys(password);
-        passwordInput.shouldHave(value(password));
+        passwordInput.shouldBe(enabled)
+                .setValue(password)
+                .shouldHave(value(password));
         return this;
     }
 

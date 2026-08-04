@@ -31,12 +31,13 @@ public class DepositPage extends BasePage<DepositPage> {
         shouldHaveOptionWithText(accountSelector, accountNumber);
 
         accountSelector.selectOptionContainingText(accountNumber);
+        accountSelector.getSelectedOption()
+                .shouldHave(text(accountNumber));
         return this;
     }
 
     public DepositPage setAmount(double amount) {
-        amountInput.clear();
-        amountInput.sendKeys(String.valueOf(amount));
+        amountInput.setValue(String.valueOf(amount));
         amountInput.shouldHave(value(String.valueOf(amount)));
         return this;
     }
