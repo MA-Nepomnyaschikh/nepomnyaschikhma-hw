@@ -21,20 +21,18 @@ public class ProfilePage extends BasePage<ProfilePage> {
     public ProfilePage shouldBeOpened() {
         webdriver().shouldHave(urlContaining(url()));
         header.shouldBe(visible).shouldHave(text("✏\uFE0F Edit Profile"));
-        nameInput.shouldBe(visible, enabled);
-        saveChangeButton.shouldBe(visible, enabled);
-        logoutButton.shouldBe(visible, enabled);
         return this;
     }
 
     public ProfilePage setNewName(String name) {
-        nameInput.setValue(name)
+        nameInput.shouldBe(visible,enabled)
+                .setValue(name)
                 .shouldHave(value(name));
         return this;
     }
 
     public ProfilePage saveChanges() {
-        saveChangeButton.click();
+        saveChangeButton.shouldBe(visible,enabled).click();
         return this;
     }
 
@@ -45,7 +43,7 @@ public class ProfilePage extends BasePage<ProfilePage> {
     }
 
     public LoginPage logout() {
-        logoutButton.click();
+        logoutButton.shouldBe(visible,enabled).click();
         return new LoginPage();
     }
 }

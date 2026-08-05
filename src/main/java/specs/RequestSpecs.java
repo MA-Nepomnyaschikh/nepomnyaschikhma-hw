@@ -1,5 +1,6 @@
 package specs;
 
+import com.github.viclovsky.swagger.coverage.FileSystemOutputWriter;
 import com.github.viclovsky.swagger.coverage.SwaggerCoverageRestAssured;
 import configs.Config;
 import io.qameta.allure.restassured.AllureRestAssured;
@@ -9,9 +10,13 @@ import io.restassured.filter.log.ResponseLoggingFilter;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 
+import java.nio.file.Paths;
+
+import static com.github.viclovsky.swagger.coverage.SwaggerCoverageConstants.OUTPUT_DIRECTORY;
+
 public class RequestSpecs {
 
-    private static final String BASE_URI = Config.getProperty("apiBaseUrl") + Config.getProperty("apiVersion");
+    private static final String BASE_URI = Config.getProperty("apiBaseUrl");
     private static final String ADMIN_TOKEN = Config.getProperty("admin.token");
 
     private RequestSpecs() {}
@@ -23,7 +28,7 @@ public class RequestSpecs {
                 .addFilter(new RequestLoggingFilter())
                 .addFilter(new ResponseLoggingFilter())
                 .addFilter(new AllureRestAssured())
-                .addFilter(new SwaggerCoverageRestAssured());
+                .addFilter(new SwaggerCoverageRestAssured(new FileSystemOutputWriter(Paths.get("target/" + OUTPUT_DIRECTORY))));
     }
 
     public static RequestSpecification unauth() {

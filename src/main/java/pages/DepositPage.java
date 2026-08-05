@@ -22,13 +22,11 @@ public class DepositPage extends BasePage<DepositPage> {
     public DepositPage shouldBeOpened() {
         webdriver().shouldHave(urlContaining(url()));
         header.shouldBe(visible).shouldHave(text("\uD83D\uDCB0 Deposit Money"));
-        accountSelector.shouldBe(visible,enabled);
-        amountInput.shouldBe(visible,enabled);
-        depositButton.shouldBe(visible,enabled);
         return this;
     }
 
     public DepositPage selectAccount(CreateAccountResponseDto userAccount) {
+        accountSelector.shouldBe(visible,enabled);
         String accountNumber = userAccount.getAccountNumber();
 
         shouldHaveOptionWithText(accountSelector, accountNumber);
@@ -40,13 +38,14 @@ public class DepositPage extends BasePage<DepositPage> {
     }
 
     public DepositPage setAmount(double amount) {
-        amountInput.setValue(String.valueOf(amount));
-        amountInput.shouldHave(value(String.valueOf(amount)));
+        amountInput.shouldBe(visible,enabled)
+                .setValue(String.valueOf(amount))
+                .shouldHave(value(String.valueOf(amount)));
         return this;
     }
 
     public DepositPage sendDeposit() {
-        depositButton.shouldBe(enabled).click();
+        depositButton.shouldBe(visible,enabled).click();
         return this;
     }
 

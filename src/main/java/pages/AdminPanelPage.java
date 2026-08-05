@@ -32,28 +32,25 @@ public class AdminPanelPage extends BasePage<AdminPanelPage> {
     public AdminPanelPage shouldBeOpened() {
         webdriver().shouldHave(urlContaining(url()));
         header.shouldBe(visible).shouldHave(text("Admin Panel"));
-        usernameInput.shouldBe(visible, enabled);
-        passwordInput.shouldBe(visible, enabled);
-        createUserButton.shouldBe(visible, enabled);
         return this;
     }
 
     public AdminPanelPage setUsername(String username) {
-        usernameInput.shouldBe(enabled)
+        usernameInput.shouldBe(visible, enabled)
                 .setValue(username)
                 .shouldHave(value(username));
         return this;
     }
 
     public AdminPanelPage setPassword(String password) {
-        passwordInput.shouldBe(enabled)
+        passwordInput.shouldBe(visible, enabled)
                 .setValue(password)
                 .shouldHave(value(password));
         return this;
     }
 
     public AdminPanelPage createUser() {
-        createUserButton.shouldBe(enabled).click();
+        createUserButton.shouldBe(visible, enabled).click();
         return this;
     }
 

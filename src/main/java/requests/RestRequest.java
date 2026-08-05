@@ -1,5 +1,6 @@
 package requests;
 
+import configs.Config;
 import models.BaseModel;
 import io.restassured.response.ValidatableResponse;
 import io.restassured.specification.RequestSpecification;
@@ -9,6 +10,8 @@ import supports.StepLogger;
 import static io.restassured.RestAssured.given;
 
 public class RestRequest extends HttpRequest implements CrudOperations {
+    public static final String API_VERSION = Config.getProperty("apiVersion");
+
     public RestRequest(RequestSpecification requestSpecification, Endpoint endpoint, ResponseSpecification responseSpecification) {
         super(requestSpecification, endpoint, responseSpecification);
     }
@@ -20,7 +23,7 @@ public class RestRequest extends HttpRequest implements CrudOperations {
             return given()
                     .spec(requestSpecification)
                     .body(model)
-                    .post(endpoint.getUrl())
+                    .post(API_VERSION + endpoint.getUrl())
                     .then()
                     .spec(responseSpecification);
 
@@ -33,7 +36,7 @@ public class RestRequest extends HttpRequest implements CrudOperations {
 
             return given()
                     .spec(requestSpecification)
-                    .post(endpoint.getUrl())
+                    .post(API_VERSION + endpoint.getUrl())
                     .then()
                     .spec(responseSpecification);
 
@@ -46,7 +49,7 @@ public class RestRequest extends HttpRequest implements CrudOperations {
 
             return given()
                     .spec(requestSpecification)
-                    .get(endpoint.getUrl())
+                    .get(API_VERSION + endpoint.getUrl())
                     .then()
                     .spec(responseSpecification);
 
@@ -59,7 +62,7 @@ public class RestRequest extends HttpRequest implements CrudOperations {
 
             return given()
                     .spec(requestSpecification)
-                    .get(endpoint.getUrl())
+                    .get(API_VERSION + endpoint.getUrl())
                     .then()
                     .spec(responseSpecification);
 
@@ -73,7 +76,7 @@ public class RestRequest extends HttpRequest implements CrudOperations {
             return given()
                     .spec(requestSpecification)
                     .body(model)
-                    .put(endpoint.getUrl())
+                    .put(API_VERSION + endpoint.getUrl())
                     .then()
                     .spec(responseSpecification);
 
@@ -87,7 +90,7 @@ public class RestRequest extends HttpRequest implements CrudOperations {
             return given()
                     .spec(requestSpecification)
                     .pathParam("id", id)
-                    .delete(endpoint.getUrl())
+                    .delete(API_VERSION + endpoint.getUrl())
                     .then()
                     .spec(responseSpecification);
 
