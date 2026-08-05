@@ -36,12 +36,14 @@ public class UserDashboardPage extends BasePage<UserDashboardPage> {
     }
 
     public UserDashboardPage shouldHaveWelcomeText(String name) {
-        welcomeText.shouldHave(text(WELCOME_MESSAGE.formatted(name)));
+        welcomeText.shouldBe(visible, enabled)
+                .shouldHave(text(WELCOME_MESSAGE.formatted(name)));
         return this;
     }
 
     public UserDashboardPage shouldHaveWelcomeText() {
-        welcomeText.shouldHave(text(DEFAULT_WELCOME_MESSAGE));
+        welcomeText.shouldBe(visible, enabled)
+                .shouldHave(text(DEFAULT_WELCOME_MESSAGE));
         return this;
     }
 
