@@ -1,5 +1,8 @@
 package steps;
 
+import io.restassured.response.ValidatableResponse;
+import io.restassured.specification.RequestSpecification;
+import io.restassured.specification.ResponseSpecification;
 import models.request.DepositRequestDto;
 import models.request.TransferRequestDto;
 import models.response.CreateAccountResponseDto;
@@ -9,10 +12,6 @@ import requests.RestRequest;
 import requests.ValidatableRestRequest;
 import specs.RequestSpecs;
 import specs.ResponseSpecs;
-import io.restassured.response.ValidatableResponse;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
-import supports.StepLogger;
 
 import java.util.List;
 import java.util.NoSuchElementException;

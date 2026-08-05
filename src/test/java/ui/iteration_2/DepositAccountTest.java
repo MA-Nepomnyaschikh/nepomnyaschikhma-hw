@@ -2,6 +2,10 @@ package ui.iteration_2;
 
 import models.response.CreateAccountResponseDto;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import pages.UserDashboardPage;
 import supports.StepLogger;
 import supports.annotations.Browsers;
@@ -9,10 +13,6 @@ import supports.annotations.UserSession;
 import supports.assertions.AccountAssertions;
 import supports.context.TestUser;
 import ui.BaseUiTest;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.stream.Stream;
 
@@ -27,7 +27,7 @@ public class DepositAccountTest extends BaseUiTest {
     @UserSession(needBrowserLogin = true)
     public void userCanDepositAccountTest(TestUser user) {
         double depositAmount = getRandomValidDepositAmount();
-        
+
         CreateAccountResponseDto userAccount =  StepLogger.log("Создать счет", () -> {
             return accountSteps.createAccount(user.getToken());
         });

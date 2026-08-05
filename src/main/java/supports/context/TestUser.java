@@ -1,8 +1,8 @@
 package supports.context;
 
+import lombok.Getter;
 import models.request.CreateUserRequestDto;
 import models.response.CreateUserResponseDto;
-import lombok.Getter;
 
 @Getter
 public class TestUser {

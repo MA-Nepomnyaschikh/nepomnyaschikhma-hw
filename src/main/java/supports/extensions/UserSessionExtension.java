@@ -3,6 +3,7 @@ package supports.extensions;
 import models.request.CreateUserRequestDto;
 import models.request.LoginUserRequestDto;
 import models.response.CreateUserResponseDto;
+import org.junit.jupiter.api.extension.*;
 import requests.Endpoint;
 import requests.RestRequest;
 import requests.ValidatableRestRequest;
@@ -12,7 +13,6 @@ import supports.StepLogger;
 import supports.annotations.UserSession;
 import supports.context.TestUser;
 import testdata.randommodelgenerator.RandomModelGenerator;
-import org.junit.jupiter.api.extension.*;
 
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;

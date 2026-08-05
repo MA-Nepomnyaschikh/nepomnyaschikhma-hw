@@ -23,11 +23,13 @@ public class AccountData {
     private AccountData() {}
 
     public static double getRandomValidDepositAmount() {
-        return getRandomDouble(MIN_DEPOSIT_AMOUNT, MAX_DEPOSIT_AMOUNT);
+        double amount = getRandomDouble(MIN_DEPOSIT_AMOUNT, MAX_DEPOSIT_AMOUNT);
+        return Math.round(amount * 100.0) / 100.0;
     }
 
     public static double getRandomValidTransferAmount() {
-        return getRandomDouble(MIN_TRANSFER_AMOUNT, MAX_TRANSFER_AMOUNT);
+        double amount = getRandomDouble(MIN_TRANSFER_AMOUNT, MAX_TRANSFER_AMOUNT);
+        return Math.round(amount * 100.0) / 100.0;
     }
 
     public static DepositRequestDto generateDepositDto(int accountId, double amount) {

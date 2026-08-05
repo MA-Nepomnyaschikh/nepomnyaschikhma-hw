@@ -1,7 +1,6 @@
 package pages;
 
 import com.codeborne.selenide.SelenideElement;
-import supports.StepLogger;
 
 import static com.codeborne.selenide.Condition.*;
 import static com.codeborne.selenide.Selenide.*;
@@ -22,16 +21,23 @@ public class LoginPage extends BasePage<LoginPage> {
     public LoginPage shouldBeOpened() {
         webdriver().shouldHave(urlContaining(url()));
         header.shouldBe(visible).shouldHave(text("Login"));
+        usernameInput.shouldBe(visible, enabled);
+        passwordInput.shouldBe(visible, enabled);
+        loginButton.shouldBe(visible, enabled);
         return this;
     }
 
     public LoginPage setUsername(String username) {
-        usernameInput.setValue(username);
+        usernameInput.shouldBe(enabled)
+                .setValue(username)
+                .shouldHave(value(username));
         return this;
     }
 
     public LoginPage setPassword(String password) {
-        passwordInput.setValue(password);
+        passwordInput.shouldBe(enabled)
+                .setValue(password)
+                .shouldHave(value(password));
         return this;
     }
 

@@ -1,7 +1,7 @@
 package pages;
 
-import models.response.CreateAccountResponseDto;
 import com.codeborne.selenide.SelenideElement;
+import models.response.CreateAccountResponseDto;
 
 import static com.codeborne.selenide.Condition.*;
 import static com.codeborne.selenide.Selenide.*;
@@ -22,6 +22,9 @@ public class DepositPage extends BasePage<DepositPage> {
     public DepositPage shouldBeOpened() {
         webdriver().shouldHave(urlContaining(url()));
         header.shouldBe(visible).shouldHave(text("\uD83D\uDCB0 Deposit Money"));
+        accountSelector.shouldBe(visible,enabled);
+        amountInput.shouldBe(visible,enabled);
+        depositButton.shouldBe(visible,enabled);
         return this;
     }
 
@@ -31,11 +34,14 @@ public class DepositPage extends BasePage<DepositPage> {
         shouldHaveOptionWithText(accountSelector, accountNumber);
 
         accountSelector.selectOptionContainingText(accountNumber);
+        accountSelector.getSelectedOption()
+                .shouldHave(text(accountNumber));
         return this;
     }
 
     public DepositPage setAmount(double amount) {
         amountInput.setValue(String.valueOf(amount));
+        amountInput.shouldHave(value(String.valueOf(amount)));
         return this;
     }
 

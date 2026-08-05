@@ -1,5 +1,8 @@
 package steps;
 
+import io.restassured.response.ValidatableResponse;
+import io.restassured.specification.RequestSpecification;
+import io.restassured.specification.ResponseSpecification;
 import models.request.CreateUserRequestDto;
 import models.request.UpdateUserRequestDto;
 import models.response.CreateUserResponseDto;
@@ -10,11 +13,7 @@ import requests.ValidatableRestRequest;
 import specs.RequestSpecs;
 import specs.ResponseSpecs;
 import supports.CleanupManager;
-import supports.StepLogger;
 import testdata.randommodelgenerator.RandomModelGenerator;
-import io.restassured.response.ValidatableResponse;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
 
 import java.util.List;
 import java.util.NoSuchElementException;

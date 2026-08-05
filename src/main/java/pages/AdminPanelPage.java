@@ -32,16 +32,23 @@ public class AdminPanelPage extends BasePage<AdminPanelPage> {
     public AdminPanelPage shouldBeOpened() {
         webdriver().shouldHave(urlContaining(url()));
         header.shouldBe(visible).shouldHave(text("Admin Panel"));
+        usernameInput.shouldBe(visible, enabled);
+        passwordInput.shouldBe(visible, enabled);
+        createUserButton.shouldBe(visible, enabled);
         return this;
     }
 
     public AdminPanelPage setUsername(String username) {
-        usernameInput.setValue(username);
+        usernameInput.shouldBe(enabled)
+                .setValue(username)
+                .shouldHave(value(username));
         return this;
     }
 
     public AdminPanelPage setPassword(String password) {
-        passwordInput.setValue(password);
+        passwordInput.shouldBe(enabled)
+                .setValue(password)
+                .shouldHave(value(password));
         return this;
     }
 
@@ -59,18 +66,14 @@ public class AdminPanelPage extends BasePage<AdminPanelPage> {
 
     public List<UserBadge> getAllUserBadges() {
         return StepLogger.log("Get all users from Admin Panel", () -> {
-
             return mapToElementsList(getAllUsers(), UserBadge::new);
-
         });
     }
 
     public UserBadge getUserBadge(CreateUserRequestDto userDto) {
         return StepLogger.log("Get user from Admin Panel", () -> {
-
             SelenideElement root = allUsers.findBy(ownText(userDto.getUsername()));
             return new UserBadge(root);
-
         });
     }
 }
