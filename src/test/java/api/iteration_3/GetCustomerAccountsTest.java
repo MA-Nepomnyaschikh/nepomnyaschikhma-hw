@@ -1,0 +1,44 @@
+package api.iteration_3;
+
+import api.BaseTest;
+import models.response.CreateAccountResponseDto;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import specs.RequestSpecs;
+import specs.ResponseSpecs;
+import supports.StepLogger;
+import supports.annotations.UserSession;
+import supports.context.TestUser;
+
+import java.util.List;
+
+public class GetCustomerAccountsTest extends BaseTest {
+
+    @DisplayName("API. Авторизованный пользователь может получить список своих счетов")
+    @Test
+    @UserSession
+    public void authorizedUserCanGetOwnAccountsTest(TestUser user) {
+        CreateAccountResponseDto createdAccount = StepLogger.log("Создать счет пользователя", () -> {
+            return accountSteps.createAccount(user.getToken());
+        });
+
+        List<CreateAccountResponseDto> expectedAccounts = List.of(createdAccount);
+
+        List<CreateAccountResponseDto> actualAccounts = StepLogger.log("Получить список счетов пользователя", () -> {
+            return accountSteps.getClientAccounts(user.getToken());
+        });
+
+        StepLogger.log("Проверить список счетов пользователя", () -> {
+            softly.assertThat(actualAccounts)
+                    .isEqualTo(expectedAccounts);
+        });
+    }
+
+    @DisplayName("API. Неавторизованный пользователь не может получить список своих счетов")
+    @Test
+    public void unauthorizedUserCannotGetOwnAccountsTest() {
+        StepLogger.log("Получить список счетов без авторизации", () -> {
+            accountSteps.getClientAccounts(RequestSpecs.unauth(), ResponseSpecs.unauthorized());
+        });
+    }
+}
