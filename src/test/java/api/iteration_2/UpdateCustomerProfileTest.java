@@ -20,14 +20,14 @@ import java.util.stream.Stream;
 
 import static testdata.UserData.generateUpdateUserDto;
 import static testdata.expectedmessages.api.UserApiMessages.PROFILE_UPDATE_INVALID_NAME;
-import static testdata.expectedmessages.api.UserApiMessages.PROFILE_UPDATE_SUCCESS;
+import static testdata.expectedmessages.api.UserApiMessages.PROFILE_UPDATE_SUCCESSFULLY;
 
 public class UpdateCustomerProfileTest extends BaseTest {
 
     @DisplayName("API. Авторизованный пользователь может изменить имя в профиле на валидное")
     @Test
     @UserSession
-    public void authorizedUserCanSetValidName(TestUser user) {
+    public void authorizedUserCanSetValidNameTest(TestUser user) {
         UpdateUserRequestDto updateUserDto = RandomModelGenerator.generate(UpdateUserRequestDto.class);
 
         UpdateUserResponseDto updatedUser = StepLogger.log("Изменить имя в профиле", () -> {
@@ -35,7 +35,7 @@ public class UpdateCustomerProfileTest extends BaseTest {
         });
 
         StepLogger.log("Проверить изменение имени", () -> {
-            softly.assertThat(updatedUser.getMessage()).isEqualTo(PROFILE_UPDATE_SUCCESS);
+            softly.assertThat(updatedUser.getMessage()).isEqualTo(PROFILE_UPDATE_SUCCESSFULLY);
             softly.assertThat(updatedUser.getCustomer().getName()).isEqualTo(updateUserDto.getName());
         });
 
@@ -61,7 +61,7 @@ public class UpdateCustomerProfileTest extends BaseTest {
     @MethodSource("invalidNameProvider")
     @ParameterizedTest
     @UserSession
-    public void authorizedUserCannotSetInvalidName(UpdateUserRequestDto updateUserDto, TestUser user) {
+    public void authorizedUserCannotSetInvalidNameTest(UpdateUserRequestDto updateUserDto, TestUser user) {
         String errorResponse = StepLogger.log("Изменить имя в профиле на невалидное", () -> {
             return userSteps.updateCustomerProfile(
                 updateUserDto, RequestSpecs.authAsUser(user.getToken()), ResponseSpecs.badRequest())
@@ -81,7 +81,7 @@ public class UpdateCustomerProfileTest extends BaseTest {
     @DisplayName("API. Неавторизованный пользователь не может изменить имя в профиле")
     @Test
     @UserSession
-    public void unauthorizedUserCannotChangeName(TestUser user) {
+    public void unauthorizedUserCannotChangeNameTest(TestUser user) {
         UpdateUserRequestDto updateUserDto = RandomModelGenerator.generate(UpdateUserRequestDto.class);
 
         StepLogger.log("Изменить имя в профиле без авторизации", () -> {

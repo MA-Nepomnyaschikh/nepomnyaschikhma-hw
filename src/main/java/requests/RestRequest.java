@@ -70,6 +70,20 @@ public class RestRequest extends HttpRequest implements CrudOperations {
     }
 
     @Override
+    public ValidatableResponse getAll(long accountId) {
+        return StepLogger.log("GET request to " + endpoint.getUrl(), () -> {
+
+            return given()
+                    .spec(requestSpecification)
+                    .pathParam("accountId", accountId)
+                    .get(API_VERSION + endpoint.getUrl())
+                    .then()
+                    .spec(responseSpecification);
+
+        });
+    }
+
+    @Override
     public ValidatableResponse put(BaseModel model) {
         return StepLogger.log("PUT request to " + endpoint.getUrl(), () -> {
 

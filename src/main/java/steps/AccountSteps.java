@@ -6,6 +6,7 @@ import io.restassured.specification.ResponseSpecification;
 import models.request.DepositRequestDto;
 import models.request.TransferRequestDto;
 import models.response.CreateAccountResponseDto;
+import models.response.TransactionResponseDto;
 import models.response.TransferResponseDto;
 import requests.Endpoint;
 import requests.RestRequest;
@@ -88,6 +89,14 @@ public class AccountSteps {
                 .getAll();
     }
 
+    public ValidatableResponse getClientAccounts(RequestSpecification requestSpec, ResponseSpecification responseSpec) {
+        return new RestRequest(
+                requestSpec,
+                Endpoint.GET_CLIENT_ACCOUNTS,
+                responseSpec)
+                .getAll();
+    }
+
     public CreateAccountResponseDto getClientAccountById(String token, int id) {
         List<CreateAccountResponseDto> accountsList = getClientAccounts(token);
         return accountsList.stream()
@@ -111,5 +120,21 @@ public class AccountSteps {
                 responseSpec)
                 .post(dto)
                 .extract().asString();
+    }
+
+    public List<TransactionResponseDto> getAccountTransactions(String token, long accountId) {
+        return new ValidatableRestRequest<TransactionResponseDto>(
+                RequestSpecs.authAsUser(token),
+                Endpoint.GET_ACCOUNT_TRANSACTIONS,
+                ResponseSpecs.ok())
+                .getAll(accountId);
+    }
+
+    public ValidatableResponse getAccountTransactions(long accountId, RequestSpecification requestSpec, ResponseSpecification responseSpec) {
+        return new RestRequest(
+                requestSpec,
+                Endpoint.GET_ACCOUNT_TRANSACTIONS,
+                responseSpec)
+                .getAll(accountId);
     }
 }

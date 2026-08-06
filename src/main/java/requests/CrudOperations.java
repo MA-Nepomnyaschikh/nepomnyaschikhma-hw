@@ -7,6 +7,7 @@ public interface CrudOperations<T extends BaseModel> {
     Object post();
     Object get();
     Object getAll();
+    Object getAll(long id);
     Object put(BaseModel model);
     Object delete(long id);
 

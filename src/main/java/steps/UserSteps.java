@@ -67,6 +67,14 @@ public class UserSteps {
                 .get();
     }
 
+    public ValidatableResponse getCustomerProfile(RequestSpecification requestSpec, ResponseSpecification responseSpec) {
+        return new RestRequest(
+                requestSpec,
+                Endpoint.GET_CUSTOMER_PROFILE,
+                responseSpec)
+                .get();
+    }
+
     public UpdateUserResponseDto updateCustomerProfile(String token, UpdateUserRequestDto dto) {
         return new ValidatableRestRequest<UpdateUserResponseDto>(
                 RequestSpecs.authAsUser(token),
@@ -91,6 +99,14 @@ public class UserSteps {
                 .getAll();
     }
 
+    public ValidatableResponse getAllUsers(RequestSpecification requestSpec, ResponseSpecification responseSpec) {
+        return new RestRequest(
+                requestSpec,
+                Endpoint.GET_ALL_USERS,
+                responseSpec)
+                .getAll();
+    }
+
     public CreateUserResponseDto getUserById(long id) {
         List<CreateUserResponseDto> usersList = getAllUsers();
         return usersList.stream()
@@ -112,6 +128,14 @@ public class UserSteps {
                 RequestSpecs.authAsAdmin(),
                 Endpoint.DELETE_USER,
                 ResponseSpecs.ok())
+                .delete(id);
+    }
+
+    public ValidatableResponse deleteUserById(long id, RequestSpecification requestSpec, ResponseSpecification responseSpec) {
+        return new RestRequest(
+                requestSpec,
+                Endpoint.DELETE_USER,
+                responseSpec)
                 .delete(id);
     }
 }

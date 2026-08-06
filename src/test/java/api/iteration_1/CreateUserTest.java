@@ -21,8 +21,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static testdata.UserData.*;
-import static testdata.expectedmessages.api.UserApiMessages.CREATE_USER_DUPLICATE_USERNAME;
-import static testdata.expectedmessages.api.UserApiMessages.USER_CREATE_FORBIDDEN;
+import static testdata.expectedmessages.api.UserApiMessages.*;
 
 public class CreateUserTest extends BaseTest {
 
@@ -158,7 +157,7 @@ public class CreateUserTest extends BaseTest {
         });
 
         StepLogger.log("Проверить ошибку при создании пользователя", () -> {
-            softly.assertThat(errorResponse.getError()).isEqualTo(USER_CREATE_FORBIDDEN);
+            softly.assertThat(errorResponse.getError()).isEqualTo(DELETE_USER_FORBIDDEN);
         });
 
         StepLogger.log("Проверить отсутствие пользователя в системе", () -> {

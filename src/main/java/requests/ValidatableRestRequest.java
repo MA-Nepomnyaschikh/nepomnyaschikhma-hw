@@ -39,6 +39,13 @@ public class ValidatableRestRequest<T extends BaseModel> extends HttpRequest imp
     }
 
     @Override
+    public List<T> getAll(long id) {
+        Class<?> arrayClass = Array.newInstance(endpoint.getResponseModel(), 0).getClass();
+        T[] array = (T[]) restRequest.getAll(id).extract().as(arrayClass);
+        return Arrays.asList(array);
+    }
+
+    @Override
     public T put(BaseModel model) {
         return (T) restRequest.put(model).extract().as(endpoint.getResponseModel());
     }
