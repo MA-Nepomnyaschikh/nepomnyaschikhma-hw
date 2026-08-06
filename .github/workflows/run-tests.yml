@@ -37,6 +37,10 @@ jobs:
           UIBASEURL: http://frontend
           APIVERSION: /api/v1
 
+      - name: Make Swagger coverage executable
+        if: always()
+        run: chmod +x .swagger-coverage/bin/swagger-coverage-commandline
+
       - name: Run Swagger coverage
         if: always()
         run: .swagger-coverage/bin/swagger-coverage-commandline -s http://localhost:4111/v3/api-docs -i target/swagger-coverage-output
