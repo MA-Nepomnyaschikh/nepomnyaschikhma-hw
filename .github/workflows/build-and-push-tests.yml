@@ -2,6 +2,8 @@ name: Build and Push Tests
 
 on:
   push:
+    paths:
+      - "src/**"
 
   workflow_dispatch:
 
@@ -32,6 +34,7 @@ jobs:
         env:
           APIBASEURL: http://localhost:4111
           UIBASEURL: http://frontend
+          APIVERSION: /api/v1
 
       - name: Tear down services
         if: always()
