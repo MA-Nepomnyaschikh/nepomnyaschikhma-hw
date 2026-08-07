@@ -1,0 +1,12 @@
+[2026-08-07T13:57:14.564Z] [SEVERE] http://frontend/static/js/main.95516938.js 1:306091 "❌ Failed to decode auth token:" TypeError: Cannot read properties of null (reading 'replace')
+    at http://frontend/static/js/main.95516938.js:2:305915
+    at Ui (http://frontend/static/js/main.95516938.js:2:84013)
+    at Es (http://frontend/static/js/main.95516938.js:2:99864)
+    at Ss (http://frontend/static/js/main.95516938.js:2:99748)
+    at Es (http://frontend/static/js/main.95516938.js:2:100546)
+    at Ss (http://frontend/static/js/main.95516938.js:2:99748)
+    at Es (http://frontend/static/js/main.95516938.js:2:99885)
+    at tc (http://frontend/static/js/main.95516938.js:2:126623)
+    at http://frontend/static/js/main.95516938.js:2:124002
+    at MessagePort.R (http://frontend/static/js/main.95516938.js:2:182589)
+[2026-08-07T13:57:14.564Z] [WARNING] http://frontend/static/js/main.95516938.js 1:306221 "⚠️ No auth token found, skipping profile request."
