@@ -12,11 +12,13 @@ public class CleanupManager {
 
     public void cleanup() {
         while (!actions.isEmpty()) {
-            try {
-                actions.pop().run();
-            } catch (Exception e) {
-                System.err.println("Cleanup failed: " + e.getMessage());
-            }
+            StepLogger.log("Удалить пользователя", () -> {
+                try {
+                    actions.pop().run();
+                } catch (Exception e) {
+                    System.err.println("Cleanup failed: " + e.getMessage());
+                }
+            });
         }
     }
 }

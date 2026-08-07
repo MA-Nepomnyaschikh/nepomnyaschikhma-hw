@@ -20,6 +20,7 @@ import java.util.stream.Stream;
 import static testdata.AccountData.*;
 import static testdata.expectedmessages.api.AccountApiMessages.DEPOSIT_UNAUTHORIZED;
 
+@DisplayName("API. Пополнение счета")
 public class DepositAccountTest extends BaseTest {
 
     public static Stream<Arguments> validAmountProvider() {

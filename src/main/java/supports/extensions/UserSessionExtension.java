@@ -77,7 +77,7 @@ public class UserSessionExtension implements BeforeEachCallback, AfterEachCallba
         }
 
         for (TestUser user : users) {
-            StepLogger.log("Удалить пользователя ", () -> {
+            StepLogger.log("Удалить пользователя", () -> {
                 new RestRequest(
                         RequestSpecs.authAsAdmin(),
                         Endpoint.DELETE_USER,
@@ -100,7 +100,7 @@ public class UserSessionExtension implements BeforeEachCallback, AfterEachCallba
     private TestUser createUser() {
         CreateUserRequestDto requestDto = RandomModelGenerator.generate(CreateUserRequestDto.class);
 
-        CreateUserResponseDto responseDto = StepLogger.log("Создать пользователя ", () -> {
+        CreateUserResponseDto responseDto = StepLogger.log("Создать пользователя", () -> {
             return new ValidatableRestRequest<CreateUserResponseDto>(
                     RequestSpecs.authAsAdmin(),
                     Endpoint.CREATE_USER,
@@ -110,7 +110,7 @@ public class UserSessionExtension implements BeforeEachCallback, AfterEachCallba
 
         LoginUserRequestDto loginDto = generateLoginDto(requestDto);
 
-        String token = StepLogger.log("Авторизовать пользователя ", () -> {
+        String token = StepLogger.log("Авторизовать пользователя", () -> {
             return new RestRequest(
                     RequestSpecs.unauth(),
                     Endpoint.LOGIN,
@@ -125,7 +125,9 @@ public class UserSessionExtension implements BeforeEachCallback, AfterEachCallba
 
     private void loginInBrowser(UserSession annotation, List<TestUser> users) {
         int userIndex = annotation.authUserNumber() - 1;
-        setAuthToken(users.get(userIndex).getToken());
+        StepLogger.log("Открыть браузер", () -> {
+            setAuthToken(users.get(userIndex).getToken());
+        });
     }
 
     private void saveUsers(ExtensionContext context, List<TestUser> users) {

@@ -14,6 +14,7 @@ import static testdata.AccountData.MAX_TRANSFER_AMOUNT;
 import static testdata.AccountData.getRandomValidTransferAmount;
 import static testdata.expectedmessages.ui.AccountUiMessages.*;
 
+@DisplayName("UI. Перевод")
 public class TransferFundsTest extends BaseUiTest {
 
     @DisplayName("UI. Пользователь может выполнить перевод между своими счетами")

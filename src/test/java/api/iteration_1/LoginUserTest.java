@@ -22,6 +22,7 @@ import static testdata.UserData.ADMIN_ROLE;
 import static testdata.UserData.generateUserDto;
 import static testdata.expectedmessages.api.UserApiMessages.LOGIN_USER_INVALID_DATA;
 
+@DisplayName("API. Авторизация пользователя")
 public class LoginUserTest extends BaseTest {
 
     @DisplayName("API. Администратор может авторизоваться")

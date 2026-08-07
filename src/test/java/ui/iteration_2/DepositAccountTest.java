@@ -19,6 +19,7 @@ import java.util.stream.Stream;
 import static testdata.AccountData.getRandomValidDepositAmount;
 import static testdata.expectedmessages.ui.AccountUiMessages.*;
 
+@DisplayName("UI. Пополнение счета")
 public class DepositAccountTest extends BaseUiTest {
 
     @DisplayName("UI. Пользователь может пополнить свой счет с валидной суммой")

@@ -26,6 +26,7 @@ import static testdata.UserData.getPassword;
 import static testdata.UserData.getUsername;
 import static testdata.expectedmessages.api.UserApiMessages.*;
 
+@DisplayName("API. Удаление пользователя")
 public class DeleteUserTest extends BaseTest {
 
 

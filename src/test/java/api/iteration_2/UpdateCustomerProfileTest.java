@@ -22,6 +22,7 @@ import java.util.stream.Stream;
 import static testdata.UserData.generateUpdateUserDto;
 import static testdata.expectedmessages.api.UserApiMessages.*;
 
+@DisplayName("API. Обновление профиля пользователя")
 public class UpdateCustomerProfileTest extends BaseTest {
 
     @DisplayName("API. Авторизованный пользователь может изменить имя в профиле на валидное")

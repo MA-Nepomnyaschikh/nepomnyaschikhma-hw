@@ -15,6 +15,7 @@ import ui.BaseUiTest;
 import static testdata.expectedmessages.ui.UserUiMessages.UPDATE_USER_FAILED;
 import static testdata.expectedmessages.ui.UserUiMessages.UPDATE_USER_SUCCESSFULLY;
 
+@DisplayName("UI. Обновление профиля пользователя")
 public class UpdateCustomerProfileTest extends BaseUiTest {
 
     @DisplayName("UI. Пользователь может изменить имя в профиле")

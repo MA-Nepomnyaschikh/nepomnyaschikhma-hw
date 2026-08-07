@@ -72,6 +72,14 @@ jobs:
           publish_branch: gh-pages
           publish_dir: allure-history
 
+      - name: Make quality gate script executable
+        if: always()
+        run: chmod +x check-api-coverage.sh
+
+      - name: Check API coverage quality gate
+        if: always()
+        run: ./check-api-coverage.sh
+
       - name: Tear down services
         if: always()
         run: bash infra/docker_compose/stop_nbank.sh

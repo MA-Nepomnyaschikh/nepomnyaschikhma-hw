@@ -23,6 +23,7 @@ import java.util.stream.Stream;
 import static testdata.UserData.*;
 import static testdata.expectedmessages.api.UserApiMessages.*;
 
+@DisplayName("API. Создание пользователя")
 public class CreateUserTest extends BaseTest {
 
     public static Stream<Arguments> validUserDataProvider() {

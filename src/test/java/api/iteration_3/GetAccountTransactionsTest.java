@@ -16,6 +16,7 @@ import java.util.List;
 import static testdata.AccountData.MAX_TRANSFER_AMOUNT;
 import static testdata.expectedmessages.api.AccountApiMessages.GET_ACCOUNT_TRANSACTIONS_FORBIDDEN;
 
+@DisplayName("API. Получение списка транзакций по счету")
 public class GetAccountTransactionsTest extends BaseTest {
 
     @DisplayName("API. Авторизованный пользователь может получить список транзакций по своему счету")

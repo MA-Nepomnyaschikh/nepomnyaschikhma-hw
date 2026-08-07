@@ -17,6 +17,7 @@ import java.util.List;
 import static testdata.UserData.*;
 import static testdata.expectedmessages.ui.UserUiMessages.*;
 
+@DisplayName("UI. Создание пользователя")
 public class CreateUserTest extends BaseUiTest {
 
     @DisplayName("UI. Администратор может создать пользователя")

@@ -15,6 +15,7 @@ import java.util.List;
 
 import static testdata.expectedmessages.api.UserApiMessages.GET_USERS_LIST_FORBIDDEN;
 
+@DisplayName("API. Получение списка пользователей")
 public class GetAllUsersTest extends BaseTest {
 
     @DisplayName("API. Авторизованный пользователь с правами администратора может получить список пользователей")

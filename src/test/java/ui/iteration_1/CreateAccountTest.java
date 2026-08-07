@@ -15,6 +15,7 @@ import java.util.List;
 
 import static testdata.expectedmessages.ui.AccountUiMessages.ACCOUNT_CREATED_SUCCESSFULLY;
 
+@DisplayName("UI. Создание счета")
 public class CreateAccountTest extends BaseUiTest {
 
     @DisplayName("UI. Пользователь может создать аккаунт")

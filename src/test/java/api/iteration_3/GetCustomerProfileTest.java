@@ -13,6 +13,7 @@ import supports.context.TestUser;
 
 import static testdata.expectedmessages.api.UserApiMessages.CREATE_USER_FORBIDDEN;
 
+@DisplayName("API. Получение профиля пользователя")
 public class GetCustomerProfileTest extends BaseTest {
 
     @DisplayName("API. Авторизованный пользователь может получить свой профиль")

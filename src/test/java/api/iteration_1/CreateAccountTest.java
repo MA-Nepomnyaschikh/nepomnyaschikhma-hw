@@ -16,6 +16,7 @@ import java.util.List;
 
 import static testdata.expectedmessages.api.UserApiMessages.CREATE_USER_FORBIDDEN;
 
+@DisplayName("API. Создание счета")
 public class CreateAccountTest extends BaseTest {
 
     @DisplayName("API. Авторизованный пользователь может создать счет")

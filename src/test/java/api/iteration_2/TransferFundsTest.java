@@ -22,6 +22,7 @@ import static testdata.AccountData.*;
 import static testdata.expectedmessages.api.AccountApiMessages.DEPOSIT_UNAUTHORIZED;
 import static testdata.expectedmessages.api.AccountApiMessages.TRANSFER_FAILED;
 
+@DisplayName("API. Перевод")
 public class TransferFundsTest extends BaseTest {
 
     public static Stream<Arguments> validAmountProvider() {

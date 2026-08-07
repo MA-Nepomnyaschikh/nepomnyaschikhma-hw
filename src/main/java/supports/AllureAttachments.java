@@ -40,23 +40,4 @@ public class AllureAttachments {
                 logs
         );
     }
-
-    public static void attachVideo(String sessionId) {
-        String url =
-                Config.getProperty("uiRemote")
-                .replace("/wd/hub", "")
-                + "/video/"
-                + sessionId
-                + ".mp4";
-
-        Allure.addAttachment(
-                "Video HTML",
-                "text/html",
-                "<html><body>" +
-                        "<video controls autoplay width='100%'>" +
-                        "<source src='" + url + "' type='video/mp4'>" +
-                        "</video>" +
-                        "</body></html>"
-        );
-    }
 }
