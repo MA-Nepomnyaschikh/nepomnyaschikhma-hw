@@ -27,15 +27,15 @@ public class CreateUserTest extends BaseTest {
 
     public static Stream<Arguments> validUserDataProvider() {
         return Stream.of(
-                Arguments.of(generateUserDto(getUsername(), getPassword(), USER_ROLE)),
-                Arguments.of(generateUserDto(getUsername(), getPassword(), ADMIN_ROLE))
+                Arguments.of("Создание пользователя без прав администратора", generateUserDto(getUsername(), getPassword(), USER_ROLE)),
+                Arguments.of("Создание пользователя с правами администратора", generateUserDto(getUsername(), getPassword(), ADMIN_ROLE))
         );
     }
 
     @DisplayName("API. Администратор может создать пользователя с валидными данными")
     @MethodSource("validUserDataProvider")
-    @ParameterizedTest
-    public void adminCanCreateUserWithValidDataTest(CreateUserRequestDto userDto) {
+    @ParameterizedTest(name= "{0}")
+    public void adminCanCreateUserWithValidDataTest(String testName, CreateUserRequestDto userDto) {
         CreateUserResponseDto createdUser = StepLogger.log("Создать пользователя", () -> {
             return userSteps.createUser(userDto);
         });
@@ -54,25 +54,28 @@ public class CreateUserTest extends BaseTest {
 
     public static Stream<Arguments> invalidUserDataProvider() {
         return Stream.of(
-                Arguments.of(generateUserDto("   ", "test$X2p", USER_ROLE), "username", List.of("Username cannot be blank", "Username must contain only letters, digits, dashes, underscores, and dots")),
-                Arguments.of(generateUserDto("ab", "test$X2p", USER_ROLE), "username", List.of("Username must be between 3 and 15 characters")),
-                Arguments.of(generateUserDto("qwertyuiopasdfgh", "test$X2p", USER_ROLE), "username", List.of("Username must be between 3 and 15 characters")),
-                Arguments.of(generateUserDto("abc1$", "test$X2p", USER_ROLE), "username", List.of("Username must contain only letters, digits, dashes, underscores, and dots")),
-                Arguments.of(generateUserDto("testX2p", "", USER_ROLE), "password", List.of("Password cannot be blank", "Password must contain at least one digit, one lower case, one upper case, one special character, no spaces, and be at least 8 characters long")),
-                Arguments.of(generateUserDto("testX2p", "pass$1R", USER_ROLE), "password", List.of("Password must contain at least one digit, one lower case, one upper case, one special character, no spaces, and be at least 8 characters long")),
-                Arguments.of(generateUserDto("testX2p", "passworD$", USER_ROLE), "password", List.of("Password must contain at least one digit, one lower case, one upper case, one special character, no spaces, and be at least 8 characters long")),
-                Arguments.of(generateUserDto("testX2p", "PASSWORD$1", USER_ROLE), "password", List.of("Password must contain at least one digit, one lower case, one upper case, one special character, no spaces, and be at least 8 characters long")),
-                Arguments.of(generateUserDto("testX2p", "password$1", USER_ROLE), "password", List.of("Password must contain at least one digit, one lower case, one upper case, one special character, no spaces, and be at least 8 characters long")),
-                Arguments.of(generateUserDto("testX2p", "passworD1", USER_ROLE), "password", List.of("Password must contain at least one digit, one lower case, one upper case, one special character, no spaces, and be at least 8 characters long")),
-                Arguments.of(generateUserDto("testX2p", "pass worD1$", USER_ROLE), "password", List.of("Password must contain at least one digit, one lower case, one upper case, one special character, no spaces, and be at least 8 characters long")),
-                Arguments.of(generateUserDto("testX2p", "test$X2p", "TEST"), "role", List.of("Role must be either 'ADMIN' or 'USER'"))
+                Arguments.of("Пустой username", generateUserDto("   ", "test$X2p", USER_ROLE), "username", List.of("Username cannot be blank", "Username must contain only letters, digits, dashes, underscores, and dots")),
+                Arguments.of("Username короче 3 символов", generateUserDto("ab", "test$X2p", USER_ROLE), "username", List.of("Username must be between 3 and 15 characters")),
+                Arguments.of("Username длиннее 15 символов", generateUserDto("qwertyuiopasdfgh", "test$X2p", USER_ROLE), "username", List.of("Username must be between 3 and 15 characters")),
+                Arguments.of("Username содержит пробел", generateUserDto("user name", "test$X2p", USER_ROLE), "username", List.of("Username must contain only letters, digits, dashes, underscores, and dots")),
+                Arguments.of("Username содержит спецсимвол", generateUserDto("abc1$", "test$X2p", USER_ROLE), "username", List.of("Username must contain only letters, digits, dashes, underscores, and dots")),
+
+                Arguments.of("Пустой password", generateUserDto("testX2p", "", USER_ROLE), "password", List.of("Password cannot be blank", "Password must contain at least one digit, one lower case, one upper case, one special character, no spaces, and be at least 8 characters long")),
+                Arguments.of("Password короче 8 символов", generateUserDto("testX2p", "pass$1R", USER_ROLE), "password", List.of("Password must contain at least one digit, one lower case, one upper case, one special character, no spaces, and be at least 8 characters long")),
+                Arguments.of("Password без цифры", generateUserDto("testX2p", "passworD$", USER_ROLE), "password", List.of("Password must contain at least one digit, one lower case, one upper case, one special character, no spaces, and be at least 8 characters long")),
+                Arguments.of("Password без строчной буквы", generateUserDto("testX2p", "PASSWORD$1", USER_ROLE), "password", List.of("Password must contain at least one digit, one lower case, one upper case, one special character, no spaces, and be at least 8 characters long")),
+                Arguments.of("Password без заглавной буквы", generateUserDto("testX2p", "password$1", USER_ROLE), "password", List.of("Password must contain at least one digit, one lower case, one upper case, one special character, no spaces, and be at least 8 characters long")),
+                Arguments.of("Password без спецсимвола", generateUserDto("testX2p", "passworD1", USER_ROLE), "password", List.of("Password must contain at least one digit, one lower case, one upper case, one special character, no spaces, and be at least 8 characters long")),
+                Arguments.of("Password содержит пробел", generateUserDto("testX2p", "pass worD1$", USER_ROLE), "password", List.of("Password must contain at least one digit, one lower case, one upper case, one special character, no spaces, and be at least 8 characters long")),
+
+                Arguments.of("Невалидный role", generateUserDto("testX2p", "test$X2p", "TEST"), "role", List.of("Role must be either 'ADMIN' or 'USER'"))
         );
     }
 
     @DisplayName("API. Администратор не может создать пользователя с невалидными данными")
     @MethodSource("invalidUserDataProvider")
-    @ParameterizedTest
-    public void adminCannotCreateUserWithInvalidDataTest(CreateUserRequestDto userDto, String errorKey, List<String> errorValues) {
+    @ParameterizedTest(name= "{0}")
+    public void adminCannotCreateUserWithInvalidDataTest(String testName, CreateUserRequestDto userDto, String errorKey, List<String> errorValues) {
         Map<String, List<String>> errors = StepLogger.log("Создать пользователя с невалидными данными", () -> {
             return userSteps.createUser(
                     userDto, RequestSpecs.authAsAdmin(), ResponseSpecs.badRequest())

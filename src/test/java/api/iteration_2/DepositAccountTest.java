@@ -33,7 +33,7 @@ public class DepositAccountTest extends BaseTest {
 
     @DisplayName("API. Авторизованный пользователь может пополнить счет")
     @MethodSource("validAmountProvider")
-    @ParameterizedTest
+    @ParameterizedTest(name = "Сумма пополнения: {0}")
     @UserSession
     public void authorizedUserCanDepositAccountTest(double depositAmount, TestUser user) {
         CreateAccountResponseDto accountBeforeDeposit = StepLogger.log("Создать счет", () -> {
@@ -60,17 +60,17 @@ public class DepositAccountTest extends BaseTest {
 
     public static Stream<Arguments> invalidAmountProvider() {
         return Stream.of(
-                Arguments.of(5000.01, "Deposit amount cannot exceed 5000"),
-                Arguments.of(0, "Deposit amount must be at least 0.01"),
-                Arguments.of(-0.01, "Deposit amount must be at least 0.01")
+                Arguments.of("Сумма пополнения больше максимальной", 5000.01, "Deposit amount cannot exceed 5000"),
+                Arguments.of("Сумма пополнения равна 0", 0, "Deposit amount must be at least 0.01"),
+                Arguments.of("Сумма пополнения меньше минимальной", -0.01, "Deposit amount must be at least 0.01")
         );
     }
 
     @DisplayName("API. Авторизованный пользователь не может пополнить счет невалидной суммой")
     @MethodSource("invalidAmountProvider")
-    @ParameterizedTest
+    @ParameterizedTest(name = "{0}")
     @UserSession
-    public void authorizedUserCannotDepositAccountWithInvalidAmountTest(double depositAmount, String errorMessage, TestUser user) {
+    public void authorizedUserCannotDepositAccountWithInvalidAmountTest(String testName, double depositAmount, String errorMessage, TestUser user) {
         CreateAccountResponseDto accountBeforeDeposit = StepLogger.log("Создать счет", () -> {
             return accountSteps.createAccount(user.getToken());
         });

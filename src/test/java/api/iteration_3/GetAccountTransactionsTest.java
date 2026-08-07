@@ -22,7 +22,7 @@ public class GetAccountTransactionsTest extends BaseTest {
     @Test
     @UserSession
     public void authorizedUserCanGetOwnAccountTransactionsTest(TestUser user) {
-        CreateAccountResponseDto createdAccount = StepLogger.log("Создать первый счет", () -> {
+        CreateAccountResponseDto createdAccount = StepLogger.log("Создать счет", () -> {
             return accountSteps.createAccountWithBalance(user.getToken(), MAX_TRANSFER_AMOUNT);
         });
 
@@ -42,7 +42,7 @@ public class GetAccountTransactionsTest extends BaseTest {
     @Test
     @UserSession(usersCount = 2)
     public void authorizedUserCannotGetAnotherUserAccountTransactionsTest(TestUser firstUser, TestUser secondUser) {
-        CreateAccountResponseDto createdAccount = StepLogger.log("Создать первый счет", () -> {
+        CreateAccountResponseDto createdAccount = StepLogger.log("Создать счет второго пользователя", () -> {
             return accountSteps.createAccountWithBalance(secondUser.getToken(), MAX_TRANSFER_AMOUNT);
         });
 
@@ -60,7 +60,7 @@ public class GetAccountTransactionsTest extends BaseTest {
     @Test
     @UserSession
     public void unauthorizedUserCannotGetOwnAccountsTransactionsTest(TestUser user) {
-        CreateAccountResponseDto createdAccount = StepLogger.log("Создать первый счет", () -> {
+        CreateAccountResponseDto createdAccount = StepLogger.log("Создать счет", () -> {
             return accountSteps.createAccountWithBalance(user.getToken(), MAX_TRANSFER_AMOUNT);
         });
 

@@ -54,18 +54,18 @@ public class DepositAccountTest extends BaseUiTest {
 
     public static Stream<Arguments> invalidAmountProvider() {
         return Stream.of(
-                Arguments.of(5000.01, DEPOSIT_AMOUNT_ABOVE_MAX_LIMIT),
-                Arguments.of(0, DEPOSIT_AMOUNT_BELOW_MIN_LIMIT),
-                Arguments.of(-0.01, DEPOSIT_AMOUNT_BELOW_MIN_LIMIT)
+                Arguments.of("Сумма пополнения больше максимальной", 5000.01, DEPOSIT_AMOUNT_ABOVE_MAX_LIMIT),
+                Arguments.of("Сумма пополнения равна 0", 0, DEPOSIT_AMOUNT_BELOW_MIN_LIMIT),
+                Arguments.of("Сумма пополнения меньше минимальной", -0.01, DEPOSIT_AMOUNT_BELOW_MIN_LIMIT)
         );
     }
 
     @DisplayName("UI. Пользователь не может пополнить свой счет с невалидной суммой")
     @MethodSource("invalidAmountProvider")
-    @ParameterizedTest
+    @ParameterizedTest(name = "{0}")
     @Browsers(values = {"chrome"})
     @UserSession(needBrowserLogin = true)
-    public void userCannotDepositAccountWithInvalidAmountTest(double invalidAmount, String errorMessage, TestUser user) {
+    public void userCannotDepositAccountWithInvalidAmountTest(String testName, double invalidAmount, String errorMessage, TestUser user) {
         CreateAccountResponseDto userAccount =  StepLogger.log("Создать счет", () -> {
             return accountSteps.createAccount(user.getToken());
         });

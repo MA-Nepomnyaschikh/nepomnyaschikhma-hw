@@ -35,7 +35,7 @@ public class TransferFundsTest extends BaseTest {
 
     @DisplayName("API. Авторизованный пользователь может перевести валидную сумму между своими счетами")
     @MethodSource("validAmountProvider")
-    @ParameterizedTest
+    @ParameterizedTest(name = "Сумма перевода: {0}")
     @UserSession
     public void authorizedUserCanTransferValidAmountBetweenTheirAccountsTest(double transferAmount, TestUser user) {
         CreateAccountResponseDto senderAccount = StepLogger.log("Создать первый счет", () -> {
@@ -68,7 +68,7 @@ public class TransferFundsTest extends BaseTest {
 
     @DisplayName("API. Авторизованный пользователь может перевести валидную сумму на счет другого пользователя")
     @MethodSource("validAmountProvider")
-    @ParameterizedTest
+    @ParameterizedTest(name = "Сумма перевода: {0}")
     @UserSession(usersCount = 2)
     public void authorizedUserCanTransferValidAmountToAnotherUserAccountTest(double transferAmount, TestUser sender, TestUser receiver) {
         CreateAccountResponseDto senderAccount = StepLogger.log("Создать счет отправителя", () -> {
@@ -102,17 +102,17 @@ public class TransferFundsTest extends BaseTest {
 
     public static Stream<Arguments> invalidAmountProvider() {
         return Stream.of(
-                Arguments.of(10000.01, "Transfer amount cannot exceed 10000"),
-                Arguments.of(0, "Transfer amount must be at least 0.01"),
-                Arguments.of(-0.01, "Transfer amount must be at least 0.01")
+                Arguments.of("Сумма перевода больше максимальной", 10000.01, "Transfer amount cannot exceed 10000"),
+                Arguments.of("Сумма перевода равна 0", 0, "Transfer amount must be at least 0.01"),
+                Arguments.of("Сумма перевода меньше минимальной", -0.01, "Transfer amount must be at least 0.01")
         );
     }
 
     @DisplayName("API. Авторизованный пользователь не может перевести невалидную сумму между своими счетами")
     @MethodSource("invalidAmountProvider")
-    @ParameterizedTest
+    @ParameterizedTest(name = "{0}")
     @UserSession
-    public void authorizedUserCannotTransferInvalidAmountBetweenTheirAccountsTest(double transferAmount, String errorMessage, TestUser user) {
+    public void authorizedUserCannotTransferInvalidAmountBetweenTheirAccountsTest(String testName, double transferAmount, String errorMessage, TestUser user) {
         CreateAccountResponseDto senderAccount = StepLogger.log("Создать первый счет", () -> {
             return accountSteps.createAccountWithBalance(user.getToken(), MAX_TRANSFER_AMOUNT);
         });
@@ -149,9 +149,9 @@ public class TransferFundsTest extends BaseTest {
 
     @DisplayName("API. Авторизованный пользователь не может перевести невалидную сумму на счет другого пользователя")
     @MethodSource("invalidAmountProvider")
-    @ParameterizedTest
+    @ParameterizedTest(name = "{0}")
     @UserSession(usersCount = 2)
-    public void authorizedUserCannotTransferInvalidAmountToAnotherUserAccountTest(double transferAmount, String errorMessage, TestUser sender, TestUser receiver) {
+    public void authorizedUserCannotTransferInvalidAmountToAnotherUserAccountTest(String testName, double transferAmount, String errorMessage, TestUser sender, TestUser receiver) {
         CreateAccountResponseDto senderAccount = StepLogger.log("Создать счет отправителя", () -> {
             return accountSteps.createAccountWithBalance(sender.getToken(), MAX_TRANSFER_AMOUNT);
         });

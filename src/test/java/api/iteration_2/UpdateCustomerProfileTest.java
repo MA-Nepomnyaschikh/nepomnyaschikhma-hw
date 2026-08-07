@@ -3,6 +3,7 @@ package api.iteration_2;
 import api.BaseTest;
 import models.request.UpdateUserRequestDto;
 import models.response.CreateUserResponseDto;
+import models.response.ErrorResponseDto;
 import models.response.UpdateUserResponseDto;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -19,8 +20,7 @@ import testdata.randommodelgenerator.RandomModelGenerator;
 import java.util.stream.Stream;
 
 import static testdata.UserData.generateUpdateUserDto;
-import static testdata.expectedmessages.api.UserApiMessages.PROFILE_UPDATE_INVALID_NAME;
-import static testdata.expectedmessages.api.UserApiMessages.PROFILE_UPDATE_SUCCESSFULLY;
+import static testdata.expectedmessages.api.UserApiMessages.*;
 
 public class UpdateCustomerProfileTest extends BaseTest {
 
@@ -47,21 +47,21 @@ public class UpdateCustomerProfileTest extends BaseTest {
 
     public static Stream<Arguments> invalidNameProvider() {
         return Stream.of(
-                Arguments.of(generateUpdateUserDto("Mikhail")),
-                Arguments.of(generateUpdateUserDto("Nepomnyaschikh Mikhail Aleksandrovich")),
-                Arguments.of(generateUpdateUserDto("Mikhail Nepomnyaschikh1")),
-                Arguments.of(generateUpdateUserDto("Mikhail! Nepomnyaschikh")),
-                Arguments.of(generateUpdateUserDto("Mikhail  Nepomnyaschikh")),
-                Arguments.of(generateUpdateUserDto("Mikhail Nepomnyaschikh ")),
-                Arguments.of(generateUpdateUserDto(" Mikhail"))
+                Arguments.of("Имя из одного слова", generateUpdateUserDto("Mikhail")),
+                Arguments.of("Имя из трех слов", generateUpdateUserDto("Nepomnyaschikh Mikhail Aleksandrovich")),
+                Arguments.of("Имя с цифрой", generateUpdateUserDto("Mikhail Nepomnyaschikh1")),
+                Arguments.of("Имя со спецсимволом", generateUpdateUserDto("Mikhail! Nepomnyaschikh")),
+                Arguments.of("Имя с двумя пробелами", generateUpdateUserDto("Mikhail  Nepomnyaschikh")),
+                Arguments.of("Имя с пробелом на конце", generateUpdateUserDto("Mikhail Nepomnyaschikh ")),
+                Arguments.of("Имя с пробелом в начале", generateUpdateUserDto(" Mikhail"))
         );
     }
 
     @DisplayName("API. Авторизованный пользователь не может изменить имя в профиле на невалидное")
     @MethodSource("invalidNameProvider")
-    @ParameterizedTest
+    @ParameterizedTest(name = "{0}")
     @UserSession
-    public void authorizedUserCannotSetInvalidNameTest(UpdateUserRequestDto updateUserDto, TestUser user) {
+    public void authorizedUserCannotSetInvalidNameTest(String testName, UpdateUserRequestDto updateUserDto, TestUser user) {
         String errorResponse = StepLogger.log("Изменить имя в профиле на невалидное", () -> {
             return userSteps.updateCustomerProfile(
                 updateUserDto, RequestSpecs.authAsUser(user.getToken()), ResponseSpecs.badRequest())
@@ -91,6 +91,22 @@ public class UpdateCustomerProfileTest extends BaseTest {
         StepLogger.log("Проверить отсутствие изменений в профиле", () -> {
             CreateUserResponseDto actualUser = userSteps.getCustomerProfile(user.getToken());
             softly.assertThat(actualUser.getName()).isNull();
+        });
+    }
+
+    @DisplayName("API. Администратор не может изменить профиль")
+    @Test
+    public void adminCannotGetProfileTest() {
+        UpdateUserRequestDto updateUserDto = RandomModelGenerator.generate(UpdateUserRequestDto.class);
+
+        ErrorResponseDto errorResponse = StepLogger.log("Изменить профиль администратором", () -> {
+            return userSteps.updateCustomerProfile(
+                    updateUserDto, RequestSpecs.authAsAdmin(), ResponseSpecs.forbidden())
+                    .extract().as(ErrorResponseDto.class);
+        });
+
+        StepLogger.log("Проверить ошибку при изменении профиля", () -> {
+            softly.assertThat(errorResponse.getError()).isEqualTo(CREATE_USER_FORBIDDEN);
         });
     }
 }

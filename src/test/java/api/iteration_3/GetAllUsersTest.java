@@ -21,8 +21,14 @@ public class GetAllUsersTest extends BaseTest {
     @Test
     @UserSession
     public void authorizedUserWithAdminPermissionsCanGetUsersListTest(TestUser user) {
-        List<CreateUserResponseDto> actualUser = StepLogger.log("Получить список пользователей", () -> {
+        List<CreateUserResponseDto> actualUsersList = StepLogger.log("Получить список пользователей", () -> {
             return userSteps.getAllUsers();
+        });
+
+        List<CreateUserResponseDto> expectedUserList = List.of(user.getResponseDto());
+
+        StepLogger.log("Проверить полученный список пользователей", () -> {
+            softly.assertThat(actualUsersList).isEqualTo(expectedUserList);
         });
     }
 

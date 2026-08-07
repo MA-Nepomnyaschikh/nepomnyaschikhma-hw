@@ -31,15 +31,15 @@ public class DeleteUserTest extends BaseTest {
 
     public static Stream<Arguments> validUserDataProvider() {
         return Stream.of(
-                Arguments.of(generateUserDto(getUsername(), getPassword(), USER_ROLE)),
-                Arguments.of(generateUserDto(getUsername(), getPassword(), ADMIN_ROLE))
+                Arguments.of("Удаление пользователя без прав администратора", generateUserDto(getUsername(), getPassword(), USER_ROLE)),
+                Arguments.of("Удаление пользователя с правами администратора", generateUserDto(getUsername(), getPassword(), ADMIN_ROLE))
         );
     }
 
     @DisplayName("API. Администратор может удалить пользователя")
     @MethodSource("validUserDataProvider")
-    @ParameterizedTest
-    public void adminCanDeleteUserTest(CreateUserRequestDto userDto) {
+    @ParameterizedTest(name= "{0}")
+    public void adminCanDeleteUserTest(String testName, CreateUserRequestDto userDto) {
         CreateUserResponseDto createdUser = StepLogger.log("Создать пользователя", () -> {
             return userSteps.createUser(userDto, RequestSpecs.authAsAdmin(), ResponseSpecs.created())
                     .extract().as(CreateUserResponseDto.class);

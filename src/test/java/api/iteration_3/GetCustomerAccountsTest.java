@@ -2,6 +2,7 @@ package api.iteration_3;
 
 import api.BaseTest;
 import models.response.CreateAccountResponseDto;
+import models.response.ErrorResponseDto;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import specs.RequestSpecs;
@@ -11,6 +12,8 @@ import supports.annotations.UserSession;
 import supports.context.TestUser;
 
 import java.util.List;
+
+import static testdata.expectedmessages.api.UserApiMessages.CREATE_USER_FORBIDDEN;
 
 public class GetCustomerAccountsTest extends BaseTest {
 
@@ -39,6 +42,20 @@ public class GetCustomerAccountsTest extends BaseTest {
     public void unauthorizedUserCannotGetOwnAccountsTest() {
         StepLogger.log("Получить список счетов без авторизации", () -> {
             accountSteps.getClientAccounts(RequestSpecs.unauth(), ResponseSpecs.unauthorized());
+        });
+    }
+
+    @DisplayName("API. Администратор не может получить список счетов")
+    @Test
+    public void adminCannotGetAccountsTest() {
+        ErrorResponseDto errorResponse = StepLogger.log("Получить список счетов администратором", () -> {
+            return accountSteps.getClientAccounts(
+                    RequestSpecs.authAsAdmin(), ResponseSpecs.forbidden())
+                    .extract().as(ErrorResponseDto.class);
+        });
+
+        StepLogger.log("Проверить ошибку при получении счетов", () -> {
+            softly.assertThat(errorResponse.getError()).isEqualTo(CREATE_USER_FORBIDDEN);
         });
     }
 }
