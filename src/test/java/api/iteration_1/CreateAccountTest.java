@@ -23,11 +23,11 @@ public class CreateAccountTest extends BaseTest {
     @Test
     @UserSession
     public void authorizedUserCanCreateAccountTest(TestUser user) {
-        CreateAccountResponseDto createdAccount = StepLogger.log("Создать счет", () -> {
+        CreateAccountResponseDto createdAccount = StepLogger.apiStep("Создать счет", () -> {
             return accountSteps.createAccount(user.getToken());
         });
 
-        StepLogger.log("Проверить создание счета", () -> {
+        StepLogger.apiStep("Проверить создание счета", () -> {
             AccountAssertions.assertAccountCreated(softly, createdAccount);
             CreateAccountResponseDto actualAccount = accountSteps.getClientAccountById(user.getToken(), createdAccount.getId());
             softly.assertThat(actualAccount)
@@ -41,11 +41,11 @@ public class CreateAccountTest extends BaseTest {
     @UserSession
     public void unauthorizedUserCannotCreateAccountTest(TestUser user) {
 
-        StepLogger.log("Создать счет", () -> {
+        StepLogger.apiStep("Создать счет", () -> {
             accountSteps.createAccount(RequestSpecs.unauth(), ResponseSpecs.unauthorized());
         });
 
-        StepLogger.log("Проверить отсутствие счета", () -> {
+        StepLogger.apiStep("Проверить отсутствие счета", () -> {
             List<CreateAccountResponseDto> userAccounts = accountSteps.getClientAccounts(user.getToken());
             softly.assertThat(userAccounts).isEmpty();
         });
@@ -54,13 +54,13 @@ public class CreateAccountTest extends BaseTest {
     @DisplayName("API. Администратор не может создать счет")
     @Test
     public void adminCannotCreateAccountTest() {
-        ErrorResponseDto errorResponse = StepLogger.log("Создать счет администратором", () -> {
+        ErrorResponseDto errorResponse = StepLogger.apiStep("Создать счет администратором", () -> {
             return accountSteps.createAccount(
                     RequestSpecs.authAsAdmin(), ResponseSpecs.forbidden())
                     .extract().as(ErrorResponseDto.class);
         });
 
-        StepLogger.log("Проверить ошибку при создании счета", () -> {
+        StepLogger.apiStep("Проверить ошибку при создании счета", () -> {
             softly.assertThat(errorResponse.getError()).isEqualTo(CREATE_USER_FORBIDDEN);
         });
     }

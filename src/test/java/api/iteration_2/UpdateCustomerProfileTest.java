@@ -31,16 +31,16 @@ public class UpdateCustomerProfileTest extends BaseTest {
     public void authorizedUserCanSetValidNameTest(TestUser user) {
         UpdateUserRequestDto updateUserDto = RandomModelGenerator.generate(UpdateUserRequestDto.class);
 
-        UpdateUserResponseDto updatedUser = StepLogger.log("Изменить имя в профиле", () -> {
+        UpdateUserResponseDto updatedUser = StepLogger.apiStep("Изменить имя в профиле", () -> {
             return userSteps.updateCustomerProfile(user.getToken(), updateUserDto);
         });
 
-        StepLogger.log("Проверить изменение имени", () -> {
+        StepLogger.apiStep("Проверить изменение имени", () -> {
             softly.assertThat(updatedUser.getMessage()).isEqualTo(PROFILE_UPDATE_SUCCESSFULLY);
             softly.assertThat(updatedUser.getCustomer().getName()).isEqualTo(updateUserDto.getName());
         });
 
-        StepLogger.log("Проверить профиль после изменения имени", () -> {
+        StepLogger.apiStep("Проверить профиль после изменения имени", () -> {
             CreateUserResponseDto actualUser = userSteps.getCustomerProfile(user.getToken());
             softly.assertThat(actualUser.getName()).isEqualTo(updateUserDto.getName());
         });
@@ -63,17 +63,17 @@ public class UpdateCustomerProfileTest extends BaseTest {
     @ParameterizedTest(name = "{0}")
     @UserSession
     public void authorizedUserCannotSetInvalidNameTest(String testName, UpdateUserRequestDto updateUserDto, TestUser user) {
-        String errorResponse = StepLogger.log("Изменить имя в профиле на невалидное", () -> {
+        String errorResponse = StepLogger.apiStep("Изменить имя в профиле на невалидное", () -> {
             return userSteps.updateCustomerProfile(
                 updateUserDto, RequestSpecs.authAsUser(user.getToken()), ResponseSpecs.badRequest())
                 .extract().asString();
         });
 
-        StepLogger.log("Проверить сообщение об ошибке", () -> {
+        StepLogger.apiStep("Проверить сообщение об ошибке", () -> {
             softly.assertThat(errorResponse).isEqualTo(PROFILE_UPDATE_INVALID_NAME);
         });
 
-        StepLogger.log("Проверить отсутствие изменений в профиле", () -> {
+        StepLogger.apiStep("Проверить отсутствие изменений в профиле", () -> {
             CreateUserResponseDto actualUser = userSteps.getCustomerProfile(user.getToken());
             softly.assertThat(actualUser.getName()).isNull();
         });
@@ -85,11 +85,11 @@ public class UpdateCustomerProfileTest extends BaseTest {
     public void unauthorizedUserCannotChangeNameTest(TestUser user) {
         UpdateUserRequestDto updateUserDto = RandomModelGenerator.generate(UpdateUserRequestDto.class);
 
-        StepLogger.log("Изменить имя в профиле без авторизации", () -> {
+        StepLogger.apiStep("Изменить имя в профиле без авторизации", () -> {
             userSteps.updateCustomerProfile(updateUserDto, RequestSpecs.unauth(), ResponseSpecs.unauthorized());
         });
 
-        StepLogger.log("Проверить отсутствие изменений в профиле", () -> {
+        StepLogger.apiStep("Проверить отсутствие изменений в профиле", () -> {
             CreateUserResponseDto actualUser = userSteps.getCustomerProfile(user.getToken());
             softly.assertThat(actualUser.getName()).isNull();
         });
@@ -100,13 +100,13 @@ public class UpdateCustomerProfileTest extends BaseTest {
     public void adminCannotGetProfileTest() {
         UpdateUserRequestDto updateUserDto = RandomModelGenerator.generate(UpdateUserRequestDto.class);
 
-        ErrorResponseDto errorResponse = StepLogger.log("Изменить профиль администратором", () -> {
+        ErrorResponseDto errorResponse = StepLogger.apiStep("Изменить профиль администратором", () -> {
             return userSteps.updateCustomerProfile(
                     updateUserDto, RequestSpecs.authAsAdmin(), ResponseSpecs.forbidden())
                     .extract().as(ErrorResponseDto.class);
         });
 
-        StepLogger.log("Проверить ошибку при изменении профиля", () -> {
+        StepLogger.apiStep("Проверить ошибку при изменении профиля", () -> {
             softly.assertThat(errorResponse.getError()).isEqualTo(CREATE_USER_FORBIDDEN);
         });
     }

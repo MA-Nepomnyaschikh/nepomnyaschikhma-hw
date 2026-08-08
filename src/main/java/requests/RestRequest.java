@@ -18,7 +18,7 @@ public class RestRequest extends HttpRequest implements CrudOperations {
 
     @Override
     public ValidatableResponse post(BaseModel model) {
-        return StepLogger.log("POST request to " + endpoint.getUrl(), () -> {
+        return StepLogger.apiStep("POST request to " + endpoint.getUrl(), () -> {
 
             return given()
                     .spec(requestSpecification)
@@ -32,7 +32,7 @@ public class RestRequest extends HttpRequest implements CrudOperations {
 
     @Override
     public ValidatableResponse post() {
-        return StepLogger.log("POST request to " + endpoint.getUrl(), () -> {
+        return StepLogger.apiStep("POST request to " + endpoint.getUrl(), () -> {
 
             return given()
                     .spec(requestSpecification)
@@ -45,7 +45,7 @@ public class RestRequest extends HttpRequest implements CrudOperations {
 
     @Override
     public ValidatableResponse get() {
-        return StepLogger.log("GET request to " + endpoint.getUrl(), () -> {
+        return StepLogger.apiStep("GET request to " + endpoint.getUrl(), () -> {
 
             return given()
                     .spec(requestSpecification)
@@ -58,7 +58,7 @@ public class RestRequest extends HttpRequest implements CrudOperations {
 
     @Override
     public ValidatableResponse getAll() {
-        return StepLogger.log("GET request to " + endpoint.getUrl(), () -> {
+        return StepLogger.apiStep("GET request to " + endpoint.getUrl(), () -> {
 
             return given()
                     .spec(requestSpecification)
@@ -71,7 +71,7 @@ public class RestRequest extends HttpRequest implements CrudOperations {
 
     @Override
     public ValidatableResponse getAll(long accountId) {
-        return StepLogger.log("GET request to " + endpoint.getUrl(), () -> {
+        return StepLogger.apiStep("GET request to " + endpoint.getUrl(), () -> {
 
             return given()
                     .spec(requestSpecification)
@@ -85,7 +85,7 @@ public class RestRequest extends HttpRequest implements CrudOperations {
 
     @Override
     public ValidatableResponse put(BaseModel model) {
-        return StepLogger.log("PUT request to " + endpoint.getUrl(), () -> {
+        return StepLogger.apiStep("PUT request to " + endpoint.getUrl(), () -> {
 
             return given()
                     .spec(requestSpecification)
@@ -99,7 +99,7 @@ public class RestRequest extends HttpRequest implements CrudOperations {
 
     @Override
     public ValidatableResponse delete(long id) {
-        return StepLogger.log("DELETE request to " + endpoint.getUrl(), () -> {
+        return StepLogger.apiStep("DELETE request to " + endpoint.getUrl(), () -> {
 
             return given()
                     .spec(requestSpecification)

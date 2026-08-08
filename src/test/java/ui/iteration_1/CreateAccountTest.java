@@ -25,7 +25,7 @@ public class CreateAccountTest extends BaseUiTest {
     public void userCanCreateAccountTest(TestUser user) {
         UserDashboardPage userDashboard = new UserDashboardPage();
 
-        String alertMessage = StepLogger.log("Создать аккаунт ", () -> {
+        String alertMessage = StepLogger.uiStep("Создать аккаунт ", () -> {
             return userDashboard
                     .open()
                     .shouldBeOpened()
@@ -36,11 +36,11 @@ public class CreateAccountTest extends BaseUiTest {
 
         String accountNumber = userDashboard.extractAccountNumber(alertMessage);
 
-        StepLogger.log("Проверить создание аккаунта через UI", () -> {
+        StepLogger.uiStep("Проверить создание аккаунта через UI", () -> {
             softly.assertThat(alertMessage).isEqualTo(ACCOUNT_CREATED_SUCCESSFULLY.formatted(accountNumber));
         });
 
-        StepLogger.log("Проверить создание аккаунта через API", () -> {
+        StepLogger.apiStep("Проверить создание аккаунта через API", () -> {
             List<CreateAccountResponseDto> userAccounts = accountSteps.getClientAccounts(user.getToken());
             softly.assertThat(userAccounts)
                     .singleElement()

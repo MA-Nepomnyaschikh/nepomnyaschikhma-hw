@@ -21,7 +21,7 @@ public class LoginUserTest extends BaseUiTest {
     @Browsers(values = {"chrome"})
     public void adminCanLoginWithCorrectDataTest() {
 
-        StepLogger.log("Авторизоваться  под пользователем", () -> {
+        StepLogger.uiStep("Авторизоваться под пользователем", () -> {
         new LoginPage()
                 .open()
                 .shouldBeOpened()
@@ -35,11 +35,11 @@ public class LoginUserTest extends BaseUiTest {
     @Test
     @Browsers(values = {"chrome"})
     public void userCanLoginWithCorrectDataTest() {
-        CreateUserRequestDto user = StepLogger.log("Создать пользователя", () -> {
+        CreateUserRequestDto user = StepLogger.apiStep("Создать пользователя", () -> {
             return userSteps.createRandomUser();
         });
 
-        StepLogger.log("Авторизоваться под пользователем", () -> {
+        StepLogger.uiStep("Авторизоваться под пользователем", () -> {
             new LoginPage()
                     .open()
                     .shouldBeOpened()

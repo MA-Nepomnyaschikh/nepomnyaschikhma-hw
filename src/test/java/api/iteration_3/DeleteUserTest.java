@@ -41,22 +41,22 @@ public class DeleteUserTest extends BaseTest {
     @MethodSource("validUserDataProvider")
     @ParameterizedTest(name= "{0}")
     public void adminCanDeleteUserTest(String testName, CreateUserRequestDto userDto) {
-        CreateUserResponseDto createdUser = StepLogger.log("Создать пользователя", () -> {
+        CreateUserResponseDto createdUser = StepLogger.apiStep("Создать пользователя", () -> {
             return userSteps.createUser(userDto, RequestSpecs.authAsAdmin(), ResponseSpecs.created())
                     .extract().as(CreateUserResponseDto.class);
         });
 
-        String deleteResponse = StepLogger.log("Удалить пользователя", () -> {
+        String deleteResponse = StepLogger.apiStep("Удалить пользователя", () -> {
             return userSteps.deleteUserById(createdUser.getId())
                     .extract().asString();
         });
 
-        StepLogger.log("Проверить удаление пользователя", () -> {
+        StepLogger.apiStep("Проверить удаление пользователя", () -> {
             softly.assertThat(deleteResponse)
                     .isEqualTo(DELETE_USER_SUCCESSFULLY.formatted(createdUser.getId()));
         });
 
-        StepLogger.log("Проверить отсутствие пользователя в системе", () -> {
+        StepLogger.apiStep("Проверить отсутствие пользователя в системе", () -> {
             List<CreateUserResponseDto> actualUsers = userSteps.getAllUsers();
             softly.assertThat(actualUsers)
                     .filteredOn(user -> user.getId() == createdUser.getId())
@@ -69,12 +69,12 @@ public class DeleteUserTest extends BaseTest {
     public void adminCannotDeleteUserWithInvalidIdTest() {
         long invalidId = -1L;
 
-        String errorResponse = StepLogger.log("Удалить пользователя", () -> {
+        String errorResponse = StepLogger.apiStep("Удалить пользователя", () -> {
             return userSteps.deleteUserById(invalidId, RequestSpecs.authAsAdmin(), ResponseSpecs.notFound())
                     .extract().asString();
         });
 
-        StepLogger.log("Проверить ошибку при удалении пользователя", () -> {
+        StepLogger.apiStep("Проверить ошибку при удалении пользователя", () -> {
             softly.assertThat(errorResponse)
                     .isEqualTo(DELETE_USER_INVALID_ID.formatted(invalidId));
         });
@@ -83,16 +83,16 @@ public class DeleteUserTest extends BaseTest {
     @DisplayName("API. Неавторизованный пользователь не может удалить пользователя")
     @Test
     public void adminCannotDeleteUserWithoutAuthTest() {
-        CreateUserResponseDto createdUser = StepLogger.log("Создать пользователя", () -> {
+        CreateUserResponseDto createdUser = StepLogger.apiStep("Создать пользователя", () -> {
             CreateUserRequestDto userDto = RandomModelGenerator.generate(CreateUserRequestDto.class);
             return userSteps.createUser(userDto);
         });
 
-        StepLogger.log("Удалить пользователя", () -> {
+        StepLogger.apiStep("Удалить пользователя", () -> {
             userSteps.deleteUserById(createdUser.getId(), RequestSpecs.unauth(), ResponseSpecs.unauthorized());
         });
 
-        StepLogger.log("Проверить наличие пользователя в системе", () -> {
+        StepLogger.apiStep("Проверить наличие пользователя в системе", () -> {
             List<CreateUserResponseDto> actualUsers = userSteps.getAllUsers();
             softly.assertThat(actualUsers)
                     .filteredOn(user -> user.getId() == createdUser.getId())
@@ -104,22 +104,22 @@ public class DeleteUserTest extends BaseTest {
     @Test
     @UserSession
     public void userWithoutAdminPermissionsCannotDeleteUserTest(TestUser userWithoutAdminPermissions) {
-        CreateUserResponseDto createdUser = StepLogger.log("Создать пользователя для удаления", () -> {
+        CreateUserResponseDto createdUser = StepLogger.apiStep("Создать пользователя для удаления", () -> {
             CreateUserRequestDto userDto = RandomModelGenerator.generate(CreateUserRequestDto.class);
             return userSteps.createUser(userDto);
         });
 
-        ErrorResponseDto errorResponse = StepLogger.log("Удалить пользователя", () -> {
+        ErrorResponseDto errorResponse = StepLogger.apiStep("Удалить пользователя", () -> {
             return userSteps.deleteUserById(
                     createdUser.getId(), RequestSpecs.authAsUser(userWithoutAdminPermissions.getToken()), ResponseSpecs.forbidden())
                     .extract().as(ErrorResponseDto.class);
         });
 
-        StepLogger.log("Проверить ошибку при удалении пользователя", () -> {
+        StepLogger.apiStep("Проверить ошибку при удалении пользователя", () -> {
             softly.assertThat(errorResponse.getError()).isEqualTo(CREATE_USER_FORBIDDEN);
         });
 
-        StepLogger.log("Проверить наличие пользователя в системе", () -> {
+        StepLogger.apiStep("Проверить наличие пользователя в системе", () -> {
             List<CreateUserResponseDto> actualUsers = userSteps.getAllUsers();
             softly.assertThat(actualUsers)
                     .filteredOn(user -> user.getId() == createdUser.getId())

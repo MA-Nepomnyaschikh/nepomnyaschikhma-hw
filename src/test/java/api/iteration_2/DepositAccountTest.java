@@ -37,21 +37,21 @@ public class DepositAccountTest extends BaseTest {
     @ParameterizedTest(name = "Сумма пополнения: {0}")
     @UserSession
     public void authorizedUserCanDepositAccountTest(double depositAmount, TestUser user) {
-        CreateAccountResponseDto accountBeforeDeposit = StepLogger.log("Создать счет", () -> {
+        CreateAccountResponseDto accountBeforeDeposit = StepLogger.apiStep("Создать счет", () -> {
             return accountSteps.createAccount(user.getToken());
         });
 
         DepositRequestDto depositRequestDto = generateDepositDto(accountBeforeDeposit.getId(), depositAmount);
 
-        CreateAccountResponseDto accountAfterDeposit = StepLogger.log("Пополнить счет", () -> {
+        CreateAccountResponseDto accountAfterDeposit = StepLogger.apiStep("Пополнить счет", () -> {
             return accountSteps.deposit(user.getToken(), depositRequestDto);
         });
 
-        StepLogger.log("Проверить пополнение счета", () -> {
+        StepLogger.apiStep("Проверить пополнение счета", () -> {
             AccountAssertions.assertDepositCompleted(softly, accountAfterDeposit, accountBeforeDeposit, depositAmount);
         });
 
-        StepLogger.log("Проверить счет после пополнения", () -> {
+        StepLogger.apiStep("Проверить счет после пополнения", () -> {
             CreateAccountResponseDto actualAccount = accountSteps.getClientAccountById(user.getToken(), accountBeforeDeposit.getId());
             softly.assertThat(actualAccount)
                     .usingRecursiveComparison()
@@ -72,21 +72,21 @@ public class DepositAccountTest extends BaseTest {
     @ParameterizedTest(name = "{0}")
     @UserSession
     public void authorizedUserCannotDepositAccountWithInvalidAmountTest(String testName, double depositAmount, String errorMessage, TestUser user) {
-        CreateAccountResponseDto accountBeforeDeposit = StepLogger.log("Создать счет", () -> {
+        CreateAccountResponseDto accountBeforeDeposit = StepLogger.apiStep("Создать счет", () -> {
             return accountSteps.createAccount(user.getToken());
         });
 
         DepositRequestDto depositRequestDto = generateDepositDto(accountBeforeDeposit.getId(), depositAmount);
 
-        String errorResponse = StepLogger.log("Пополнить счет невалидной суммой", () -> {
+        String errorResponse = StepLogger.apiStep("Пополнить счет невалидной суммой", () -> {
             return accountSteps.deposit(depositRequestDto, RequestSpecs.authAsUser(user.getToken()), ResponseSpecs.badRequest());
         });
 
-        StepLogger.log("Проверить сообщение об ошибке", () -> {
+        StepLogger.apiStep("Проверить сообщение об ошибке", () -> {
             softly.assertThat(errorResponse).isEqualTo(errorMessage);
         });
 
-        StepLogger.log("Проверить состояние счета", () -> {
+        StepLogger.apiStep("Проверить состояние счета", () -> {
             CreateAccountResponseDto actualAccount = accountSteps.getClientAccountById(user.getToken(), accountBeforeDeposit.getId());
             softly.assertThat(actualAccount.getBalance()).isEqualTo(accountBeforeDeposit.getBalance());
             softly.assertThat(actualAccount.getTransactions()).isEmpty();
@@ -101,11 +101,11 @@ public class DepositAccountTest extends BaseTest {
 
         DepositRequestDto depositRequestDto = generateDepositDto(NON_EXISTING_ACCOUNT_ID, depositAmount);
 
-        String errorResponse = StepLogger.log("Пополнить счет без авторизации", () -> {
+        String errorResponse = StepLogger.apiStep("Пополнить счет без авторизации", () -> {
             return accountSteps.deposit(depositRequestDto, RequestSpecs.authAsUser(user.getToken()), ResponseSpecs.forbidden());
         });
 
-        StepLogger.log("Проверить сообщение об ошибке", () -> {
+        StepLogger.apiStep("Проверить сообщение об ошибке", () -> {
             softly.assertThat(errorResponse).isEqualTo(DEPOSIT_UNAUTHORIZED);
         });
     }
@@ -116,21 +116,21 @@ public class DepositAccountTest extends BaseTest {
     public void authorizedUserCannotDepositAnotherUserAccountTest(TestUser firstUser, TestUser secondUser) {
         double depositAmount = getRandomValidDepositAmount();
 
-        CreateAccountResponseDto secondUserAccount = StepLogger.log("Создать счет для второго пользователя", () -> {
+        CreateAccountResponseDto secondUserAccount = StepLogger.apiStep("Создать счет для второго пользователя", () -> {
             return accountSteps.createAccount(secondUser.getToken());
         });
 
         DepositRequestDto depositRequestDto = generateDepositDto(secondUserAccount.getId(), depositAmount);
 
-        String errorResponse = StepLogger.log("Пополнить счет второго пользователя первым пользователем", () -> {
+        String errorResponse = StepLogger.apiStep("Пополнить счет второго пользователя первым пользователем", () -> {
             return accountSteps.deposit(depositRequestDto, RequestSpecs.authAsUser(firstUser.getToken()), ResponseSpecs.forbidden());
         });
 
-        StepLogger.log("Проверить сообщение об ошибке", () -> {
+        StepLogger.apiStep("Проверить сообщение об ошибке", () -> {
             softly.assertThat(errorResponse).isEqualTo(DEPOSIT_UNAUTHORIZED);
         });
 
-        StepLogger.log("Проверить состояние счета", () -> {
+        StepLogger.apiStep("Проверить состояние счета", () -> {
             CreateAccountResponseDto actualSecondUserAcc = accountSteps.getClientAccountById(secondUser.getToken(), secondUserAccount.getId());
             softly.assertThat(actualSecondUserAcc.getBalance()).isEqualTo(secondUserAccount.getBalance());
             softly.assertThat(actualSecondUserAcc.getTransactions()).isEmpty();
@@ -143,17 +143,17 @@ public class DepositAccountTest extends BaseTest {
     public void unauthorizedUserCannotDepositAccountTest(TestUser user) {
         double depositAmount = getRandomValidDepositAmount();
 
-        CreateAccountResponseDto userAccount = StepLogger.log("Создать счет", () -> {
+        CreateAccountResponseDto userAccount = StepLogger.apiStep("Создать счет", () -> {
             return accountSteps.createAccount(user.getToken());
         });
 
         DepositRequestDto depositRequestDto = generateDepositDto(userAccount.getId(), depositAmount);
 
-        StepLogger.log("Пополнить счет без авторизации", () -> {
+        StepLogger.apiStep("Пополнить счет без авторизации", () -> {
             accountSteps.deposit(depositRequestDto, RequestSpecs.unauth(), ResponseSpecs.unauthorized());
         });
 
-        StepLogger.log("Проверить состояние счета", () -> {
+        StepLogger.apiStep("Проверить состояние счета", () -> {
             CreateAccountResponseDto actualAccount = accountSteps.getClientAccountById(user.getToken(), userAccount.getId());
             softly.assertThat(actualAccount.getBalance()).isEqualTo(userAccount.getBalance());
             softly.assertThat(actualAccount.getTransactions()).isEmpty();

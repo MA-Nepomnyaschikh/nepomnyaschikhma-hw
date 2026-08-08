@@ -62,13 +62,13 @@ public class AdminPanelPage extends BasePage<AdminPanelPage> {
     }
 
     public List<UserBadge> getAllUserBadges() {
-        return StepLogger.log("Get all users from Admin Panel", () -> {
+        return StepLogger.apiStep("Get all users from Admin Panel", () -> {
             return mapToElementsList(getAllUsers(), UserBadge::new);
         });
     }
 
     public UserBadge getUserBadge(CreateUserRequestDto userDto) {
-        return StepLogger.log("Get user from Admin Panel", () -> {
+        return StepLogger.apiStep("Get user from Admin Panel", () -> {
             SelenideElement root = allUsers.findBy(ownText(userDto.getUsername()));
             return new UserBadge(root);
         });

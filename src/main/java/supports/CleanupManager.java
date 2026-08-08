@@ -12,7 +12,7 @@ public class CleanupManager {
 
     public void cleanup() {
         while (!actions.isEmpty()) {
-            StepLogger.log("Удалить пользователя", () -> {
+            StepLogger.apiStep("Удалить пользователя", () -> {
                 try {
                     actions.pop().run();
                 } catch (Exception e) {

@@ -22,13 +22,13 @@ public class GetAllUsersTest extends BaseTest {
     @Test
     @UserSession
     public void authorizedUserWithAdminPermissionsCanGetUsersListTest(TestUser user) {
-        List<CreateUserResponseDto> actualUsersList = StepLogger.log("Получить список пользователей", () -> {
+        List<CreateUserResponseDto> actualUsersList = StepLogger.apiStep("Получить список пользователей", () -> {
             return userSteps.getAllUsers();
         });
 
         List<CreateUserResponseDto> expectedUserList = List.of(user.getResponseDto());
 
-        StepLogger.log("Проверить полученный список пользователей", () -> {
+        StepLogger.apiStep("Проверить полученный список пользователей", () -> {
             softly.assertThat(actualUsersList).isEqualTo(expectedUserList);
         });
     }
@@ -37,12 +37,12 @@ public class GetAllUsersTest extends BaseTest {
     @Test
     @UserSession
     public void authorizedUserWithoutAdminPermissionsCannotGetUsersListTest(TestUser user) {
-        ErrorResponseDto errorResponse = StepLogger.log("Получить список пользователей", () -> {
+        ErrorResponseDto errorResponse = StepLogger.apiStep("Получить список пользователей", () -> {
             return userSteps.getAllUsers(RequestSpecs.authAsUser(user.getToken()), ResponseSpecs.forbidden())
                     .extract().as(ErrorResponseDto.class);
         });
 
-        StepLogger.log("Проверить ошибку при получении списка пользователей", () -> {
+        StepLogger.apiStep("Проверить ошибку при получении списка пользователей", () -> {
             softly.assertThat(errorResponse.getError()).isEqualTo(GET_USERS_LIST_FORBIDDEN);
         });
     }
@@ -51,7 +51,7 @@ public class GetAllUsersTest extends BaseTest {
     @Test
     @UserSession
     public void unauthorizedUserCannotGetUsersListTest(TestUser user) {
-        StepLogger.log("Получить список пользователей без авторизации", () -> {
+        StepLogger.apiStep("Получить список пользователей без авторизации", () -> {
             userSteps.getAllUsers(RequestSpecs.unauth(), ResponseSpecs.unauthorized());
         });
     }

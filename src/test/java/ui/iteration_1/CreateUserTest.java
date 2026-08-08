@@ -29,13 +29,13 @@ public class CreateUserTest extends BaseUiTest {
 
         AdminPanelPage adminPanel = new AdminPanelPage();
 
-        String alertMessage = StepLogger.log("Создать пользователя ", () -> {
+        String alertMessage = StepLogger.uiStep("Создать пользователя ", () -> {
             return adminPanel.open()
                     .createUser(user.getUsername(), user.getPassword())
                     .getAlertMessageAndAccept();
         });
 
-        StepLogger.log("Проверить создание пользователя через UI", () -> {
+        StepLogger.uiStep("Проверить создание пользователя через UI", () -> {
             softly.assertThat(alertMessage).isEqualTo(USER_CREATED_SUCCESSFULLY);
 
             adminPanel.getUserBadge(user).shouldBeVisible();
@@ -43,11 +43,11 @@ public class CreateUserTest extends BaseUiTest {
             softly.assertThat(adminPanel.getAllUserBadges())
                     .filteredOn(userBadge ->
                             userBadge.getUsername().equals(user.getUsername()) &&
-                                    userBadge.getRole().equals(user.getRole()))
+                            userBadge.getRole().equals(user.getRole()))
                     .singleElement();
         });
 
-        StepLogger.log("Проверить создание пользователя через API", () -> {
+        StepLogger.apiStep("Проверить создание пользователя через API", () -> {
             CreateUserResponseDto actualUser = userSteps.getUserByUsername(user.getUsername());
             UserAssertions.assertUserCreated(softly, actualUser, user);
             cleanupManager.register(() -> userSteps.deleteUserById(actualUser.getId()));
@@ -63,14 +63,14 @@ public class CreateUserTest extends BaseUiTest {
 
         AdminPanelPage adminPanel = new AdminPanelPage();
 
-        String alertMessage = StepLogger.log("Создать пользователя", () -> {
+        String alertMessage = StepLogger.uiStep("Создать пользователя", () -> {
             return adminPanel
                     .open()
                     .createUser(user.getUsername(), user.getPassword())
                     .getAlertMessageAndAccept();
         });
 
-        StepLogger.log("Проверить отсутствие пользователя через UI", () -> {
+        StepLogger.uiStep("Проверить отсутствие пользователя через UI", () -> {
             softly.assertThat(alertMessage).isEqualTo(CREATE_USER_FAILED + CREATE_USER_INVALID_USERNAME_FORMAT);
 
             adminPanel.getUserBadge(user).shouldNotBeVisible();
@@ -82,7 +82,7 @@ public class CreateUserTest extends BaseUiTest {
                     .isEmpty();
         });
 
-        StepLogger.log("Проверить отсутствие пользователя через API", () -> {
+        StepLogger.apiStep("Проверить отсутствие пользователя через API", () -> {
             List<CreateUserResponseDto> allUsers = userSteps.getAllUsers();
             softly.assertThat(allUsers)
                     .filteredOn(actualUser -> actualUser.getUsername().equals(user.getUsername()))

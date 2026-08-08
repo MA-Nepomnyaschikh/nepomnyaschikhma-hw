@@ -32,11 +32,11 @@ public class LoginUserTest extends BaseTest {
 
         LoginUserRequestDto loginDto = generateLoginDto(userDto);
 
-        ValidatableResponse loginUserResponse = StepLogger.log("Авторизовать администратора", () -> {
+        ValidatableResponse loginUserResponse = StepLogger.apiStep("Авторизовать администратора", () -> {
             return authSteps.login(loginDto);
         });
 
-        StepLogger.log("Проверить авторизацию администратора", () -> {
+        StepLogger.apiStep("Проверить авторизацию администратора", () -> {
             UserAssertions.assertUserLoggedIn(softly, loginUserResponse, userDto);
         });
     }
@@ -44,17 +44,17 @@ public class LoginUserTest extends BaseTest {
     @DisplayName("API. Пользователь может авторизоваться")
     @Test
     public void userCanGenerateAuthTokenTest() {
-        CreateUserRequestDto userDto = StepLogger.log("Создать пользователя", () -> {
+        CreateUserRequestDto userDto = StepLogger.apiStep("Создать пользователя", () -> {
             return userSteps.createRandomUser();
         });
 
         LoginUserRequestDto loginDto = generateLoginDto(userDto);
 
-        ValidatableResponse loginUserResponse = StepLogger.log("Авторизовать пользователя", () -> {
+        ValidatableResponse loginUserResponse = StepLogger.apiStep("Авторизовать пользователя", () -> {
             return authSteps.login(loginDto);
         });
 
-        StepLogger.log("Проверить авторизацию пользователя", () -> {
+        StepLogger.apiStep("Проверить авторизацию пользователя", () -> {
             UserAssertions.assertUserLoggedIn(softly, loginUserResponse, userDto);
         });
     }
@@ -83,12 +83,12 @@ public class LoginUserTest extends BaseTest {
     public void userCannotGenerateAuthTokenWithInvalidDataTest(String testName, String username, String password) {
         LoginUserRequestDto loginDto = generateLoginDto(username, password);
 
-        ErrorResponseDto errorResponse = StepLogger.log("Авторизовать пользователя", () -> {
+        ErrorResponseDto errorResponse = StepLogger.apiStep("Авторизовать пользователя", () -> {
             return authSteps.login(loginDto, RequestSpecs.unauth(), ResponseSpecs.unauthorized())
                     .extract().as(ErrorResponseDto.class);
         });
 
-        StepLogger.log("Проверить ошибку авторизации пользователя", () -> {
+        StepLogger.apiStep("Проверить ошибку авторизации пользователя", () -> {
             softly.assertThat(errorResponse.getError()).isEqualTo(LOGIN_USER_INVALID_DATA);
         });
     }

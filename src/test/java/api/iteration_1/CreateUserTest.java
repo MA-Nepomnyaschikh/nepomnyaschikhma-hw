@@ -37,15 +37,15 @@ public class CreateUserTest extends BaseTest {
     @MethodSource("validUserDataProvider")
     @ParameterizedTest(name= "{0}")
     public void adminCanCreateUserWithValidDataTest(String testName, CreateUserRequestDto userDto) {
-        CreateUserResponseDto createdUser = StepLogger.log("Создать пользователя", () -> {
+        CreateUserResponseDto createdUser = StepLogger.apiStep("Создать пользователя", () -> {
             return userSteps.createUser(userDto);
         });
 
-        StepLogger.log("Проверить создание пользователя", () -> {
+        StepLogger.apiStep("Проверить создание пользователя", () -> {
             UserAssertions.assertUserCreated(softly, createdUser, userDto);
         });
 
-        StepLogger.log("Проверить наличие пользователя в системе", () -> {
+        StepLogger.apiStep("Проверить наличие пользователя в системе", () -> {
             CreateUserResponseDto actualUser = userSteps.getUserById(createdUser.getId());
             softly.assertThat(actualUser)
                     .usingRecursiveComparison()
@@ -77,19 +77,19 @@ public class CreateUserTest extends BaseTest {
     @MethodSource("invalidUserDataProvider")
     @ParameterizedTest(name= "{0}")
     public void adminCannotCreateUserWithInvalidDataTest(String testName, CreateUserRequestDto userDto, String errorKey, List<String> errorValues) {
-        Map<String, List<String>> errors = StepLogger.log("Создать пользователя с невалидными данными", () -> {
+        Map<String, List<String>> errors = StepLogger.apiStep("Создать пользователя с невалидными данными", () -> {
             return userSteps.createUser(
                     userDto, RequestSpecs.authAsAdmin(), ResponseSpecs.badRequest())
                     .extract().as(new TypeRef<Map<String, List<String>>>() {
                     });
         });
 
-        StepLogger.log("Проверить ошибку при создании пользователя", () -> {
+        StepLogger.apiStep("Проверить ошибку при создании пользователя", () -> {
             softly.assertThat(errors).containsKey(errorKey);
             softly.assertThat(errors.get(errorKey)).containsExactlyInAnyOrderElementsOf(errorValues);
         });
 
-        StepLogger.log("Проверить отсутствие пользователя в системе", () -> {
+        StepLogger.apiStep("Проверить отсутствие пользователя в системе", () -> {
             List<CreateUserResponseDto> allUsers = userSteps.getAllUsers();
             softly.assertThat(allUsers)
                     .filteredOn(actualUser -> actualUser.getUsername().equals(userDto.getUsername()))
@@ -102,22 +102,22 @@ public class CreateUserTest extends BaseTest {
     public void adminCannotCreateUserWithExistingUsernameTest() {
         CreateUserRequestDto userDto = RandomModelGenerator.generate(CreateUserRequestDto.class);
 
-        StepLogger.log("Создать пользователя", () -> {
+        StepLogger.apiStep("Создать пользователя", () -> {
             userSteps.createUser(userDto);
         });
 
-        String errorResponse = StepLogger.log("Создать пользователя с таким же username", () -> {
+        String errorResponse = StepLogger.apiStep("Создать пользователя с таким же username", () -> {
             return userSteps.createUser(
                     userDto, RequestSpecs.authAsAdmin(), ResponseSpecs.badRequest())
                     .extract().asString();
         });
 
-        StepLogger.log("Проверить ошибку при создании пользователя", () -> {
+        StepLogger.apiStep("Проверить ошибку при создании пользователя", () -> {
             softly.assertThat(errorResponse)
                     .isEqualTo(CREATE_USER_DUPLICATE_USERNAME.formatted(userDto.getUsername()));
         });
 
-        StepLogger.log("Проверить отсутствие пользователя в системе", () -> {
+        StepLogger.apiStep("Проверить отсутствие пользователя в системе", () -> {
             List<CreateUserResponseDto> allUsers = userSteps.getAllUsers();
             softly.assertThat(allUsers)
                     .filteredOn(actualUser -> actualUser.getUsername().equals(userDto.getUsername()))
@@ -129,12 +129,12 @@ public class CreateUserTest extends BaseTest {
     @Test
     public void unauthorizedUserCannotCreateUserTest() {
         CreateUserRequestDto userDto = RandomModelGenerator.generate(CreateUserRequestDto.class);
-        StepLogger.log("Создать пользователя без токена авторизации", () -> {
+        StepLogger.apiStep("Создать пользователя без токена авторизации", () -> {
             userSteps.createUser(
                     userDto, RequestSpecs.unauth(), ResponseSpecs.unauthorized());
         });
 
-        StepLogger.log("Проверить отсутствие пользователя в системе", () -> {
+        StepLogger.apiStep("Проверить отсутствие пользователя в системе", () -> {
             List<CreateUserResponseDto> allUsers = userSteps.getAllUsers();
             softly.assertThat(allUsers)
                     .filteredOn(actualUser -> actualUser.getUsername().equals(userDto.getUsername()))
@@ -147,24 +147,24 @@ public class CreateUserTest extends BaseTest {
     public void userWithoutAdminPermissionsCannotCreateUserTest() {
         CreateUserRequestDto userWithoutAdminPermissionsDto = RandomModelGenerator.generate(CreateUserRequestDto.class);
 
-        String userWithoutAdminPermissionsAuthHeader = StepLogger.log("Создать пользователя", () -> {
+        String userWithoutAdminPermissionsAuthHeader = StepLogger.apiStep("Создать пользователя", () -> {
             userSteps.createUser(userWithoutAdminPermissionsDto);
             return authSteps.loginAndGetToken(userWithoutAdminPermissionsDto);
         });
 
         CreateUserRequestDto userDto = RandomModelGenerator.generate(CreateUserRequestDto.class);
 
-        ErrorResponseDto errorResponse = StepLogger.log("Создать пользователя с токеном пользователя", () -> {
+        ErrorResponseDto errorResponse = StepLogger.apiStep("Создать пользователя с токеном пользователя", () -> {
             return userSteps.createUser(
                         userDto, RequestSpecs.authAsUser(userWithoutAdminPermissionsAuthHeader), ResponseSpecs.forbidden())
                         .extract().as(ErrorResponseDto.class);
         });
 
-        StepLogger.log("Проверить ошибку при создании пользователя", () -> {
+        StepLogger.apiStep("Проверить ошибку при создании пользователя", () -> {
             softly.assertThat(errorResponse.getError()).isEqualTo(DELETE_USER_FORBIDDEN);
         });
 
-        StepLogger.log("Проверить отсутствие пользователя в системе", () -> {
+        StepLogger.apiStep("Проверить отсутствие пользователя в системе", () -> {
             List<CreateUserResponseDto> allUsers = userSteps.getAllUsers();
             softly.assertThat(allUsers)
                     .filteredOn(actualUser -> actualUser.getUsername().equals(userDto.getUsername()))

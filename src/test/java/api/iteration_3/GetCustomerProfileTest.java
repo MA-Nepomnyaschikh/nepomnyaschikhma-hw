@@ -20,11 +20,11 @@ public class GetCustomerProfileTest extends BaseTest {
     @Test
     @UserSession
     public void authorizedUserCanGetProfileTest(TestUser user) {
-        CreateUserResponseDto actualUser = StepLogger.log("Получить профиль пользователя", () -> {
+        CreateUserResponseDto actualUser = StepLogger.apiStep("Получить профиль пользователя", () -> {
             return userSteps.getCustomerProfile(user.getToken());
         });
 
-        StepLogger.log("Проверить профиль пользователя", () -> {
+        StepLogger.apiStep("Проверить профиль пользователя", () -> {
             softly.assertThat(actualUser)
                     .usingRecursiveComparison()
                     .isEqualTo(user.getResponseDto());
@@ -34,7 +34,7 @@ public class GetCustomerProfileTest extends BaseTest {
     @DisplayName("API. Неавторизованный пользователь не может получить свой профиль")
     @Test
     public void unauthorizedUserCannotGetProfileTest() {
-        StepLogger.log("Получить профиль пользователя без авторизации", () -> {
+        StepLogger.apiStep("Получить профиль пользователя без авторизации", () -> {
             return userSteps.getCustomerProfile(RequestSpecs.unauth(), ResponseSpecs.unauthorized());
         });
     }
@@ -42,13 +42,13 @@ public class GetCustomerProfileTest extends BaseTest {
     @DisplayName("API. Администратор не может получить профиль")
     @Test
     public void adminCannotGetProfileTest() {
-        ErrorResponseDto errorResponse = StepLogger.log("Получить профиль администратором", () -> {
+        ErrorResponseDto errorResponse = StepLogger.apiStep("Получить профиль администратором", () -> {
             return userSteps.getCustomerProfile(
                     RequestSpecs.authAsAdmin(), ResponseSpecs.forbidden())
                     .extract().as(ErrorResponseDto.class);
         });
 
-        StepLogger.log("Проверить ошибку при получении профиля", () -> {
+        StepLogger.apiStep("Проверить ошибку при получении профиля", () -> {
             softly.assertThat(errorResponse.getError()).isEqualTo(CREATE_USER_FORBIDDEN);
         });
     }

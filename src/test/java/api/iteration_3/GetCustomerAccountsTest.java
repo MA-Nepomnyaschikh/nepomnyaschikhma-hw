@@ -22,17 +22,17 @@ public class GetCustomerAccountsTest extends BaseTest {
     @Test
     @UserSession
     public void authorizedUserCanGetOwnAccountsTest(TestUser user) {
-        CreateAccountResponseDto createdAccount = StepLogger.log("Создать счет пользователя", () -> {
+        CreateAccountResponseDto createdAccount = StepLogger.apiStep("Создать счет пользователя", () -> {
             return accountSteps.createAccount(user.getToken());
         });
 
         List<CreateAccountResponseDto> expectedAccounts = List.of(createdAccount);
 
-        List<CreateAccountResponseDto> actualAccounts = StepLogger.log("Получить список счетов пользователя", () -> {
+        List<CreateAccountResponseDto> actualAccounts = StepLogger.apiStep("Получить список счетов пользователя", () -> {
             return accountSteps.getClientAccounts(user.getToken());
         });
 
-        StepLogger.log("Проверить список счетов пользователя", () -> {
+        StepLogger.apiStep("Проверить список счетов пользователя", () -> {
             softly.assertThat(actualAccounts)
                     .isEqualTo(expectedAccounts);
         });
@@ -41,7 +41,7 @@ public class GetCustomerAccountsTest extends BaseTest {
     @DisplayName("API. Неавторизованный пользователь не может получить список своих счетов")
     @Test
     public void unauthorizedUserCannotGetOwnAccountsTest() {
-        StepLogger.log("Получить список счетов без авторизации", () -> {
+        StepLogger.apiStep("Получить список счетов без авторизации", () -> {
             accountSteps.getClientAccounts(RequestSpecs.unauth(), ResponseSpecs.unauthorized());
         });
     }
@@ -49,13 +49,13 @@ public class GetCustomerAccountsTest extends BaseTest {
     @DisplayName("API. Администратор не может получить список счетов")
     @Test
     public void adminCannotGetAccountsTest() {
-        ErrorResponseDto errorResponse = StepLogger.log("Получить список счетов администратором", () -> {
+        ErrorResponseDto errorResponse = StepLogger.apiStep("Получить список счетов администратором", () -> {
             return accountSteps.getClientAccounts(
                     RequestSpecs.authAsAdmin(), ResponseSpecs.forbidden())
                     .extract().as(ErrorResponseDto.class);
         });
 
-        StepLogger.log("Проверить ошибку при получении счетов", () -> {
+        StepLogger.apiStep("Проверить ошибку при получении счетов", () -> {
             softly.assertThat(errorResponse.getError()).isEqualTo(CREATE_USER_FORBIDDEN);
         });
     }

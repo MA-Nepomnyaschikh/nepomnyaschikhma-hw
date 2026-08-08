@@ -23,17 +23,17 @@ public class GetAccountTransactionsTest extends BaseTest {
     @Test
     @UserSession
     public void authorizedUserCanGetOwnAccountTransactionsTest(TestUser user) {
-        CreateAccountResponseDto createdAccount = StepLogger.log("Создать счет", () -> {
+        CreateAccountResponseDto createdAccount = StepLogger.apiStep("Создать счет", () -> {
             return accountSteps.createAccountWithBalance(user.getToken(), MAX_TRANSFER_AMOUNT);
         });
 
         List<TransactionResponseDto> expectedTransactions = createdAccount.getTransactions();
 
-        List<TransactionResponseDto> actualTransactions = StepLogger.log("Получить список транзакций по счету пользователя", () -> {
+        List<TransactionResponseDto> actualTransactions = StepLogger.apiStep("Получить список транзакций по счету пользователя", () -> {
             return accountSteps.getAccountTransactions(user.getToken(), createdAccount.getId());
         });
 
-        StepLogger.log("Проверить список транзакций по счету пользователя", () -> {
+        StepLogger.apiStep("Проверить список транзакций по счету пользователя", () -> {
             softly.assertThat(actualTransactions)
                     .isEqualTo(expectedTransactions);
         });
@@ -43,16 +43,16 @@ public class GetAccountTransactionsTest extends BaseTest {
     @Test
     @UserSession(usersCount = 2)
     public void authorizedUserCannotGetAnotherUserAccountTransactionsTest(TestUser firstUser, TestUser secondUser) {
-        CreateAccountResponseDto createdAccount = StepLogger.log("Создать счет второго пользователя", () -> {
+        CreateAccountResponseDto createdAccount = StepLogger.apiStep("Создать счет второго пользователя", () -> {
             return accountSteps.createAccountWithBalance(secondUser.getToken(), MAX_TRANSFER_AMOUNT);
         });
 
-        String errorResponse = StepLogger.log("Получить первым пользователем список транзакций по счету второго пользователя", () -> {
+        String errorResponse = StepLogger.apiStep("Получить первым пользователем список транзакций по счету второго пользователя", () -> {
             return accountSteps.getAccountTransactions( createdAccount.getId(), RequestSpecs.authAsUser(firstUser.getToken()), ResponseSpecs.forbidden())
                     .extract().asString();
         });
 
-        StepLogger.log("Проверить ошибку при получении списка транзакций", () -> {
+        StepLogger.apiStep("Проверить ошибку при получении списка транзакций", () -> {
             softly.assertThat(errorResponse).isEqualTo(GET_ACCOUNT_TRANSACTIONS_FORBIDDEN);
         });
     }
@@ -61,11 +61,11 @@ public class GetAccountTransactionsTest extends BaseTest {
     @Test
     @UserSession
     public void unauthorizedUserCannotGetOwnAccountsTransactionsTest(TestUser user) {
-        CreateAccountResponseDto createdAccount = StepLogger.log("Создать счет", () -> {
+        CreateAccountResponseDto createdAccount = StepLogger.apiStep("Создать счет", () -> {
             return accountSteps.createAccountWithBalance(user.getToken(), MAX_TRANSFER_AMOUNT);
         });
 
-        StepLogger.log("Получить список транзакций по счету пользователя без авторизации", () -> {
+        StepLogger.apiStep("Получить список транзакций по счету пользователя без авторизации", () -> {
             accountSteps.getAccountTransactions(createdAccount.getId(), RequestSpecs.unauth(), ResponseSpecs.unauthorized());
         });
     }

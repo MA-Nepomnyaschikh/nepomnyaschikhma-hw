@@ -24,15 +24,15 @@ public class TransferFundsTest extends BaseUiTest {
     public void userCanTransferFundsBetweenTheirAccountsTest(TestUser user) {
         double transferAmount = getRandomValidTransferAmount();
 
-        CreateAccountResponseDto senderAccount =  StepLogger.log("Создать первый счет пользователя с балансом " + MAX_TRANSFER_AMOUNT, () -> {
+        CreateAccountResponseDto senderAccount =  StepLogger.apiStep("Создать первый счет пользователя с балансом " + MAX_TRANSFER_AMOUNT, () -> {
             return accountSteps.createAccountWithBalance(user.getToken(), MAX_TRANSFER_AMOUNT);
         });
 
-        CreateAccountResponseDto receiverAccount =  StepLogger.log("Создать второй счет пользователя", () -> {
+        CreateAccountResponseDto receiverAccount =  StepLogger.apiStep("Создать второй счет пользователя", () -> {
             return accountSteps.createAccount(user.getToken());
         });
 
-        String alertMessage = StepLogger.log("Отправить перевод", () -> {
+        String alertMessage = StepLogger.uiStep("Отправить перевод", () -> {
             return new UserDashboardPage()
                     .open()
                     .shouldBeOpened()
@@ -42,11 +42,11 @@ public class TransferFundsTest extends BaseUiTest {
                     .getAlertMessageAndAccept();
         });
 
-        StepLogger.log("Проверить отправку перевода через UI", () -> {
+        StepLogger.uiStep("Проверить отправку перевода через UI", () -> {
             softly.assertThat(alertMessage).isEqualTo(TRANSFER_SUCCESSFULLY.formatted(transferAmount, receiverAccount.getAccountNumber()));
         });
 
-        StepLogger.log("Проверить отправку перевода через API", () -> {
+        StepLogger.apiStep("Проверить отправку перевода через API", () -> {
             CreateAccountResponseDto actualSenderAccount = accountSteps.getClientAccountById(user.getToken(), senderAccount.getId());
             softly.assertThat(actualSenderAccount.getBalance()).isEqualTo(senderAccount.getBalance() - transferAmount);
 
@@ -62,15 +62,15 @@ public class TransferFundsTest extends BaseUiTest {
     public void userCanTransferFundsToAnotherUserAccountTest(TestUser sender, TestUser receiver) {
         double transferAmount = getRandomValidTransferAmount();
 
-        CreateAccountResponseDto senderAccount =  StepLogger.log("Создать счет отправителя с балансом " + MAX_TRANSFER_AMOUNT, () -> {
+        CreateAccountResponseDto senderAccount =  StepLogger.apiStep("Создать счет отправителя с балансом " + MAX_TRANSFER_AMOUNT, () -> {
             return accountSteps.createAccountWithBalance(sender.getToken(), MAX_TRANSFER_AMOUNT);
         });
 
-        CreateAccountResponseDto receiverAccount =  StepLogger.log("Создать счет получателя", () -> {
+        CreateAccountResponseDto receiverAccount =  StepLogger.apiStep("Создать счет получателя", () -> {
             return accountSteps.createAccount(receiver.getToken());
         });
 
-        String alertMessage = StepLogger.log("Отправить перевод", () -> {
+        String alertMessage = StepLogger.uiStep("Отправить перевод", () -> {
             return new UserDashboardPage()
                     .open()
                     .shouldBeOpened()
@@ -80,11 +80,11 @@ public class TransferFundsTest extends BaseUiTest {
                     .getAlertMessageAndAccept();
         });
 
-        StepLogger.log("Проверить отправку перевода через UI", () -> {
+        StepLogger.uiStep("Проверить отправку перевода через UI", () -> {
             softly.assertThat(alertMessage).isEqualTo(TRANSFER_SUCCESSFULLY.formatted(transferAmount, receiverAccount.getAccountNumber()));
         });
 
-        StepLogger.log("Проверить отправку перевода через API", () -> {
+        StepLogger.apiStep("Проверить отправку перевода через API", () -> {
             CreateAccountResponseDto actualSenderAccount = accountSteps.getClientAccountById(sender.getToken(), senderAccount.getId());
             softly.assertThat(actualSenderAccount.getBalance()).isEqualTo(senderAccount.getBalance() - transferAmount);
 
@@ -100,15 +100,15 @@ public class TransferFundsTest extends BaseUiTest {
     public void userCannotTransferFundsWithoutSenderAccountNumberTest(TestUser sender, TestUser receiver) {
         double transferAmount = getRandomValidTransferAmount();
 
-        CreateAccountResponseDto senderAccount =  StepLogger.log("Создать счет отправителя с балансом " + MAX_TRANSFER_AMOUNT, () -> {
+        CreateAccountResponseDto senderAccount =  StepLogger.apiStep("Создать счет отправителя с балансом " + MAX_TRANSFER_AMOUNT, () -> {
             return accountSteps.createAccountWithBalance(sender.getToken(), MAX_TRANSFER_AMOUNT);
         });
 
-        CreateAccountResponseDto receiverAccount =  StepLogger.log("Создать счет получателя", () -> {
+        CreateAccountResponseDto receiverAccount =  StepLogger.apiStep("Создать счет получателя", () -> {
             return accountSteps.createAccount(receiver.getToken());
         });
 
-        String alertMessage = StepLogger.log("Отправить перевод", () -> {
+        String alertMessage = StepLogger.uiStep("Отправить перевод", () -> {
             return new UserDashboardPage()
                     .open()
                     .shouldBeOpened()
@@ -121,11 +121,11 @@ public class TransferFundsTest extends BaseUiTest {
                     .getAlertMessageAndAccept();
         });
 
-        StepLogger.log("Проверить ошибку перевода через UI", () -> {
+        StepLogger.uiStep("Проверить ошибку перевода через UI", () -> {
             softly.assertThat(alertMessage).isEqualTo(TRANSFER_REQUIRED_FIELDS_NOT_FILLED);
         });
 
-        StepLogger.log("Проверить отсутствие перевода через API", () -> {
+        StepLogger.apiStep("Проверить отсутствие перевода через API", () -> {
             CreateAccountResponseDto actualSenderAccount = accountSteps.getClientAccountById(sender.getToken(), senderAccount.getId());
             softly.assertThat(actualSenderAccount.getBalance()).isEqualTo(senderAccount.getBalance());
 
@@ -141,15 +141,15 @@ public class TransferFundsTest extends BaseUiTest {
     public void userCannotTransferFundsWithoutReceiverAccountNumberTest(TestUser sender, TestUser receiver) {
         double transferAmount = getRandomValidTransferAmount();
 
-        CreateAccountResponseDto senderAccount =  StepLogger.log("Создать счет отправителя с балансом " + MAX_TRANSFER_AMOUNT, () -> {
+        CreateAccountResponseDto senderAccount =  StepLogger.apiStep("Создать счет отправителя с балансом " + MAX_TRANSFER_AMOUNT, () -> {
             return accountSteps.createAccountWithBalance(sender.getToken(), MAX_TRANSFER_AMOUNT);
         });
 
-        CreateAccountResponseDto receiverAccount =  StepLogger.log("Создать счет получателя", () -> {
+        CreateAccountResponseDto receiverAccount =  StepLogger.apiStep("Создать счет получателя", () -> {
             return accountSteps.createAccount(receiver.getToken());
         });
 
-        String alertMessage = StepLogger.log("Отправить перевод", () -> {
+        String alertMessage = StepLogger.uiStep("Отправить перевод", () -> {
             return new UserDashboardPage()
                     .open()
                     .shouldBeOpened()
@@ -162,11 +162,11 @@ public class TransferFundsTest extends BaseUiTest {
                     .getAlertMessageAndAccept();
         });
 
-        StepLogger.log("Проверить ошибку перевода через UI", () -> {
+        StepLogger.uiStep("Проверить ошибку перевода через UI", () -> {
             softly.assertThat(alertMessage).isEqualTo(TRANSFER_REQUIRED_FIELDS_NOT_FILLED);
         });
 
-        StepLogger.log("Проверить отсутствие перевода через API", () -> {
+        StepLogger.apiStep("Проверить отсутствие перевода через API", () -> {
             CreateAccountResponseDto actualSenderAccount = accountSteps.getClientAccountById(sender.getToken(), senderAccount.getId());
             softly.assertThat(actualSenderAccount.getBalance()).isEqualTo(senderAccount.getBalance());
 
@@ -180,15 +180,15 @@ public class TransferFundsTest extends BaseUiTest {
     @Browsers(values = {"chrome"})
     @UserSession(usersCount = 2, needBrowserLogin = true)
     public void userCannotTransferFundsWithoutAmountTest(TestUser sender, TestUser receiver) {
-        CreateAccountResponseDto senderAccount =  StepLogger.log("Создать счет отправителя с балансом " + MAX_TRANSFER_AMOUNT, () -> {
+        CreateAccountResponseDto senderAccount =  StepLogger.apiStep("Создать счет отправителя с балансом " + MAX_TRANSFER_AMOUNT, () -> {
             return accountSteps.createAccountWithBalance(sender.getToken(), MAX_TRANSFER_AMOUNT);
         });
 
-        CreateAccountResponseDto receiverAccount =  StepLogger.log("Создать счет получателя", () -> {
+        CreateAccountResponseDto receiverAccount =  StepLogger.apiStep("Создать счет получателя", () -> {
             return accountSteps.createAccount(receiver.getToken());
         });
 
-        String alertMessage = StepLogger.log("Отправить перевод", () -> {
+        String alertMessage = StepLogger.uiStep("Отправить перевод", () -> {
             return new UserDashboardPage()
                     .open()
                     .shouldBeOpened()
@@ -201,11 +201,11 @@ public class TransferFundsTest extends BaseUiTest {
                     .getAlertMessageAndAccept();
         });
 
-        StepLogger.log("Проверить ошибку перевода через UI", () -> {
+        StepLogger.uiStep("Проверить ошибку перевода через UI", () -> {
             softly.assertThat(alertMessage).isEqualTo(TRANSFER_REQUIRED_FIELDS_NOT_FILLED);
         });
 
-        StepLogger.log("Проверить отсутствие перевода через API", () -> {
+        StepLogger.apiStep("Проверить отсутствие перевода через API", () -> {
             CreateAccountResponseDto actualSenderAccount = accountSteps.getClientAccountById(sender.getToken(), senderAccount.getId());
             softly.assertThat(actualSenderAccount.getBalance()).isEqualTo(senderAccount.getBalance());
 
@@ -221,15 +221,15 @@ public class TransferFundsTest extends BaseUiTest {
     public void userCannotTransferFundsWithoutConfirmTest(TestUser sender, TestUser receiver) {
         double transferAmount = getRandomValidTransferAmount();
 
-        CreateAccountResponseDto senderAccount =  StepLogger.log("Создать счет отправителя с балансом " + MAX_TRANSFER_AMOUNT, () -> {
+        CreateAccountResponseDto senderAccount =  StepLogger.apiStep("Создать счет отправителя с балансом " + MAX_TRANSFER_AMOUNT, () -> {
             return accountSteps.createAccountWithBalance(sender.getToken(), MAX_TRANSFER_AMOUNT);
         });
 
-        CreateAccountResponseDto receiverAccount =  StepLogger.log("Создать счет получателя", () -> {
+        CreateAccountResponseDto receiverAccount =  StepLogger.apiStep("Создать счет получателя", () -> {
             return accountSteps.createAccount(receiver.getToken());
         });
 
-        String alertMessage = StepLogger.log("Отправить перевод", () -> {
+        String alertMessage = StepLogger.uiStep("Отправить перевод", () -> {
             return new UserDashboardPage()
                     .open()
                     .shouldBeOpened()
@@ -242,11 +242,11 @@ public class TransferFundsTest extends BaseUiTest {
                     .getAlertMessageAndAccept();
         });
 
-        StepLogger.log("Проверить ошибку перевода через UI", () -> {
+        StepLogger.uiStep("Проверить ошибку перевода через UI", () -> {
             softly.assertThat(alertMessage).isEqualTo(TRANSFER_REQUIRED_FIELDS_NOT_FILLED);
         });
 
-        StepLogger.log("Проверить отсутствие перевода через API", () -> {
+        StepLogger.apiStep("Проверить отсутствие перевода через API", () -> {
             CreateAccountResponseDto actualSenderAccount = accountSteps.getClientAccountById(sender.getToken(), senderAccount.getId());
             softly.assertThat(actualSenderAccount.getBalance()).isEqualTo(senderAccount.getBalance());
 
@@ -262,15 +262,15 @@ public class TransferFundsTest extends BaseUiTest {
     public void userCannotTransferFundsWithInvalidAmountTest(TestUser sender, TestUser receiver) {
         double transferAmount = 0.0;
 
-        CreateAccountResponseDto senderAccount =  StepLogger.log("Создать счет отправителя с балансом " + MAX_TRANSFER_AMOUNT, () -> {
+        CreateAccountResponseDto senderAccount =  StepLogger.apiStep("Создать счет отправителя с балансом " + MAX_TRANSFER_AMOUNT, () -> {
             return accountSteps.createAccountWithBalance(sender.getToken(), MAX_TRANSFER_AMOUNT);
         });
 
-        CreateAccountResponseDto receiverAccount =  StepLogger.log("Создать счет получателя", () -> {
+        CreateAccountResponseDto receiverAccount =  StepLogger.apiStep("Создать счет получателя", () -> {
             return accountSteps.createAccount(receiver.getToken());
         });
 
-        String alertMessage = StepLogger.log("Отправить перевод", () -> {
+        String alertMessage = StepLogger.uiStep("Отправить перевод", () -> {
             return new UserDashboardPage()
                     .open()
                     .shouldBeOpened()
@@ -280,11 +280,11 @@ public class TransferFundsTest extends BaseUiTest {
                     .getAlertMessageAndAccept();
         });
 
-        StepLogger.log("Проверить ошибку перевода через UI", () -> {
+        StepLogger.uiStep("Проверить ошибку перевода через UI", () -> {
             softly.assertThat(alertMessage).isEqualTo(TRANSFER_AMOUNT_BELOW_MIN_LIMIT);
         });
 
-        StepLogger.log("Проверить отсутствие перевода через API", () -> {
+        StepLogger.apiStep("Проверить отсутствие перевода через API", () -> {
             CreateAccountResponseDto actualSenderAccount = accountSteps.getClientAccountById(sender.getToken(), senderAccount.getId());
             softly.assertThat(actualSenderAccount.getBalance()).isEqualTo(senderAccount.getBalance());
 

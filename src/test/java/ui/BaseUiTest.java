@@ -47,7 +47,7 @@ public class BaseUiTest extends BaseTest {
     public void tearDown() {
         AllureAttachments.attachLogs();
         AllureAttachments.attachSource();
-        StepLogger.log("Закрыть браузер", () -> {
+        StepLogger.uiStep("Закрыть браузер", () -> {
             Selenide.closeWebDriver();
         });
     }
