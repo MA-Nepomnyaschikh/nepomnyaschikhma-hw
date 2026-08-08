@@ -41,4 +41,10 @@ public class ResponseSpecs {
                 .expectStatusCode(403)
                 .build();
     }
+
+    public static ResponseSpecification notFound() {
+        return defaultResponseSpecBuilder()
+                .expectStatusCode(404)
+                .build();
+    }
 }

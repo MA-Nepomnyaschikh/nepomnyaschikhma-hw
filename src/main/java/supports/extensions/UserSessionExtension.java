@@ -3,15 +3,16 @@ package supports.extensions;
 import models.request.CreateUserRequestDto;
 import models.request.LoginUserRequestDto;
 import models.response.CreateUserResponseDto;
+import org.junit.jupiter.api.extension.*;
 import requests.Endpoint;
 import requests.RestRequest;
 import requests.ValidatableRestRequest;
 import specs.RequestSpecs;
 import specs.ResponseSpecs;
+import supports.StepLogger;
 import supports.annotations.UserSession;
 import supports.context.TestUser;
 import testdata.randommodelgenerator.RandomModelGenerator;
-import org.junit.jupiter.api.extension.*;
 
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
@@ -39,7 +40,9 @@ public class UserSessionExtension implements BeforeEachCallback, AfterEachCallba
         // Шаг 4: Положить созданных пользователей в контекст теста
         saveUsers(context, users);
         // Шаг 5: Положить токен нужного пользователя в локал сторейдж
-        loginInBrowser(annotation, users);
+        if (annotation.needBrowserLogin()) {
+            loginInBrowser(annotation, users);
+        }
     }
 
     @Override
@@ -74,11 +77,13 @@ public class UserSessionExtension implements BeforeEachCallback, AfterEachCallba
         }
 
         for (TestUser user : users) {
-            new RestRequest(
-                    RequestSpecs.authAsAdmin(),
-                    Endpoint.DELETE_USER,
-                    ResponseSpecs.ok())
-                    .delete(user.getId());
+            StepLogger.apiStep("Удалить пользователя", () -> {
+                new RestRequest(
+                        RequestSpecs.authAsAdmin(),
+                        Endpoint.DELETE_USER,
+                        ResponseSpecs.ok())
+                        .delete(user.getId());
+            });
         }
     }
 
@@ -95,28 +100,34 @@ public class UserSessionExtension implements BeforeEachCallback, AfterEachCallba
     private TestUser createUser() {
         CreateUserRequestDto requestDto = RandomModelGenerator.generate(CreateUserRequestDto.class);
 
-        CreateUserResponseDto responseDto = new ValidatableRestRequest<CreateUserResponseDto>(
-                RequestSpecs.authAsAdmin(),
-                Endpoint.CREATE_USER,
-                ResponseSpecs.created())
-                .post(requestDto);
+        CreateUserResponseDto responseDto = StepLogger.apiStep("Создать пользователя", () -> {
+            return new ValidatableRestRequest<CreateUserResponseDto>(
+                    RequestSpecs.authAsAdmin(),
+                    Endpoint.CREATE_USER,
+                    ResponseSpecs.created())
+                    .post(requestDto);
+        });
 
         LoginUserRequestDto loginDto = generateLoginDto(requestDto);
 
-        String token = new RestRequest(
-                RequestSpecs.unauth(),
-                Endpoint.LOGIN,
-                ResponseSpecs.ok())
-                .post(loginDto)
-                .extract()
-                .header(AUTH_HEADER);
+        String token = StepLogger.apiStep("Авторизовать пользователя", () -> {
+            return new RestRequest(
+                    RequestSpecs.unauth(),
+                    Endpoint.LOGIN,
+                    ResponseSpecs.ok())
+                    .post(loginDto)
+                    .extract()
+                    .header(AUTH_HEADER);
+        });
 
         return new TestUser(requestDto, responseDto, token);
     }
 
     private void loginInBrowser(UserSession annotation, List<TestUser> users) {
-        int userIndex = annotation.authUserNumber() -1;
-        setAuthToken(users.get(userIndex).getToken());
+        int userIndex = annotation.authUserNumber() - 1;
+        StepLogger.apiStep("Открыть браузер", () -> {
+            setAuthToken(users.get(userIndex).getToken());
+        });
     }
 
     private void saveUsers(ExtensionContext context, List<TestUser> users) {

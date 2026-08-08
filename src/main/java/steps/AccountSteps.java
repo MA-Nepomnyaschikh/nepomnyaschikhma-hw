@@ -1,17 +1,18 @@
 package steps;
 
+import io.restassured.response.ValidatableResponse;
+import io.restassured.specification.RequestSpecification;
+import io.restassured.specification.ResponseSpecification;
 import models.request.DepositRequestDto;
 import models.request.TransferRequestDto;
 import models.response.CreateAccountResponseDto;
+import models.response.TransactionResponseDto;
 import models.response.TransferResponseDto;
 import requests.Endpoint;
 import requests.RestRequest;
 import requests.ValidatableRestRequest;
 import specs.RequestSpecs;
 import specs.ResponseSpecs;
-import io.restassured.response.ValidatableResponse;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -61,17 +62,20 @@ public class AccountSteps {
     }
 
     public CreateAccountResponseDto createAccountWithBalance(String token, double balance) {
-        if (balance <= 0) {
+        double remainingBalance = balance;
+
+        if (remainingBalance <= 0) {
             throw new IllegalArgumentException("Balance must be positive");
         }
+
         CreateAccountResponseDto account = createAccount(token);
 
-        while (balance > 0) {
-            double depositAmount = Math.min(balance, MAX_DEPOSIT_AMOUNT);
+        while (remainingBalance > 0) {
+            double depositAmount = Math.min(remainingBalance, MAX_DEPOSIT_AMOUNT);
 
             account = deposit(token, account.getId(), depositAmount);
 
-            balance -= depositAmount;
+            remainingBalance -= depositAmount;
         }
 
         return account;
@@ -85,9 +89,16 @@ public class AccountSteps {
                 .getAll();
     }
 
+    public ValidatableResponse getClientAccounts(RequestSpecification requestSpec, ResponseSpecification responseSpec) {
+        return new RestRequest(
+                requestSpec,
+                Endpoint.GET_CLIENT_ACCOUNTS,
+                responseSpec)
+                .getAll();
+    }
+
     public CreateAccountResponseDto getClientAccountById(String token, int id) {
         List<CreateAccountResponseDto> accountsList = getClientAccounts(token);
-
         return accountsList.stream()
                 .filter(acc -> Objects.equals(acc.getId(), id))
                 .findFirst()
@@ -109,5 +120,21 @@ public class AccountSteps {
                 responseSpec)
                 .post(dto)
                 .extract().asString();
+    }
+
+    public List<TransactionResponseDto> getAccountTransactions(String token, long accountId) {
+        return new ValidatableRestRequest<TransactionResponseDto>(
+                RequestSpecs.authAsUser(token),
+                Endpoint.GET_ACCOUNT_TRANSACTIONS,
+                ResponseSpecs.ok())
+                .getAll(accountId);
+    }
+
+    public ValidatableResponse getAccountTransactions(long accountId, RequestSpecification requestSpec, ResponseSpecification responseSpec) {
+        return new RestRequest(
+                requestSpec,
+                Endpoint.GET_ACCOUNT_TRANSACTIONS,
+                responseSpec)
+                .getAll(accountId);
     }
 }

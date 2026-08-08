@@ -1,16 +1,18 @@
 package api;
 
-import steps.AccountSteps;
-import steps.AuthSteps;
-import steps.UserSteps;
-import supports.CleanupManager;
-import supports.extensions.TimingExtension;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
+import steps.AccountSteps;
+import steps.AuthSteps;
+import steps.UserSteps;
+import supports.CleanupManager;
+import supports.extensions.TimingExtension;
+import supports.extensions.UserSessionExtension;
 
+@ExtendWith(UserSessionExtension.class)
 @ExtendWith(TimingExtension.class)
 public class BaseTest {
     protected CleanupManager cleanupManager;

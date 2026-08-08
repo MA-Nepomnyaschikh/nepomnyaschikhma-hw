@@ -1,7 +1,7 @@
 package pages;
 
-import models.response.CreateAccountResponseDto;
 import com.codeborne.selenide.SelenideElement;
+import models.response.CreateAccountResponseDto;
 
 import static com.codeborne.selenide.Condition.*;
 import static com.codeborne.selenide.Selenide.*;
@@ -26,21 +26,26 @@ public class DepositPage extends BasePage<DepositPage> {
     }
 
     public DepositPage selectAccount(CreateAccountResponseDto userAccount) {
+        accountSelector.shouldBe(visible,enabled);
         String accountNumber = userAccount.getAccountNumber();
 
         shouldHaveOptionWithText(accountSelector, accountNumber);
 
         accountSelector.selectOptionContainingText(accountNumber);
+        accountSelector.getSelectedOption()
+                .shouldHave(text(accountNumber));
         return this;
     }
 
     public DepositPage setAmount(double amount) {
-        amountInput.setValue(String.valueOf(amount));
+        amountInput.shouldBe(visible,enabled)
+                .setValue(String.valueOf(amount))
+                .shouldHave(value(String.valueOf(amount)));
         return this;
     }
 
     public DepositPage sendDeposit() {
-        depositButton.shouldBe(enabled).click();
+        depositButton.shouldBe(visible,enabled).click();
         return this;
     }
 

@@ -1,0 +1,85 @@
+name: Run tests
+
+on: [ push, workflow_dispatch ]
+
+jobs:
+  run-tests:
+    name: Set up services and run tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'corretto'
+          java-version: '21'
+
+      - name: Cache Maven repository
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      - name: Set up services
+        run: bash infra/docker_compose/restart_nbank_with_update_images.sh
+
+      - name: Make mvnw executable
+        run: chmod +x mvnw
+
+      - name: Run tests
+        run: ./mvnw clean test
+        env:
+          APIBASEURL: http://localhost:4111
+          UIBASEURL: http://frontend
+          APIVERSION: /api/v1
+
+      - name: Make Swagger coverage executable
+        if: always()
+        run: chmod +x .swagger-coverage/bin/swagger-coverage-commandline
+
+      - name: Run Swagger coverage
+        if: always()
+        run: .swagger-coverage/bin/swagger-coverage-commandline -s http://localhost:4111/v3/api-docs -i target/swagger-coverage-output
+
+      - name: Load test report history
+        uses: actions/checkout@v2
+        if: always()
+        with:
+          ref: gh-pages
+          path: gh-pages
+
+      - name: Build test report
+        uses: simple-elf/allure-report-action@v1.15
+        if: always()
+        with:
+          gh_pages: gh-pages
+          allure_results: target/allure-results
+          allure_history: allure-history
+
+      - name: Build Swagger coverage report
+        if: always()
+        run: sudo cp swagger-coverage-report.html allure-history/${{ github.run_number }}
+
+      - name: Publish test report
+        uses: peaceiris/actions-gh-pages@v3
+        if: always()
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: allure-history
+
+      - name: Make quality gate script executable
+        if: always()
+        run: chmod +x check-api-coverage.sh
+
+      - name: Check API coverage quality gate
+        if: always()
+        run: ./check-api-coverage.sh
+
+      - name: Tear down services
+        if: always()
+        run: bash infra/docker_compose/stop_nbank.sh

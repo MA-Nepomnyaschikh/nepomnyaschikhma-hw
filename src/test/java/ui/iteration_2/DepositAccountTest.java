@@ -1,117 +1,158 @@
 package ui.iteration_2;
 
 import models.response.CreateAccountResponseDto;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import pages.UserDashboardPage;
+import supports.StepLogger;
 import supports.annotations.Browsers;
 import supports.annotations.UserSession;
 import supports.assertions.AccountAssertions;
 import supports.context.TestUser;
 import ui.BaseUiTest;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.stream.Stream;
 
 import static testdata.AccountData.getRandomValidDepositAmount;
 import static testdata.expectedmessages.ui.AccountUiMessages.*;
 
+@DisplayName("UI. Пополнение счета")
 public class DepositAccountTest extends BaseUiTest {
 
+    @DisplayName("UI. Пользователь может пополнить свой счет с валидной суммой")
     @Test
     @Browsers(values = {"chrome"})
-    @UserSession
+    @UserSession(needBrowserLogin = true)
     public void userCanDepositAccountTest(TestUser user) {
-        CreateAccountResponseDto userAccount = accountSteps.createAccount(user.getToken());
         double depositAmount = getRandomValidDepositAmount();
 
-        String alertMessage = new UserDashboardPage()
-                .open()
-                .shouldBeOpened()
-                .openDepositPage()
-                .shouldBeOpened()
-                .sendDeposit(userAccount, depositAmount)
-                .getAlertMessageAndAccept();
+        CreateAccountResponseDto userAccount =  StepLogger.apiStep("Создать счет", () -> {
+            return accountSteps.createAccount(user.getToken());
+        });
 
-        softly.assertThat(alertMessage).isEqualTo(DEPOSIT_SUCCESSFULLY.formatted(depositAmount, userAccount.getAccountNumber()));
+        String alertMessage = StepLogger.uiStep("Пополнить счет", () -> {
+            return new UserDashboardPage()
+                    .open()
+                    .shouldBeOpened()
+                    .openDepositPage()
+                    .shouldBeOpened()
+                    .sendDeposit(userAccount, depositAmount)
+                    .getAlertMessageAndAccept();
+        });
 
-        CreateAccountResponseDto actualAccount = accountSteps.getClientAccountById(user.getToken(), userAccount.getId());
-        AccountAssertions.assertDepositCompleted(softly, actualAccount, userAccount, depositAmount);
+        StepLogger.uiStep("Проверить отправку пополнения через UI", () -> {
+            softly.assertThat(alertMessage).isEqualTo(DEPOSIT_SUCCESSFULLY.formatted(depositAmount, userAccount.getAccountNumber()));
+        });
+
+        StepLogger.apiStep("Проверить наличие пополнения через API", () -> {
+            CreateAccountResponseDto actualAccount = accountSteps.getClientAccountById(user.getToken(), userAccount.getId());
+            AccountAssertions.assertDepositCompleted(softly, actualAccount, userAccount, depositAmount);
+        });
     }
 
     public static Stream<Arguments> invalidAmountProvider() {
         return Stream.of(
-                Arguments.of(5000.01, DEPOSIT_AMOUNT_ABOVE_MAX_LIMIT),
-                Arguments.of(0, DEPOSIT_AMOUNT_BELOW_MIN_LIMIT),
-                Arguments.of(-0.01, DEPOSIT_AMOUNT_BELOW_MIN_LIMIT)
+                Arguments.of("Сумма пополнения больше максимальной", 5000.01, DEPOSIT_AMOUNT_ABOVE_MAX_LIMIT),
+                Arguments.of("Сумма пополнения равна 0", 0, DEPOSIT_AMOUNT_BELOW_MIN_LIMIT),
+                Arguments.of("Сумма пополнения меньше минимальной", -0.01, DEPOSIT_AMOUNT_BELOW_MIN_LIMIT)
         );
     }
 
+    @DisplayName("UI. Пользователь не может пополнить свой счет с невалидной суммой")
     @MethodSource("invalidAmountProvider")
-    @ParameterizedTest
+    @ParameterizedTest(name = "{0}")
     @Browsers(values = {"chrome"})
-    @UserSession
-    public void userCannotDepositAccountWithInvalidAmountTest(double invalidAmount, String errorMessage, TestUser user) {
-        CreateAccountResponseDto userAccount = accountSteps.createAccount(user.getToken());
+    @UserSession(needBrowserLogin = true)
+    public void userCannotDepositAccountWithInvalidAmountTest(String testName, double invalidAmount, String errorMessage, TestUser user) {
+        CreateAccountResponseDto userAccount =  StepLogger.apiStep("Создать счет", () -> {
+            return accountSteps.createAccount(user.getToken());
+        });
 
-        String alertMessage = new UserDashboardPage()
-                .open()
-                .shouldBeOpened()
-                .openDepositPage()
-                .shouldBeOpened()
-                .sendDeposit(userAccount, invalidAmount)
-                .getAlertMessageAndAccept();
+        String alertMessage = StepLogger.uiStep("Пополнить счет", () -> {
+            return new UserDashboardPage()
+                    .open()
+                    .shouldBeOpened()
+                    .openDepositPage()
+                    .shouldBeOpened()
+                    .sendDeposit(userAccount, invalidAmount)
+                    .getAlertMessageAndAccept();
+        });
 
-        softly.assertThat(alertMessage).contains(errorMessage);
+        StepLogger.uiStep("Проверить ошибку пополнения через UI", () -> {
+            softly.assertThat(alertMessage).contains(errorMessage);
+        });
 
-        CreateAccountResponseDto actualAccount = accountSteps.getClientAccountById(user.getToken(), userAccount.getId());
-        softly.assertThat(actualAccount.getBalance()).isEqualTo(userAccount.getBalance());
-        softly.assertThat(actualAccount.getTransactions()).isEmpty();
+        StepLogger.apiStep("Проверить отсутствие пополнения через API", () -> {
+            CreateAccountResponseDto actualAccount = accountSteps.getClientAccountById(user.getToken(), userAccount.getId());
+            softly.assertThat(actualAccount.getBalance()).isEqualTo(userAccount.getBalance());
+            softly.assertThat(actualAccount.getTransactions()).isEmpty();
+        });
     }
 
+    @DisplayName("UI. Пользователь не может пополнить свой счет без указания номера счета")
     @Test
     @Browsers(values = {"chrome"})
-    @UserSession
+    @UserSession(needBrowserLogin = true)
     public void userCannotDepositAccountWithoutAccountNumberTest(TestUser user) {
-        CreateAccountResponseDto userAccount = accountSteps.createAccount(user.getToken());
         double depositAmount = getRandomValidDepositAmount();
 
-        String alertMessage = new UserDashboardPage()
-                .open()
-                .shouldBeOpened()
-                .openDepositPage()
-                .shouldBeOpened()
-                .setAmount(depositAmount)
-                .sendDeposit()
-                .getAlertMessageAndAccept();
+        CreateAccountResponseDto userAccount =  StepLogger.apiStep("Создать счет", () -> {
+            return accountSteps.createAccount(user.getToken());
+        });
 
-        softly.assertThat(alertMessage).contains(DEPOSIT_ACCOUNT_NOT_SELECTED);
+        String alertMessage = StepLogger.uiStep("Пополнить счет", () -> {
+            return new UserDashboardPage()
+                    .open()
+                    .shouldBeOpened()
+                    .openDepositPage()
+                    .shouldBeOpened()
+                    .setAmount(depositAmount)
+                    .sendDeposit()
+                    .getAlertMessageAndAccept();
+        });
 
-        CreateAccountResponseDto actualAccount = accountSteps.getClientAccountById(user.getToken(), userAccount.getId());
-        softly.assertThat(actualAccount.getBalance()).isEqualTo(userAccount.getBalance());
-        softly.assertThat(actualAccount.getTransactions()).isEmpty();
+        StepLogger.uiStep("Проверить ошибку пополнения через UI", () -> {
+            softly.assertThat(alertMessage).contains(DEPOSIT_ACCOUNT_NOT_SELECTED);
+        });
+
+        StepLogger.apiStep("Проверить отсутствие пополнения через API", () -> {
+            CreateAccountResponseDto actualAccount = accountSteps.getClientAccountById(user.getToken(), userAccount.getId());
+            softly.assertThat(actualAccount.getBalance()).isEqualTo(userAccount.getBalance());
+            softly.assertThat(actualAccount.getTransactions()).isEmpty();
+        });
     }
 
+    @DisplayName("UI. Пользователь не может пополнить свой счет без указания суммы")
     @Test
     @Browsers(values = {"chrome"})
-    @UserSession
+    @UserSession(needBrowserLogin = true)
     public void userCannotDepositAccountWithoutAmountTest(TestUser user) {
-        CreateAccountResponseDto userAccount = accountSteps.createAccount(user.getToken());
+        CreateAccountResponseDto userAccount =  StepLogger.apiStep("Создать счет", () -> {
+            return accountSteps.createAccount(user.getToken());
+        });
 
-        String alertMessage = new UserDashboardPage()
-                .open()
-                .shouldBeOpened()
-                .openDepositPage()
-                .shouldBeOpened()
-                .selectAccount(userAccount)
-                .sendDeposit()
-                .getAlertMessageAndAccept();
+        String alertMessage = StepLogger.uiStep("Пополнить счет", () -> {
+            return new UserDashboardPage()
+                    .open()
+                    .shouldBeOpened()
+                    .openDepositPage()
+                    .shouldBeOpened()
+                    .selectAccount(userAccount)
+                    .sendDeposit()
+                    .getAlertMessageAndAccept();
+        });
 
-        softly.assertThat(alertMessage).contains(DEPOSIT_AMOUNT_BELOW_MIN_LIMIT);
+        StepLogger.uiStep("Проверить ошибку пополнения через UI", () -> {
+            softly.assertThat(alertMessage).contains(DEPOSIT_AMOUNT_BELOW_MIN_LIMIT);
+        });
 
-        CreateAccountResponseDto actualAccount = accountSteps.getClientAccountById(user.getToken(), userAccount.getId());
-        softly.assertThat(actualAccount.getBalance()).isEqualTo(userAccount.getBalance());
-        softly.assertThat(actualAccount.getTransactions()).isEmpty();
+        StepLogger.apiStep("Проверить отсутствие пополнения через API", () -> {
+            CreateAccountResponseDto actualAccount = accountSteps.getClientAccountById(user.getToken(), userAccount.getId());
+            softly.assertThat(actualAccount.getBalance()).isEqualTo(userAccount.getBalance());
+            softly.assertThat(actualAccount.getTransactions()).isEmpty();
+        });
     }
 }

@@ -6,7 +6,7 @@ export MSYS_NO_PATHCONV=1
 TEST_PROFILE=${1:-all}
 
 COMPOSE_FILE="./infra/docker_compose/docker-compose.yml"
-IMAGE_NAME="nepomnyaschikhma/nbank-tests"
+IMAGE_NAME="nbank-tests"
 TAG="latest"
 TIMESTAMP=$(date +"%Y%m%d_%H%M")
 TEST_OUTPUT_DIR=./test-output/$TIMESTAMP
@@ -41,13 +41,14 @@ echo "Образ: $IMAGE_NAME:$TAG"
 set +e
 
 docker run --rm \
+  --network nbank-network \
   -v "$TEST_OUTPUT_DIR/logs":/app/logs \
   -v "$TEST_OUTPUT_DIR/results":/app/target/surefire-reports \
   -v "$TEST_OUTPUT_DIR/report":/app/target/site \
   -e TEST_PROFILE="$TEST_PROFILE" \
-  -e APIBASEURL=http://host.docker.internal \
-  -e UIBASEURL=http://host.docker.internal \
-  -e UIREMOTE=http://host.docker.internal:4444/wd/hub \
+  -e APIBASEURL=http://backend:4111 \
+  -e UIBASEURL=http://frontend  \
+  -e UIREMOTE=http://selenoid:4444/wd/hub \
   "$IMAGE_NAME:$TAG"
 
 TEST_RESULT=$?

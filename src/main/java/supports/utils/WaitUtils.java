@@ -8,7 +8,7 @@ import java.util.function.Function;
 
 public final class WaitUtils {
 
-    private static final Duration DEFAULT_TIMEOUT = Duration.ofSeconds(4);
+    private static final Duration DEFAULT_TIMEOUT = Duration.ofSeconds(10);
 
     private WaitUtils() {
     }

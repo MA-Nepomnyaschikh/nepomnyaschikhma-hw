@@ -1,7 +1,7 @@
 package pages;
 
-import models.response.CreateAccountResponseDto;
 import com.codeborne.selenide.SelenideElement;
+import models.response.CreateAccountResponseDto;
 
 import static com.codeborne.selenide.Condition.*;
 import static com.codeborne.selenide.Selenide.*;
@@ -28,31 +28,38 @@ public class TransferPage extends BasePage<TransferPage> {
     }
 
     public TransferPage selectSenderAccount(CreateAccountResponseDto senderAccount) {
+        senderAccountSelector.shouldBe(visible,enabled);
         String accountNumber = senderAccount.getAccountNumber();
 
         shouldHaveOptionWithText(senderAccountSelector, accountNumber);
 
         senderAccountSelector.selectOptionContainingText(accountNumber);
+        senderAccountSelector.getSelectedOption()
+                .shouldHave(text(accountNumber));
         return this;
     }
 
     public TransferPage setReceiverAccount(CreateAccountResponseDto receiverAccount) {
-        receiverAccountNumber.setValue(receiverAccount.getAccountNumber());
+        receiverAccountNumber.shouldBe(visible, enabled)
+                .setValue(receiverAccount.getAccountNumber())
+                .shouldHave(value(receiverAccount.getAccountNumber()));
         return this;
     }
 
     public TransferPage setAmount(double amount) {
-        amountInput.setValue(String.valueOf(amount));
+        amountInput.shouldBe(visible, enabled)
+                .setValue(String.valueOf(amount))
+                .shouldHave(value(String.valueOf(amount)));
         return this;
     }
 
     public TransferPage confirmDetails() {
-        confirmCheckbox.click();
+        confirmCheckbox.shouldBe(visible, enabled).click();
         return this;
     }
 
     public TransferPage sendTransfer() {
-        transferButton.shouldBe(enabled).click();
+        transferButton.shouldBe(visible, enabled).click();
         return this;
     }
 
