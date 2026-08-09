@@ -1,0 +1,2 @@
+[2026-08-09T14:30:56.486Z] [WARNING] http://frontend/static/js/main.95516938.js 1:305201 "⚠️ Updated but failed to refresh user profile:" TypeError: n is not a function
+    at onClick (http://frontend/static/js/main.95516938.js:2:305159)
