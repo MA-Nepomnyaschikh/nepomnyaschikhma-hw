@@ -1,0 +1,6 @@
+apiVersion: v2
+name: logging-chart
+description: Elasticsearch, Kibana and Filebeat logging stack
+type: application
+version: 0.0.1
+appVersion: "8.5.1"
