@@ -1,0 +1,14 @@
+[2026-08-12T15:12:38.476Z] [SEVERE] http://frontend/static/js/main.95516938.js 1:306091 "❌ Failed to decode auth token:" TypeError: Cannot read properties of null (reading 'replace')
+    at http://frontend/static/js/main.95516938.js:2:305915
+    at Ui (http://frontend/static/js/main.95516938.js:2:84013)
+    at Es (http://frontend/static/js/main.95516938.js:2:99864)
+    at Ss (http://frontend/static/js/main.95516938.js:2:99748)
+    at Es (http://frontend/static/js/main.95516938.js:2:100546)
+    at Ss (http://frontend/static/js/main.95516938.js:2:99748)
+    at Es (http://frontend/static/js/main.95516938.js:2:99885)
+    at tc (http://frontend/static/js/main.95516938.js:2:126623)
+    at http://frontend/static/js/main.95516938.js:2:124002
+    at MessagePort.R (http://frontend/static/js/main.95516938.js:2:182589)
+[2026-08-12T15:12:38.477Z] [WARNING] http://frontend/static/js/main.95516938.js 1:306221 "⚠️ No auth token found, skipping profile request."
+[2026-08-12T15:12:39.190Z] [SEVERE] https://fonts.gstatic.com/s/unbounded/v12/Yq64-LOTXCb04q32xlpat-6uR42XTqtG60bxsYblcCYX5EAwbLdgxRlZ6HY.woff2 - Failed to load resource: the server responded with a status of 404 ()
+[2026-08-12T15:12:39.310Z] [SEVERE] https://fonts.gstatic.com/s/unbounded/v12/Yq64-LOTXCb04q32xlpat-6uR42XTqtG60bxsYblcCYX5EAwbLdgxRlZ6HY.woff2 - Failed to load resource: the server responded with a status of 404 ()
