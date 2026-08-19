@@ -1,0 +1,15 @@
+image:
+  tag: "8.5.1"
+  pullPolicy: IfNotPresent
+
+elasticsearch:
+  image:
+    repository: docker.elastic.co/elasticsearch/elasticsearch
+
+kibana:
+  image:
+    repository: docker.elastic.co/kibana/kibana
+
+filebeat:
+  image:
+    repository: docker.elastic.co/beats/filebeat
