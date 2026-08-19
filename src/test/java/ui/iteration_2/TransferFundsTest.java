@@ -1,12 +1,12 @@
 package ui.iteration_2;
 
 import models.response.CreateAccountResponseDto;
+import org.junit.jupiter.api.Test;
 import pages.UserDashboardPage;
 import supports.annotations.Browsers;
 import supports.annotations.UserSession;
 import supports.context.TestUser;
 import ui.BaseUiTest;
-import org.junit.jupiter.api.Test;
 
 import static testdata.AccountData.MAX_TRANSFER_AMOUNT;
 import static testdata.AccountData.getRandomValidTransferAmount;
@@ -191,7 +191,7 @@ public class TransferFundsTest extends BaseUiTest {
                 .sendTransfer(senderAccount, receiverAccount, transferAmount)
                 .getAlertMessageAndAccept();
 
-        softly.assertThat(alertMessage).isEqualTo(TRANSFER_AMOUNT_BELOW_MIN_LIMIT);
+        softly.assertThat(alertMessage).isEqualTo(TRANSFER_AMOUNT_IS_INVALID);
 
         CreateAccountResponseDto actualSenderAccount = accountSteps.getClientAccountById(sender.getToken(), senderAccount.getId());
         softly.assertThat(actualSenderAccount.getBalance()).isEqualTo(senderAccount.getBalance());

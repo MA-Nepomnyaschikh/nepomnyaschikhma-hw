@@ -1,13 +1,13 @@
 package ui.iteration_1;
 
 import models.response.CreateAccountResponseDto;
+import org.junit.jupiter.api.Test;
 import pages.UserDashboardPage;
 import supports.annotations.Browsers;
 import supports.annotations.UserSession;
 import supports.assertions.AccountAssertions;
 import supports.context.TestUser;
 import ui.BaseUiTest;
-import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
