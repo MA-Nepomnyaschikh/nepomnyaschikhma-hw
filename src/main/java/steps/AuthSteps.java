@@ -1,6 +1,8 @@
 package steps;
 
 import io.restassured.response.ValidatableResponse;
+import io.restassured.specification.RequestSpecification;
+import io.restassured.specification.ResponseSpecification;
 import models.request.CreateUserRequestDto;
 import models.request.LoginUserRequestDto;
 import requests.Endpoint;
@@ -18,6 +20,14 @@ public class AuthSteps {
                 RequestSpecs.unauth(),
                 Endpoint.LOGIN,
                 ResponseSpecs.ok())
+                .post(loginDto);
+    }
+
+    public ValidatableResponse login(LoginUserRequestDto loginDto, RequestSpecification requestSpec, ResponseSpecification responseSpec) {
+        return new RestRequest(
+                requestSpec,
+                Endpoint.LOGIN,
+                responseSpec)
                 .post(loginDto);
     }
 

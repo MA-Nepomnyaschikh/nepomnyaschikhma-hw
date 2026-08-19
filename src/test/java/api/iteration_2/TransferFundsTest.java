@@ -22,6 +22,7 @@ import static testdata.AccountData.*;
 import static testdata.expectedmessages.api.AccountApiMessages.DEPOSIT_UNAUTHORIZED;
 import static testdata.expectedmessages.api.AccountApiMessages.TRANSFER_FAILED;
 
+@DisplayName("API. Перевод")
 public class TransferFundsTest extends BaseTest {
 
     public static Stream<Arguments> validAmountProvider() {
@@ -35,32 +36,32 @@ public class TransferFundsTest extends BaseTest {
 
     @DisplayName("API. Авторизованный пользователь может перевести валидную сумму между своими счетами")
     @MethodSource("validAmountProvider")
-    @ParameterizedTest
+    @ParameterizedTest(name = "Сумма перевода: {0}")
     @UserSession
     public void authorizedUserCanTransferValidAmountBetweenTheirAccountsTest(double transferAmount, TestUser user) {
-        CreateAccountResponseDto senderAccount = StepLogger.log("Создать первый счет", () -> {
+        CreateAccountResponseDto senderAccount = StepLogger.apiStep("Создать первый счет", () -> {
             return accountSteps.createAccountWithBalance(user.getToken(), MAX_TRANSFER_AMOUNT);
         });
-        CreateAccountResponseDto receiverAccount = StepLogger.log("Создать второй счет", () -> {
+        CreateAccountResponseDto receiverAccount = StepLogger.apiStep("Создать второй счет", () -> {
             return accountSteps.createAccount(user.getToken());
         });
 
         TransferRequestDto transferDto = generateTransferDto(senderAccount.getId(), receiverAccount.getId(), transferAmount);
 
-        TransferResponseDto transferResponseDto = StepLogger.log("Перевести валидную сумму с первого счета на второй", () -> {
+        TransferResponseDto transferResponseDto = StepLogger.apiStep("Перевести валидную сумму с первого счета на второй", () -> {
             return accountSteps.transfer(user.getToken(), transferDto);
         });
 
-        StepLogger.log("Проверить перевод средств", () -> {
+        StepLogger.apiStep("Проверить перевод средств", () -> {
             AccountAssertions.assertTransferCompleted(softly, transferResponseDto, transferDto);
         });
 
-        StepLogger.log("Проверить состояние второго счета", () -> {
+        StepLogger.apiStep("Проверить состояние второго счета", () -> {
             CreateAccountResponseDto actualReceiverAcc = accountSteps.getClientAccountById(user.getToken(), receiverAccount.getId());
             AccountAssertions.assertTransferInTransaction(softly, receiverAccount, actualReceiverAcc, transferDto);
         });
 
-        StepLogger.log("Проверить состояние первого счета", () -> {
+        StepLogger.apiStep("Проверить состояние первого счета", () -> {
             CreateAccountResponseDto actualSenderAcc = accountSteps.getClientAccountById(user.getToken(), senderAccount.getId());
             AccountAssertions.assertTransferOutTransaction(softly, senderAccount, actualSenderAcc, transferDto);
         });
@@ -68,33 +69,33 @@ public class TransferFundsTest extends BaseTest {
 
     @DisplayName("API. Авторизованный пользователь может перевести валидную сумму на счет другого пользователя")
     @MethodSource("validAmountProvider")
-    @ParameterizedTest
+    @ParameterizedTest(name = "Сумма перевода: {0}")
     @UserSession(usersCount = 2)
     public void authorizedUserCanTransferValidAmountToAnotherUserAccountTest(double transferAmount, TestUser sender, TestUser receiver) {
-        CreateAccountResponseDto senderAccount = StepLogger.log("Создать счет отправителя", () -> {
+        CreateAccountResponseDto senderAccount = StepLogger.apiStep("Создать счет отправителя", () -> {
             return accountSteps.createAccountWithBalance(sender.getToken(), MAX_TRANSFER_AMOUNT);
         });
 
-        CreateAccountResponseDto receiverAccount = StepLogger.log("Создать счет получателя", () -> {
+        CreateAccountResponseDto receiverAccount = StepLogger.apiStep("Создать счет получателя", () -> {
             return accountSteps.createAccount(receiver.getToken());
         });
 
         TransferRequestDto transferDto = generateTransferDto(senderAccount.getId(), receiverAccount.getId(), transferAmount);
 
-        TransferResponseDto transferResponseDto = StepLogger.log("Перевести валидную сумму со счета отправителя на счет получателя", () -> {
+        TransferResponseDto transferResponseDto = StepLogger.apiStep("Перевести валидную сумму со счета отправителя на счет получателя", () -> {
             return accountSteps.transfer(sender.getToken(), transferDto);
         });
 
-        StepLogger.log("Проверить перевод средств", () -> {
+        StepLogger.apiStep("Проверить перевод средств", () -> {
         AccountAssertions.assertTransferCompleted(softly, transferResponseDto, transferDto);
         });
 
-        StepLogger.log("Проверить состояние счета получателя", () -> {
+        StepLogger.apiStep("Проверить состояние счета получателя", () -> {
             CreateAccountResponseDto actualReceiverAcc = accountSteps.getClientAccountById(receiver.getToken(), receiverAccount.getId());
             AccountAssertions.assertTransferInTransaction(softly, receiverAccount, actualReceiverAcc, transferDto);
         });
 
-        StepLogger.log("Проверить состояние счета отправителя", () -> {
+        StepLogger.apiStep("Проверить состояние счета отправителя", () -> {
             CreateAccountResponseDto actualSenderAcc = accountSteps.getClientAccountById(sender.getToken(), senderAccount.getId());
             AccountAssertions.assertTransferOutTransaction(softly, senderAccount, actualSenderAcc, transferDto);
         });
@@ -102,35 +103,35 @@ public class TransferFundsTest extends BaseTest {
 
     public static Stream<Arguments> invalidAmountProvider() {
         return Stream.of(
-                Arguments.of(10000.01, "Invalid transfer: insufficient funds or invalid accounts"),
-                Arguments.of(0, "Invalid transfer: insufficient funds or invalid accounts"),
-                Arguments.of(-0.01, "Invalid transfer: insufficient funds or invalid accounts")
+                Arguments.of("Сумма перевода больше максимальной", 10000.01, "Transfer amount cannot exceed 10000"),
+                Arguments.of("Сумма перевода равна 0", 0, "Transfer amount must be at least 0.01"),
+                Arguments.of("Сумма перевода меньше минимальной", -0.01, "Transfer amount must be at least 0.01")
         );
     }
 
     @DisplayName("API. Авторизованный пользователь не может перевести невалидную сумму между своими счетами")
     @MethodSource("invalidAmountProvider")
-    @ParameterizedTest
+    @ParameterizedTest(name = "{0}")
     @UserSession
-    public void authorizedUserCannotTransferInvalidAmountBetweenTheirAccountsTest(double transferAmount, String errorMessage, TestUser user) {
-        CreateAccountResponseDto senderAccount = StepLogger.log("Создать первый счет", () -> {
+    public void authorizedUserCannotTransferInvalidAmountBetweenTheirAccountsTest(String testName, double transferAmount, String errorMessage, TestUser user) {
+        CreateAccountResponseDto senderAccount = StepLogger.apiStep("Создать первый счет", () -> {
             return accountSteps.createAccountWithBalance(user.getToken(), MAX_TRANSFER_AMOUNT);
         });
-        CreateAccountResponseDto receiverAccount = StepLogger.log("Создать второй счет", () -> {
+        CreateAccountResponseDto receiverAccount = StepLogger.apiStep("Создать второй счет", () -> {
             return accountSteps.createAccount(user.getToken());
         });
 
         TransferRequestDto transferDto = generateTransferDto(senderAccount.getId(), receiverAccount.getId(), transferAmount);
 
-        String errorResponse = StepLogger.log("Перевести невалидную сумму с первого счета на второй", () -> {
+        String errorResponse = StepLogger.apiStep("Перевести невалидную сумму с первого счета на второй", () -> {
             return accountSteps.transfer(transferDto, RequestSpecs.authAsUser(user.getToken()), ResponseSpecs.badRequest());
         });
 
-        StepLogger.log("Проверить сообщение об ошибке", () -> {
+        StepLogger.apiStep("Проверить сообщение об ошибке", () -> {
             softly.assertThat(errorResponse).isEqualTo(errorMessage);
         });
 
-        StepLogger.log("Проверить состояние второго счета", () -> {
+        StepLogger.apiStep("Проверить состояние второго счета", () -> {
             CreateAccountResponseDto actualReceiverAcc = accountSteps.getClientAccountById(user.getToken(), receiverAccount.getId());
             softly.assertThat(actualReceiverAcc.getBalance()).isEqualTo(receiverAccount.getBalance());
             softly.assertThat(actualReceiverAcc.getTransactions())
@@ -138,7 +139,7 @@ public class TransferFundsTest extends BaseTest {
                     .isEmpty();
         });
 
-        StepLogger.log("Проверить состояние первого счета", () -> {
+        StepLogger.apiStep("Проверить состояние первого счета", () -> {
             CreateAccountResponseDto actualSenderAcc = accountSteps.getClientAccountById(user.getToken(), senderAccount.getId());
             softly.assertThat(actualSenderAcc.getBalance()).isEqualTo(senderAccount.getBalance());
             softly.assertThat(actualSenderAcc.getTransactions())
@@ -149,28 +150,28 @@ public class TransferFundsTest extends BaseTest {
 
     @DisplayName("API. Авторизованный пользователь не может перевести невалидную сумму на счет другого пользователя")
     @MethodSource("invalidAmountProvider")
-    @ParameterizedTest
+    @ParameterizedTest(name = "{0}")
     @UserSession(usersCount = 2)
-    public void authorizedUserCannotTransferInvalidAmountToAnotherUserAccountTest(double transferAmount, String errorMessage, TestUser sender, TestUser receiver) {
-        CreateAccountResponseDto senderAccount = StepLogger.log("Создать счет отправителя", () -> {
+    public void authorizedUserCannotTransferInvalidAmountToAnotherUserAccountTest(String testName, double transferAmount, String errorMessage, TestUser sender, TestUser receiver) {
+        CreateAccountResponseDto senderAccount = StepLogger.apiStep("Создать счет отправителя", () -> {
             return accountSteps.createAccountWithBalance(sender.getToken(), MAX_TRANSFER_AMOUNT);
         });
 
-        CreateAccountResponseDto receiverAccount = StepLogger.log("Создать счет получателя", () -> {
+        CreateAccountResponseDto receiverAccount = StepLogger.apiStep("Создать счет получателя", () -> {
             return accountSteps.createAccount(receiver.getToken());
         });
 
         TransferRequestDto transferDto = generateTransferDto(senderAccount.getId(), receiverAccount.getId(), transferAmount);
 
-        String errorResponse = StepLogger.log("Перевести невалидную сумму со счета отправителя на счет получателя", () -> {
+        String errorResponse = StepLogger.apiStep("Перевести невалидную сумму со счета отправителя на счет получателя", () -> {
             return accountSteps.transfer(transferDto, RequestSpecs.authAsUser(sender.getToken()), ResponseSpecs.badRequest());
         });
 
-        StepLogger.log("Проверить сообщение об ошибке", () -> {
+        StepLogger.apiStep("Проверить сообщение об ошибке", () -> {
             softly.assertThat(errorResponse).isEqualTo(errorMessage);
         });
 
-        StepLogger.log("Проверить состояние счета получателя", () -> {
+        StepLogger.apiStep("Проверить состояние счета получателя", () -> {
         CreateAccountResponseDto actualReceiverAcc = accountSteps.getClientAccountById(receiver.getToken(), receiverAccount.getId());
         softly.assertThat(actualReceiverAcc.getBalance()).isEqualTo(receiverAccount.getBalance());
         softly.assertThat(actualReceiverAcc.getTransactions())
@@ -178,7 +179,7 @@ public class TransferFundsTest extends BaseTest {
                 .isEmpty();
         });
 
-        StepLogger.log("Проверить состояние счета отправителя", () -> {
+        StepLogger.apiStep("Проверить состояние счета отправителя", () -> {
         CreateAccountResponseDto actualSenderAcc = accountSteps.getClientAccountById(sender.getToken(), senderAccount.getId());
         softly.assertThat(actualSenderAcc.getBalance()).isEqualTo(senderAccount.getBalance());
         softly.assertThat(actualSenderAcc.getTransactions())
@@ -193,25 +194,25 @@ public class TransferFundsTest extends BaseTest {
     public void authorizedUserCannotTransferAmountExceedingAccountBalanceTest(TestUser sender, TestUser receiver) {
         double transferAmountExceedingBalance = MAX_DEPOSIT_AMOUNT + 0.01;
 
-        CreateAccountResponseDto senderAccount = StepLogger.log("Создать счет отправителя", () -> {
+        CreateAccountResponseDto senderAccount = StepLogger.apiStep("Создать счет отправителя", () -> {
             return accountSteps.createAccountWithBalance(sender.getToken(), MAX_DEPOSIT_AMOUNT);
         });
 
-        CreateAccountResponseDto receiverAccount = StepLogger.log("Создать счет получателя", () -> {
+        CreateAccountResponseDto receiverAccount = StepLogger.apiStep("Создать счет получателя", () -> {
             return accountSteps.createAccount(receiver.getToken());
         });
 
         TransferRequestDto transferDto = generateTransferDto(senderAccount.getId(), receiverAccount.getId(), transferAmountExceedingBalance);
 
-        String errorResponse = StepLogger.log("Перевести сумму превышающую баланс со счета отправителя на счет получателя", () -> {
+        String errorResponse = StepLogger.apiStep("Перевести сумму превышающую баланс со счета отправителя на счет получателя", () -> {
             return accountSteps.transfer(transferDto, RequestSpecs.authAsUser(sender.getToken()), ResponseSpecs.badRequest());
         });
 
-        StepLogger.log("Проверить сообщение об ошибке", () -> {
+        StepLogger.apiStep("Проверить сообщение об ошибке", () -> {
             softly.assertThat(errorResponse).isEqualTo(TRANSFER_FAILED);
         });
 
-        StepLogger.log("Проверить состояние счета получателя", () -> {
+        StepLogger.apiStep("Проверить состояние счета получателя", () -> {
             CreateAccountResponseDto actualReceiverAcc = accountSteps.getClientAccountById(receiver.getToken(), receiverAccount.getId());
             softly.assertThat(actualReceiverAcc.getBalance()).isEqualTo(receiverAccount.getBalance());
             softly.assertThat(actualReceiverAcc.getTransactions())
@@ -219,7 +220,7 @@ public class TransferFundsTest extends BaseTest {
                     .isEmpty();
         });
 
-        StepLogger.log("Проверить состояние счета отправителя", () -> {
+        StepLogger.apiStep("Проверить состояние счета отправителя", () -> {
             CreateAccountResponseDto actualSenderAcc = accountSteps.getClientAccountById(sender.getToken(), senderAccount.getId());
             softly.assertThat(actualSenderAcc.getBalance()).isEqualTo(senderAccount.getBalance());
             softly.assertThat(actualSenderAcc.getTransactions())
@@ -234,22 +235,22 @@ public class TransferFundsTest extends BaseTest {
     public void authorizedUserCannotTransferFundsIntoNonExistingAccountTest(TestUser user) {
         double transferAmount = getRandomValidTransferAmount();
 
-        CreateAccountResponseDto senderAccount = StepLogger.log("Создать счет отправителя", () -> {
+        CreateAccountResponseDto senderAccount = StepLogger.apiStep("Создать счет отправителя", () -> {
             return accountSteps.createAccountWithBalance(user.getToken(), MAX_TRANSFER_AMOUNT);
         });
 
         TransferRequestDto transferDto = generateTransferDto(senderAccount.getId(), NON_EXISTING_ACCOUNT_ID, transferAmount);
 
 
-        String errorResponse = StepLogger.log("Перевести валидную сумму со счета отправителя на несуществующий счет", () -> {
+        String errorResponse = StepLogger.apiStep("Перевести валидную сумму со счета отправителя на несуществующий счет", () -> {
             return accountSteps.transfer(transferDto, RequestSpecs.authAsUser(user.getToken()), ResponseSpecs.badRequest());
         });
 
-        StepLogger.log("Проверить сообщение об ошибке", () -> {
+        StepLogger.apiStep("Проверить сообщение об ошибке", () -> {
             softly.assertThat(errorResponse).isEqualTo(TRANSFER_FAILED);
         });
 
-        StepLogger.log("Проверить состояние счета отправителя", () -> {
+        StepLogger.apiStep("Проверить состояние счета отправителя", () -> {
         CreateAccountResponseDto actualSenderAcc = accountSteps.getClientAccountById(user.getToken(), senderAccount.getId());
         softly.assertThat(actualSenderAcc.getBalance()).isEqualTo(senderAccount.getBalance());
         softly.assertThat(actualSenderAcc.getTransactions())
@@ -264,26 +265,26 @@ public class TransferFundsTest extends BaseTest {
     public void authorizedUserCannotTransferFundsFromNonExistingAccountTest(TestUser sender, TestUser receiver) {
         double transferAmount = getRandomValidTransferAmount();
 
-        CreateAccountResponseDto senderAccount = StepLogger.log("Создать счет отправителя", () -> {
+        CreateAccountResponseDto senderAccount = StepLogger.apiStep("Создать счет отправителя", () -> {
             return accountSteps.createAccountWithBalance(sender.getToken(), MAX_TRANSFER_AMOUNT);
         });
 
-        CreateAccountResponseDto receiverAccount = StepLogger.log("Создать счет получателя", () -> {
+        CreateAccountResponseDto receiverAccount = StepLogger.apiStep("Создать счет получателя", () -> {
             return accountSteps.createAccount(receiver.getToken());
         });
 
         TransferRequestDto transferDto = generateTransferDto(NON_EXISTING_ACCOUNT_ID, receiverAccount.getId(), transferAmount);
 
 
-        String errorResponse = StepLogger.log("Перевести валидную сумму с несуществующего счета на счет получателя", () -> {
+        String errorResponse = StepLogger.apiStep("Перевести валидную сумму с несуществующего счета на счет получателя", () -> {
             return accountSteps.transfer(transferDto, RequestSpecs.authAsUser(sender.getToken()), ResponseSpecs.forbidden());
         });
 
-        StepLogger.log("Проверить сообщение об ошибке", () -> {
+        StepLogger.apiStep("Проверить сообщение об ошибке", () -> {
             softly.assertThat(errorResponse).isEqualTo(DEPOSIT_UNAUTHORIZED);
         });
 
-        StepLogger.log("Проверить состояние счета получателя", () -> {
+        StepLogger.apiStep("Проверить состояние счета получателя", () -> {
             CreateAccountResponseDto actualReceiverAcc = accountSteps.getClientAccountById(receiver.getToken(), receiverAccount.getId());
             softly.assertThat(actualReceiverAcc.getBalance()).isEqualTo(receiverAccount.getBalance());
             softly.assertThat(actualReceiverAcc.getTransactions())
@@ -291,7 +292,7 @@ public class TransferFundsTest extends BaseTest {
                     .isEmpty();
         });
 
-        StepLogger.log("Проверить состояние счета отправителя", () -> {
+        StepLogger.apiStep("Проверить состояние счета отправителя", () -> {
             CreateAccountResponseDto actualSenderAcc = accountSteps.getClientAccountById(sender.getToken(), senderAccount.getId());
             softly.assertThat(actualSenderAcc.getBalance()).isEqualTo(senderAccount.getBalance());
             softly.assertThat(actualSenderAcc.getTransactions())
@@ -306,21 +307,21 @@ public class TransferFundsTest extends BaseTest {
     public void unauthorizedUserCannotTransferFundsTest(TestUser sender, TestUser receiver) {
         double transferAmount = getRandomValidTransferAmount();
 
-        CreateAccountResponseDto senderAccount = StepLogger.log("Создать счет отправителя", () -> {
+        CreateAccountResponseDto senderAccount = StepLogger.apiStep("Создать счет отправителя", () -> {
             return accountSteps.createAccountWithBalance(sender.getToken(), MAX_TRANSFER_AMOUNT);
         });
 
-        CreateAccountResponseDto receiverAccount = StepLogger.log("Создать счет получателя", () -> {
+        CreateAccountResponseDto receiverAccount = StepLogger.apiStep("Создать счет получателя", () -> {
             return accountSteps.createAccount(receiver.getToken());
         });
 
         TransferRequestDto transferDto = generateTransferDto(senderAccount.getId(), receiverAccount.getId(), transferAmount);
 
-        StepLogger.log("Перевести валидную сумму со счета отправителя на счет получателя без авторизации", () -> {
+        StepLogger.apiStep("Перевести валидную сумму со счета отправителя на счет получателя без авторизации", () -> {
             accountSteps.transfer(transferDto, RequestSpecs.unauth(), ResponseSpecs.unauthorized());
         });
 
-        StepLogger.log("Проверить состояние счета получателя", () -> {
+        StepLogger.apiStep("Проверить состояние счета получателя", () -> {
             CreateAccountResponseDto actualReceiverAcc = accountSteps.getClientAccountById(receiver.getToken(), receiverAccount.getId());
             softly.assertThat(actualReceiverAcc.getBalance()).isEqualTo(receiverAccount.getBalance());
             softly.assertThat(actualReceiverAcc.getTransactions())
@@ -328,7 +329,7 @@ public class TransferFundsTest extends BaseTest {
                     .isEmpty();
         });
 
-        StepLogger.log("Проверить состояние счета отправителя", () -> {
+        StepLogger.apiStep("Проверить состояние счета отправителя", () -> {
             CreateAccountResponseDto actualSenderAcc = accountSteps.getClientAccountById(sender.getToken(), senderAccount.getId());
             softly.assertThat(actualSenderAcc.getBalance()).isEqualTo(senderAccount.getBalance());
             softly.assertThat(actualSenderAcc.getTransactions())

@@ -11,6 +11,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import supports.AllureAttachments;
+import supports.StepLogger;
 import supports.extensions.AdminSessionExtension;
 import supports.extensions.BrowserMatchExtension;
 
@@ -44,8 +45,10 @@ public class BaseUiTest extends BaseTest {
 
     @AfterEach
     public void tearDown() {
-        AllureAttachments.attachVideo(Selenide.sessionId().toString());
         AllureAttachments.attachLogs();
-        Selenide.closeWebDriver();
+        AllureAttachments.attachSource();
+        StepLogger.uiStep("Закрыть браузер", () -> {
+            Selenide.closeWebDriver();
+        });
     }
 }

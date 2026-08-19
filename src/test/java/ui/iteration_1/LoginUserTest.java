@@ -13,6 +13,7 @@ import ui.BaseUiTest;
 import static testdata.AuthData.ADMIN_PASSWORD;
 import static testdata.AuthData.ADMIN_USERNAME;
 
+@DisplayName("UI. Авторизация пользователя")
 public class LoginUserTest extends BaseUiTest {
 
     @DisplayName("UI. Администратор может авторизоваться с валидными данными")
@@ -20,7 +21,7 @@ public class LoginUserTest extends BaseUiTest {
     @Browsers(values = {"chrome"})
     public void adminCanLoginWithCorrectDataTest() {
 
-        StepLogger.log("Авторизоваться  под пользователем: " + ADMIN_USERNAME, () -> {
+        StepLogger.uiStep("Авторизоваться под пользователем", () -> {
         new LoginPage()
                 .open()
                 .shouldBeOpened()
@@ -34,11 +35,11 @@ public class LoginUserTest extends BaseUiTest {
     @Test
     @Browsers(values = {"chrome"})
     public void userCanLoginWithCorrectDataTest() {
-        CreateUserRequestDto user = StepLogger.log("Создать пользователя", () -> {
+        CreateUserRequestDto user = StepLogger.apiStep("Создать пользователя", () -> {
             return userSteps.createRandomUser();
         });
 
-        StepLogger.log("Авторизоваться  под пользователем: " + user.getUsername(), () -> {
+        StepLogger.uiStep("Авторизоваться под пользователем", () -> {
             new LoginPage()
                     .open()
                     .shouldBeOpened()

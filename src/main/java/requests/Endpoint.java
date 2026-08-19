@@ -34,6 +34,12 @@ public enum Endpoint {
             CreateAccountResponseDto.class
     ),
 
+    GET_ACCOUNT_TRANSACTIONS(
+            "/accounts/{accountId}/transactions",
+            null,
+            TransactionResponseDto.class
+    ),
+
     GET_ALL_USERS(
             "/admin/users",
             null,

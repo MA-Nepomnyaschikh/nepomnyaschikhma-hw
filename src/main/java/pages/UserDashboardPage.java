@@ -32,40 +32,38 @@ public class UserDashboardPage extends BasePage<UserDashboardPage> {
     public UserDashboardPage shouldBeOpened() {
         webdriver().shouldHave(urlContaining(url()));
         header.shouldBe(visible).shouldHave(text("User Dashboard"));
-        goToProfileButton.shouldBe(visible, enabled);
-        depositButton.shouldBe(visible, enabled);
-        transferButton.shouldBe(visible, enabled);
-        createAccountButton.shouldBe(visible, enabled);
         return this;
     }
 
     public UserDashboardPage shouldHaveWelcomeText(String name) {
-        welcomeText.shouldHave(text(WELCOME_MESSAGE.formatted(name)));
+        welcomeText.shouldBe(visible, enabled)
+                .shouldHave(text(WELCOME_MESSAGE.formatted(name)));
         return this;
     }
 
     public UserDashboardPage shouldHaveWelcomeText() {
-        welcomeText.shouldHave(text(DEFAULT_WELCOME_MESSAGE));
+        welcomeText.shouldBe(visible, enabled)
+                .shouldHave(text(DEFAULT_WELCOME_MESSAGE));
         return this;
     }
 
     public UserDashboardPage createAccount() {
-        createAccountButton.shouldBe(enabled).click();
+        createAccountButton.shouldBe(visible, enabled).click();
         return this;
     }
 
     public ProfilePage openProfilePage() {
-        goToProfileButton.shouldBe(enabled).click();
+        goToProfileButton.shouldBe(visible, enabled).click();
         return new ProfilePage();
     }
 
     public DepositPage openDepositPage() {
-        depositButton.shouldBe(enabled).click();
+        depositButton.shouldBe(visible, enabled).click();
         return new DepositPage();
     }
 
     public TransferPage openTransferPage() {
-        transferButton.shouldBe(enabled).click();
+        transferButton.shouldBe(visible, enabled).click();
         return new TransferPage();
     }
 

@@ -14,7 +14,7 @@ public class StepLogger {
         void run() throws Throwable;
     }
 
-    public static <T> T log(String title, ThrowableRunnable<T> runnable) {
+    public static <T> T uiStep(String title, ThrowableRunnable<T> runnable) {
         return Allure.step(title, () -> {
             try {
                 return runnable.run();
@@ -26,7 +26,7 @@ public class StepLogger {
         });
     }
 
-    public static void log(String title, ThrowableVoidRunnable runnable) {
+    public static void uiStep(String title, ThrowableVoidRunnable runnable) {
         Allure.step(title, () -> {
             try {
                 runnable.run();
@@ -36,6 +36,17 @@ public class StepLogger {
                 }
             }
 
+            return null;
+        });
+    }
+
+    public static <T> T apiStep(String title, ThrowableRunnable<T> runnable) {
+        return Allure.step(title, runnable::run);
+    }
+
+    public static void apiStep(String title, ThrowableVoidRunnable runnable) {
+        Allure.step(title, () -> {
+            runnable.run();
             return null;
         });
     }

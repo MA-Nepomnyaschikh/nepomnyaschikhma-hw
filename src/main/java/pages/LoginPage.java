@@ -21,28 +21,25 @@ public class LoginPage extends BasePage<LoginPage> {
     public LoginPage shouldBeOpened() {
         webdriver().shouldHave(urlContaining(url()));
         header.shouldBe(visible).shouldHave(text("Login"));
-        usernameInput.shouldBe(visible, enabled);
-        passwordInput.shouldBe(visible, enabled);
-        loginButton.shouldBe(visible, enabled);
         return this;
     }
 
     public LoginPage setUsername(String username) {
-        usernameInput.shouldBe(enabled)
+        usernameInput.shouldBe(visible,enabled)
                 .setValue(username)
                 .shouldHave(value(username));
         return this;
     }
 
     public LoginPage setPassword(String password) {
-        passwordInput.shouldBe(enabled)
+        passwordInput.shouldBe(visible,enabled)
                 .setValue(password)
                 .shouldHave(value(password));
         return this;
     }
 
     public LoginPage login() {
-        loginButton.shouldBe(enabled).click();
+        loginButton.shouldBe(visible,enabled).click();
         return this;
     }
 

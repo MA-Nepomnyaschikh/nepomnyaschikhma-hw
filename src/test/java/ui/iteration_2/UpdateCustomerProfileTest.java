@@ -15,6 +15,7 @@ import ui.BaseUiTest;
 import static testdata.expectedmessages.ui.UserUiMessages.UPDATE_USER_FAILED;
 import static testdata.expectedmessages.ui.UserUiMessages.UPDATE_USER_SUCCESSFULLY;
 
+@DisplayName("UI. Обновление профиля пользователя")
 public class UpdateCustomerProfileTest extends BaseUiTest {
 
     @DisplayName("UI. Пользователь может изменить имя в профиле")
@@ -24,7 +25,7 @@ public class UpdateCustomerProfileTest extends BaseUiTest {
     public void userCanSetValidNameInProfileTest(TestUser user) {
         String newName = UserData.getValidName();
 
-        String alertMessage = StepLogger.log("Изменить имя пользователя", () -> {
+        String alertMessage = StepLogger.uiStep("Изменить имя пользователя", () -> {
             return new UserDashboardPage()
                 .open()
                 .shouldBeOpened()
@@ -34,7 +35,7 @@ public class UpdateCustomerProfileTest extends BaseUiTest {
                 .getAlertMessageAndAccept();
         });
 
-        StepLogger.log("Проверить изменение имени пользователя через UI", () -> {
+        StepLogger.uiStep("Проверить изменение имени пользователя через UI", () -> {
             softly.assertThat(alertMessage).isEqualTo(UPDATE_USER_SUCCESSFULLY);
 
             new ProfilePage()
@@ -46,7 +47,7 @@ public class UpdateCustomerProfileTest extends BaseUiTest {
                     .shouldHaveWelcomeText(newName);
         });
 
-        StepLogger.log("Проверить изменение имени пользователя через API", () -> {
+        StepLogger.apiStep("Проверить изменение имени пользователя через API", () -> {
             CreateUserResponseDto actualUser = userSteps.getCustomerProfile(user.getToken());
             softly.assertThat(actualUser.getName()).isEqualTo(newName);
         });
@@ -59,7 +60,7 @@ public class UpdateCustomerProfileTest extends BaseUiTest {
     public void userCannotSetInvalidNameInProfileTest(TestUser user) {
         String newName = UserData.getUsername();
 
-        String alertMessage = StepLogger.log("Изменить имя пользователя", () -> {
+        String alertMessage = StepLogger.uiStep("Изменить имя пользователя", () -> {
             return new UserDashboardPage()
                     .open()
                     .shouldBeOpened()
@@ -69,7 +70,7 @@ public class UpdateCustomerProfileTest extends BaseUiTest {
                     .getAlertMessageAndAccept();
         });
 
-        StepLogger.log("Проверить отсутствие изменений пользователя через UI", () -> {
+        StepLogger.uiStep("Проверить отсутствие изменений пользователя через UI", () -> {
             softly.assertThat(alertMessage).isEqualTo(UPDATE_USER_FAILED);
 
             new ProfilePage()
@@ -81,7 +82,7 @@ public class UpdateCustomerProfileTest extends BaseUiTest {
                     .shouldHaveWelcomeText();
         });
 
-        StepLogger.log("Проверить отсутствие изменений пользователя через API", () -> {
+        StepLogger.apiStep("Проверить отсутствие изменений пользователя через API", () -> {
             CreateUserResponseDto actualUser = userSteps.getCustomerProfile(user.getToken());
             softly.assertThat(actualUser.getName()).isNull();
         });

@@ -24,15 +24,11 @@ public class TransferPage extends BasePage<TransferPage> {
     public TransferPage shouldBeOpened() {
         webdriver().shouldHave(urlContaining(url()));
         header.shouldBe(visible).shouldHave(text("\uD83D\uDD04 Make a Transfer"));
-        senderAccountSelector.shouldBe(visible, enabled);
-        receiverAccountNumber.shouldBe(visible, enabled);
-        amountInput.shouldBe(visible, enabled);
-        confirmCheckbox.shouldBe(visible, enabled);
-        transferButton.shouldBe(visible, enabled);
         return this;
     }
 
     public TransferPage selectSenderAccount(CreateAccountResponseDto senderAccount) {
+        senderAccountSelector.shouldBe(visible,enabled);
         String accountNumber = senderAccount.getAccountNumber();
 
         shouldHaveOptionWithText(senderAccountSelector, accountNumber);
@@ -44,26 +40,26 @@ public class TransferPage extends BasePage<TransferPage> {
     }
 
     public TransferPage setReceiverAccount(CreateAccountResponseDto receiverAccount) {
-        receiverAccountNumber.shouldBe(enabled)
+        receiverAccountNumber.shouldBe(visible, enabled)
                 .setValue(receiverAccount.getAccountNumber())
                 .shouldHave(value(receiverAccount.getAccountNumber()));
         return this;
     }
 
     public TransferPage setAmount(double amount) {
-        amountInput.shouldBe(enabled)
+        amountInput.shouldBe(visible, enabled)
                 .setValue(String.valueOf(amount))
                 .shouldHave(value(String.valueOf(amount)));
         return this;
     }
 
     public TransferPage confirmDetails() {
-        confirmCheckbox.click();
+        confirmCheckbox.shouldBe(visible, enabled).click();
         return this;
     }
 
     public TransferPage sendTransfer() {
-        transferButton.shouldBe(enabled).click();
+        transferButton.shouldBe(visible, enabled).click();
         return this;
     }
 
