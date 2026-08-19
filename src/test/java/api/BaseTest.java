@@ -10,7 +10,9 @@ import steps.AuthSteps;
 import steps.UserSteps;
 import supports.CleanupManager;
 import supports.extensions.TimingExtension;
+import supports.extensions.UserSessionExtension;
 
+@ExtendWith(UserSessionExtension.class)
 @ExtendWith(TimingExtension.class)
 public class BaseTest {
     protected CleanupManager cleanupManager;

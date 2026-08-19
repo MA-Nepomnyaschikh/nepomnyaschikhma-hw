@@ -2,8 +2,7 @@ package pages;
 
 import com.codeborne.selenide.SelenideElement;
 
-import static com.codeborne.selenide.Condition.text;
-import static com.codeborne.selenide.Condition.visible;
+import static com.codeborne.selenide.Condition.*;
 import static com.codeborne.selenide.Selenide.*;
 import static com.codeborne.selenide.WebDriverConditions.urlContaining;
 
@@ -22,13 +21,35 @@ public class LoginPage extends BasePage<LoginPage> {
     public LoginPage shouldBeOpened() {
         webdriver().shouldHave(urlContaining(url()));
         header.shouldBe(visible).shouldHave(text("Login"));
+        usernameInput.shouldBe(visible, enabled);
+        passwordInput.shouldBe(visible, enabled);
+        loginButton.shouldBe(visible, enabled);
+        return this;
+    }
+
+    public LoginPage setUsername(String username) {
+        usernameInput.shouldBe(enabled)
+                .setValue(username)
+                .shouldHave(value(username));
+        return this;
+    }
+
+    public LoginPage setPassword(String password) {
+        passwordInput.shouldBe(enabled)
+                .setValue(password)
+                .shouldHave(value(password));
+        return this;
+    }
+
+    public LoginPage login() {
+        loginButton.shouldBe(enabled).click();
         return this;
     }
 
     public LoginPage login(String username, String password) {
-        usernameInput.setValue(username);
-        passwordInput.setValue(password);
-        loginButton.click();
+        setUsername(username);
+        setPassword(password);
+        login();
         return this;
     }
 

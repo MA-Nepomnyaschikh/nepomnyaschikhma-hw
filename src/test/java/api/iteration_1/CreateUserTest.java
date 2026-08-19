@@ -5,12 +5,14 @@ import io.restassured.common.mapper.TypeRef;
 import models.request.CreateUserRequestDto;
 import models.response.CreateUserResponseDto;
 import models.response.ErrorResponseDto;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import specs.RequestSpecs;
 import specs.ResponseSpecs;
+import supports.StepLogger;
 import supports.assertions.UserAssertions;
 import testdata.randommodelgenerator.RandomModelGenerator;
 
@@ -26,22 +28,29 @@ public class CreateUserTest extends BaseTest {
 
     public static Stream<Arguments> validUserDataProvider() {
         return Stream.of(
-                Arguments.of(generateUserDto(getUsername(), getPassword(),USER_ROLE)),
-                Arguments.of(generateUserDto(getUsername(), getPassword(),ADMIN_ROLE))
-                );
+                Arguments.of(generateUserDto(getUsername(), getPassword(), USER_ROLE)),
+                Arguments.of(generateUserDto(getUsername(), getPassword(), ADMIN_ROLE))
+        );
     }
 
+    @DisplayName("API. Администратор может создать пользователя с валидными данными")
     @MethodSource("validUserDataProvider")
     @ParameterizedTest
     public void adminCanCreateUserWithValidDataTest(CreateUserRequestDto userDto) {
-        CreateUserResponseDto createdUser = userSteps.createUser(userDto);
+        CreateUserResponseDto createdUser = StepLogger.log("Создать пользователя", () -> {
+            return userSteps.createUser(userDto);
+        });
 
-        UserAssertions.assertUserCreated(softly, createdUser, userDto);
+        StepLogger.log("Проверить создание пользователя", () -> {
+            UserAssertions.assertUserCreated(softly, createdUser, userDto);
+        });
 
-        CreateUserResponseDto actualUser = userSteps.getUserById(createdUser.getId());
-        softly.assertThat(actualUser)
-                .usingRecursiveComparison()
-                .isEqualTo(createdUser);
+        StepLogger.log("Проверить наличие пользователя в системе", () -> {
+            CreateUserResponseDto actualUser = userSteps.getUserById(createdUser.getId());
+            softly.assertThat(actualUser)
+                    .usingRecursiveComparison()
+                    .isEqualTo(createdUser);
+        });
     }
 
     public static Stream<Arguments> invalidUserDataProvider() {
@@ -61,73 +70,102 @@ public class CreateUserTest extends BaseTest {
         );
     }
 
+    @DisplayName("API. Администратор не может создать пользователя с невалидными данными")
     @MethodSource("invalidUserDataProvider")
     @ParameterizedTest
     public void adminCannotCreateUserWithInvalidDataTest(CreateUserRequestDto userDto, String errorKey, List<String> errorValues) {
-        Map<String, List<String>> errors = userSteps.createUser(
-                userDto, RequestSpecs.authAsAdmin(), ResponseSpecs.badRequest())
-                .extract().as(new TypeRef<Map<String, List<String>>>() {});
+        Map<String, List<String>> errors = StepLogger.log("Создать пользователя с невалидными данными", () -> {
+            return userSteps.createUser(
+                    userDto, RequestSpecs.authAsAdmin(), ResponseSpecs.badRequest())
+                    .extract().as(new TypeRef<Map<String, List<String>>>() {
+                    });
+        });
 
-        softly.assertThat(errors).containsKey(errorKey);
-        softly.assertThat(errors.get(errorKey)).containsExactlyInAnyOrderElementsOf(errorValues);
+        StepLogger.log("Проверить ошибку при создании пользователя", () -> {
+            softly.assertThat(errors).containsKey(errorKey);
+            softly.assertThat(errors.get(errorKey)).containsExactlyInAnyOrderElementsOf(errorValues);
+        });
 
-        List<CreateUserResponseDto> allUsers = userSteps.getAllUsers();
-
-        softly.assertThat(allUsers)
-                .filteredOn(actualUser -> actualUser.getUsername().equals(userDto.getUsername()))
-                .isEmpty();
+        StepLogger.log("Проверить отсутствие пользователя в системе", () -> {
+            List<CreateUserResponseDto> allUsers = userSteps.getAllUsers();
+            softly.assertThat(allUsers)
+                    .filteredOn(actualUser -> actualUser.getUsername().equals(userDto.getUsername()))
+                    .isEmpty();
+        });
     }
 
+    @DisplayName("API. Администратор не может создать пользователя с уже существующим username")
     @Test
     public void adminCannotCreateUserWithExistingUsernameTest() {
         CreateUserRequestDto userDto = RandomModelGenerator.generate(CreateUserRequestDto.class);
-        userSteps.createUser(userDto);
 
-        String errorResponse = userSteps.createUser(
-                userDto, RequestSpecs.authAsAdmin(), ResponseSpecs.badRequest())
-                .extract().asString();
+        StepLogger.log("Создать пользователя", () -> {
+            userSteps.createUser(userDto);
+        });
 
-        softly.assertThat(errorResponse)
-                .isEqualTo(CREATE_USER_DUPLICATE_USERNAME.formatted(userDto.getUsername()));
+        String errorResponse = StepLogger.log("Создать пользователя с таким же username", () -> {
+            return userSteps.createUser(
+                    userDto, RequestSpecs.authAsAdmin(), ResponseSpecs.badRequest())
+                    .extract().asString();
+        });
 
-        List<CreateUserResponseDto> allUsers = userSteps.getAllUsers();
+        StepLogger.log("Проверить ошибку при создании пользователя", () -> {
+            softly.assertThat(errorResponse)
+                    .isEqualTo(CREATE_USER_DUPLICATE_USERNAME.formatted(userDto.getUsername()));
+        });
 
-        softly.assertThat(allUsers)
-                .filteredOn(actualUser -> actualUser.getUsername().equals(userDto.getUsername()))
-                .singleElement();
+        StepLogger.log("Проверить отсутствие пользователя в системе", () -> {
+            List<CreateUserResponseDto> allUsers = userSteps.getAllUsers();
+            softly.assertThat(allUsers)
+                    .filteredOn(actualUser -> actualUser.getUsername().equals(userDto.getUsername()))
+                    .singleElement();
+        });
     }
 
+    @DisplayName("API. Неавторизованный пользователь не может создать пользователя")
     @Test
     public void unauthorizedUserCannotCreateUserTest() {
         CreateUserRequestDto userDto = RandomModelGenerator.generate(CreateUserRequestDto.class);
-        userSteps.createUser(
-                userDto, RequestSpecs.unauth(), ResponseSpecs.unauthorized());
+        StepLogger.log("Создать пользователя без токена авторизации", () -> {
+            userSteps.createUser(
+                    userDto, RequestSpecs.unauth(), ResponseSpecs.unauthorized());
+        });
 
-        List<CreateUserResponseDto> allUsers = userSteps.getAllUsers();
-
-        softly.assertThat(allUsers)
-                .filteredOn(actualUser -> actualUser.getUsername().equals(userDto.getUsername()))
-                .isEmpty();
+        StepLogger.log("Проверить отсутствие пользователя в системе", () -> {
+            List<CreateUserResponseDto> allUsers = userSteps.getAllUsers();
+            softly.assertThat(allUsers)
+                    .filteredOn(actualUser -> actualUser.getUsername().equals(userDto.getUsername()))
+                    .isEmpty();
+        });
     }
 
+    @DisplayName("API. Пользователь без прав администратора не может создать пользователя")
     @Test
     public void userWithoutAdminPermissionsCannotCreateUserTest() {
         CreateUserRequestDto userWithoutAdminPermissionsDto = RandomModelGenerator.generate(CreateUserRequestDto.class);
-        userSteps.createUser(userWithoutAdminPermissionsDto);
-        String userWithoutAdminPermissionsAuthHeader = authSteps.loginAndGetToken(userWithoutAdminPermissionsDto);
+
+        String userWithoutAdminPermissionsAuthHeader = StepLogger.log("Создать пользователя", () -> {
+            userSteps.createUser(userWithoutAdminPermissionsDto);
+            return authSteps.loginAndGetToken(userWithoutAdminPermissionsDto);
+        });
 
         CreateUserRequestDto userDto = RandomModelGenerator.generate(CreateUserRequestDto.class);
 
-        ErrorResponseDto errorResponse = userSteps.createUser(
-                userDto, RequestSpecs.authAsUser(userWithoutAdminPermissionsAuthHeader), ResponseSpecs.forbidden())
-                .extract().as(ErrorResponseDto.class);
+        ErrorResponseDto errorResponse = StepLogger.log("Создать пользователя с токеном пользователя", () -> {
+            return userSteps.createUser(
+                        userDto, RequestSpecs.authAsUser(userWithoutAdminPermissionsAuthHeader), ResponseSpecs.forbidden())
+                        .extract().as(ErrorResponseDto.class);
+        });
 
-        softly.assertThat(errorResponse.getError()).isEqualTo(USER_CREATE_FORBIDDEN);
+        StepLogger.log("Проверить ошибку при создании пользователя", () -> {
+            softly.assertThat(errorResponse.getError()).isEqualTo(USER_CREATE_FORBIDDEN);
+        });
 
-        List<CreateUserResponseDto> allUsers = userSteps.getAllUsers();
-
-        softly.assertThat(allUsers)
-                .filteredOn(actualUser -> actualUser.getUsername().equals(userDto.getUsername()))
-                .isEmpty();
+        StepLogger.log("Проверить отсутствие пользователя в системе", () -> {
+            List<CreateUserResponseDto> allUsers = userSteps.getAllUsers();
+            softly.assertThat(allUsers)
+                    .filteredOn(actualUser -> actualUser.getUsername().equals(userDto.getUsername()))
+                    .isEmpty();
+        });
     }
 }

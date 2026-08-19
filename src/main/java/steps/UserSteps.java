@@ -1,5 +1,8 @@
 package steps;
 
+import io.restassured.response.ValidatableResponse;
+import io.restassured.specification.RequestSpecification;
+import io.restassured.specification.ResponseSpecification;
 import models.request.CreateUserRequestDto;
 import models.request.UpdateUserRequestDto;
 import models.response.CreateUserResponseDto;
@@ -11,9 +14,6 @@ import specs.RequestSpecs;
 import specs.ResponseSpecs;
 import supports.CleanupManager;
 import testdata.randommodelgenerator.RandomModelGenerator;
-import io.restassured.response.ValidatableResponse;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -33,10 +33,7 @@ public class UserSteps {
                 ResponseSpecs.created())
                 .post(userDto);
 
-        cleanupManager.register(
-                () -> deleteUserById(createdUser.getId())
-        );
-
+        cleanupManager.register(() -> deleteUserById(createdUser.getId()));
         return createdUser;
     }
 
@@ -50,7 +47,6 @@ public class UserSteps {
 
     public CreateUserRequestDto createRandomUser() {
         CreateUserRequestDto userDto = RandomModelGenerator.generate(CreateUserRequestDto.class);
-
         CreateUserResponseDto createdUser = new ValidatableRestRequest<CreateUserResponseDto>(
                 RequestSpecs.authAsAdmin(),
                 Endpoint.CREATE_USER,
@@ -60,7 +56,6 @@ public class UserSteps {
         cleanupManager.register(
                 () -> deleteUserById(createdUser.getId())
         );
-
         return userDto;
     }
 
@@ -98,7 +93,6 @@ public class UserSteps {
 
     public CreateUserResponseDto getUserById(long id) {
         List<CreateUserResponseDto> usersList = getAllUsers();
-
         return usersList.stream()
                 .filter(user -> user.getId() == id)
                 .findFirst()
@@ -107,7 +101,6 @@ public class UserSteps {
 
     public CreateUserResponseDto getUserByUsername(String username) {
         List<CreateUserResponseDto> usersList = getAllUsers();
-
         return usersList.stream()
                 .filter(user -> user.getUsername().equals(username))
                 .findFirst()
