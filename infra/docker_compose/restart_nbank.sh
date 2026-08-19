@@ -4,7 +4,6 @@ set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 COMPOSE_FILE="$SCRIPT_DIR/docker-compose.yml"
-JSON_FILE="$SCRIPT_DIR/config/browsers.json"
 
 echo ""
 echo "======================================"
