@@ -1,7 +1,9 @@
 package pages;
 
 import com.codeborne.selenide.SelenideElement;
-import models.response.CreateAccountResponseDto;
+import models.api.response.CreateAccountResponseDto;
+
+import java.math.BigDecimal;
 
 import static com.codeborne.selenide.Condition.*;
 import static com.codeborne.selenide.Selenide.*;
@@ -37,7 +39,7 @@ public class DepositPage extends BasePage<DepositPage> {
         return this;
     }
 
-    public DepositPage setAmount(double amount) {
+    public DepositPage setAmount(BigDecimal amount) {
         amountInput.shouldBe(visible,enabled)
                 .setValue(String.valueOf(amount))
                 .shouldHave(value(String.valueOf(amount)));
@@ -49,7 +51,7 @@ public class DepositPage extends BasePage<DepositPage> {
         return this;
     }
 
-    public DepositPage sendDeposit(CreateAccountResponseDto userAccount, double amount) {
+    public DepositPage sendDeposit(CreateAccountResponseDto userAccount, BigDecimal amount) {
         selectAccount(userAccount);
         setAmount(amount);
         sendDeposit();

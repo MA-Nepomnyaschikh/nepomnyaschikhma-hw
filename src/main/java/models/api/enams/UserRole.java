@@ -1,4 +1,4 @@
-package models.enams;
+package models.api.enams;
 
 public enum UserRole {
     USER,

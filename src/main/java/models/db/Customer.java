@@ -1,6 +1,5 @@
-package models.response;
+package models.db;
 
-import models.BaseModel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -10,7 +9,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class LoginUserResponseDto extends BaseModel {
-    private String role;
+public class Customer {
+    private Long id;
     private String username;
+    private String password;
+    private String name;
+    private String role;
 }

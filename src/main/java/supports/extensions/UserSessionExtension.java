@@ -1,8 +1,8 @@
 package supports.extensions;
 
-import models.request.CreateUserRequestDto;
-import models.request.LoginUserRequestDto;
-import models.response.CreateUserResponseDto;
+import models.api.request.CreateUserRequestDto;
+import models.api.request.LoginUserRequestDto;
+import models.api.response.CreateUserResponseDto;
 import org.junit.jupiter.api.extension.*;
 import requests.Endpoint;
 import requests.RestRequest;

@@ -1,4 +1,4 @@
-package models.request;
+package models.api.request;
 
 import models.BaseModel;
 import testdata.randommodelgenerator.annotations.GeneratingRule;
@@ -12,6 +12,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class UpdateUserRequestDto extends BaseModel {
-    @GeneratingRule(regex = "^[A-Za-z]+ [A-Za-z]+$")
+    @GeneratingRule(regex = "^[A-Za-z]{1,8} [A-Za-z]{1,8}$")
     private String name;
 }

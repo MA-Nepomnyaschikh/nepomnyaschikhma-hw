@@ -73,7 +73,7 @@ public class UserDashboardPage extends BasePage<UserDashboardPage> {
                     "Message cannot be blank");
         }
 
-        Pattern pattern = Pattern.compile("ACC\\d+");
+        Pattern pattern = Pattern.compile("ACC[A-Za-z0-9]{8}");
         Matcher matcher = pattern.matcher(message);
 
         if (!matcher.find()) {

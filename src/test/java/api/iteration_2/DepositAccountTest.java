@@ -1,8 +1,9 @@
 package api.iteration_2;
 
 import api.BaseTest;
-import models.request.DepositRequestDto;
-import models.response.CreateAccountResponseDto;
+import models.api.request.DepositRequestDto;
+import models.api.response.CreateAccountResponseDto;
+import models.db.Account;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -13,8 +14,10 @@ import specs.ResponseSpecs;
 import supports.StepLogger;
 import supports.annotations.UserSession;
 import supports.assertions.AccountAssertions;
+import supports.comparisons.AccountComparisonFields;
 import supports.context.TestUser;
 
+import java.math.BigDecimal;
 import java.util.stream.Stream;
 
 import static testdata.AccountData.*;
@@ -25,10 +28,10 @@ public class DepositAccountTest extends BaseTest {
 
     public static Stream<Arguments> validAmountProvider() {
         return Stream.of(
-                Arguments.of(5000.00),
-                Arguments.of(4999.99),
-                Arguments.of(0.02),
-                Arguments.of(0.01)
+                Arguments.of(BigDecimal.valueOf(5000.00)),
+                Arguments.of(BigDecimal.valueOf(4999.99)),
+                Arguments.of(BigDecimal.valueOf(0.02)),
+                Arguments.of(BigDecimal.valueOf(0.01))
         );
     }
 
@@ -36,7 +39,7 @@ public class DepositAccountTest extends BaseTest {
     @MethodSource("validAmountProvider")
     @ParameterizedTest(name = "Сумма пополнения: {0}")
     @UserSession
-    public void authorizedUserCanDepositAccountTest(double depositAmount, TestUser user) {
+    public void authorizedUserCanDepositAccountTest(BigDecimal depositAmount, TestUser user) {
         CreateAccountResponseDto accountBeforeDeposit = StepLogger.apiStep("Создать счет", () -> {
             return accountSteps.createAccount(user.getToken());
         });
@@ -47,23 +50,31 @@ public class DepositAccountTest extends BaseTest {
             return accountSteps.deposit(user.getToken(), depositRequestDto);
         });
 
-        StepLogger.apiStep("Проверить пополнение счета", () -> {
+        StepLogger.apiStep("Проверить результат пополнения счета", () -> {
             AccountAssertions.assertDepositCompleted(softly, accountAfterDeposit, accountBeforeDeposit, depositAmount);
         });
 
-        StepLogger.apiStep("Проверить счет после пополнения", () -> {
+        StepLogger.apiStep("Проверить счет после пополнения через API", () -> {
             CreateAccountResponseDto actualAccount = accountSteps.getClientAccountById(user.getToken(), accountBeforeDeposit.getId());
             softly.assertThat(actualAccount)
                     .usingRecursiveComparison()
+                    .isEqualTo(accountAfterDeposit);
+        });
+
+        StepLogger.apiStep("Проверить счет после пополнения через БД", () -> {
+            Account userAccountFromDB = databaseSteps.getCustomerAccount(user.getId(), accountBeforeDeposit.getId());
+            softly.assertThat(userAccountFromDB)
+                    .usingRecursiveComparison()
+                    .comparingOnlyFields(AccountComparisonFields.SELECT_ACCOUNT_RESPONSE_TO_CREATE_ACCOUNT_RESPONSE.fields())
                     .isEqualTo(accountAfterDeposit);
         });
     }
 
     public static Stream<Arguments> invalidAmountProvider() {
         return Stream.of(
-                Arguments.of("Сумма пополнения больше максимальной", 5000.01, "Deposit amount cannot exceed 5000"),
-                Arguments.of("Сумма пополнения равна 0", 0, "Deposit amount must be at least 0.01"),
-                Arguments.of("Сумма пополнения меньше минимальной", -0.01, "Deposit amount must be at least 0.01")
+                Arguments.of("Сумма пополнения больше максимальной", BigDecimal.valueOf(5000.01), "Deposit amount exceeds the 5000 limit"),
+                Arguments.of("Сумма пополнения равна 0", BigDecimal.valueOf(0), "Invalid account or amount"),
+                Arguments.of("Сумма пополнения меньше минимальной", BigDecimal.valueOf(-0.01), "Invalid account or amount")
         );
     }
 
@@ -71,7 +82,7 @@ public class DepositAccountTest extends BaseTest {
     @MethodSource("invalidAmountProvider")
     @ParameterizedTest(name = "{0}")
     @UserSession
-    public void authorizedUserCannotDepositAccountWithInvalidAmountTest(String testName, double depositAmount, String errorMessage, TestUser user) {
+    public void authorizedUserCannotDepositAccountWithInvalidAmountTest(String testName, BigDecimal depositAmount, String errorMessage, TestUser user) {
         CreateAccountResponseDto accountBeforeDeposit = StepLogger.apiStep("Создать счет", () -> {
             return accountSteps.createAccount(user.getToken());
         });
@@ -86,10 +97,15 @@ public class DepositAccountTest extends BaseTest {
             softly.assertThat(errorResponse).isEqualTo(errorMessage);
         });
 
-        StepLogger.apiStep("Проверить состояние счета", () -> {
+        StepLogger.apiStep("Проверить состояние счета через API", () -> {
             CreateAccountResponseDto actualAccount = accountSteps.getClientAccountById(user.getToken(), accountBeforeDeposit.getId());
-            softly.assertThat(actualAccount.getBalance()).isEqualTo(accountBeforeDeposit.getBalance());
+            softly.assertThat(actualAccount.getBalance()).isEqualByComparingTo(accountBeforeDeposit.getBalance());
             softly.assertThat(actualAccount.getTransactions()).isEmpty();
+        });
+
+        StepLogger.apiStep("Проверить состояние счета через БД", () -> {
+            Account userAccountFromDB = databaseSteps.getCustomerAccount(user.getId(), accountBeforeDeposit.getId());
+            softly.assertThat(userAccountFromDB.getBalance()).isEqualByComparingTo(accountBeforeDeposit.getBalance());
         });
     }
 
@@ -97,7 +113,7 @@ public class DepositAccountTest extends BaseTest {
     @Test
     @UserSession
     public void authorizedUserCannotDepositNonExistingAccountTest(TestUser user) {
-        double depositAmount = getRandomValidDepositAmount();
+        BigDecimal depositAmount = getRandomValidDepositAmount();
 
         DepositRequestDto depositRequestDto = generateDepositDto(NON_EXISTING_ACCOUNT_ID, depositAmount);
 
@@ -114,7 +130,7 @@ public class DepositAccountTest extends BaseTest {
     @Test
     @UserSession(usersCount = 2)
     public void authorizedUserCannotDepositAnotherUserAccountTest(TestUser firstUser, TestUser secondUser) {
-        double depositAmount = getRandomValidDepositAmount();
+        BigDecimal depositAmount = getRandomValidDepositAmount();
 
         CreateAccountResponseDto secondUserAccount = StepLogger.apiStep("Создать счет для второго пользователя", () -> {
             return accountSteps.createAccount(secondUser.getToken());
@@ -130,10 +146,15 @@ public class DepositAccountTest extends BaseTest {
             softly.assertThat(errorResponse).isEqualTo(DEPOSIT_UNAUTHORIZED);
         });
 
-        StepLogger.apiStep("Проверить состояние счета", () -> {
+        StepLogger.apiStep("Проверить состояние счета через API", () -> {
             CreateAccountResponseDto actualSecondUserAcc = accountSteps.getClientAccountById(secondUser.getToken(), secondUserAccount.getId());
-            softly.assertThat(actualSecondUserAcc.getBalance()).isEqualTo(secondUserAccount.getBalance());
+            softly.assertThat(actualSecondUserAcc.getBalance()).isEqualByComparingTo(secondUserAccount.getBalance());
             softly.assertThat(actualSecondUserAcc.getTransactions()).isEmpty();
+        });
+
+        StepLogger.apiStep("Проверить состояние счета через БД", () -> {
+            Account userAccountFromDB = databaseSteps.getCustomerAccount(secondUser.getId(), secondUserAccount.getId());
+            softly.assertThat(userAccountFromDB.getBalance()).isEqualByComparingTo(secondUserAccount.getBalance());
         });
     }
 
@@ -141,7 +162,7 @@ public class DepositAccountTest extends BaseTest {
     @Test
     @UserSession
     public void unauthorizedUserCannotDepositAccountTest(TestUser user) {
-        double depositAmount = getRandomValidDepositAmount();
+        BigDecimal depositAmount = getRandomValidDepositAmount();
 
         CreateAccountResponseDto userAccount = StepLogger.apiStep("Создать счет", () -> {
             return accountSteps.createAccount(user.getToken());
@@ -153,10 +174,15 @@ public class DepositAccountTest extends BaseTest {
             accountSteps.deposit(depositRequestDto, RequestSpecs.unauth(), ResponseSpecs.unauthorized());
         });
 
-        StepLogger.apiStep("Проверить состояние счета", () -> {
+        StepLogger.apiStep("Проверить состояние счета через API", () -> {
             CreateAccountResponseDto actualAccount = accountSteps.getClientAccountById(user.getToken(), userAccount.getId());
-            softly.assertThat(actualAccount.getBalance()).isEqualTo(userAccount.getBalance());
+            softly.assertThat(actualAccount.getBalance()).isEqualByComparingTo(userAccount.getBalance());
             softly.assertThat(actualAccount.getTransactions()).isEmpty();
+        });
+
+        StepLogger.apiStep("Проверить состояние счета через БД", () -> {
+            Account userAccountFromDB = databaseSteps.getCustomerAccount(user.getId(), userAccount.getId());
+            softly.assertThat(userAccountFromDB.getBalance()).isEqualByComparingTo(userAccount.getBalance());
         });
     }
 

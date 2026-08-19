@@ -1,4 +1,4 @@
-package models.request;
+package models.api.request;
 
 import models.BaseModel;
 import testdata.randommodelgenerator.annotations.GeneratingRule;

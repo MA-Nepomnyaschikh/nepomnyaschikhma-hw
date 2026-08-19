@@ -1,4 +1,4 @@
-package models.response;
+package models.api.response;
 
 import models.BaseModel;
 import lombok.AllArgsConstructor;
@@ -10,9 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class ErrorResponseDto extends BaseModel {
-    private String timestamp;
-    private String status;
-    private String error;
-    private String path;
+public class LoginUserResponseDto extends BaseModel {
+    private String role;
+    private String username;
 }

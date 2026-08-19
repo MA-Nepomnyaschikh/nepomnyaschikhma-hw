@@ -1,4 +1,4 @@
-package models.response;
+package models.api.request;
 
 import models.BaseModel;
 import lombok.AllArgsConstructor;
@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class UpdateUserResponseDto extends BaseModel {
-    private CreateUserResponseDto customer;
-    private String message;
+public class LoginUserRequestDto extends BaseModel {
+    private String username;
+    private String password;
 }

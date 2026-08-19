@@ -2,9 +2,9 @@ package api.iteration_1;
 
 import api.BaseTest;
 import io.restassured.response.ValidatableResponse;
-import models.request.CreateUserRequestDto;
-import models.request.LoginUserRequestDto;
-import models.response.ErrorResponseDto;
+import models.api.request.CreateUserRequestDto;
+import models.api.request.LoginUserRequestDto;
+import models.api.response.ErrorResponseDto;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -37,7 +37,7 @@ public class LoginUserTest extends BaseTest {
         });
 
         StepLogger.apiStep("Проверить авторизацию администратора", () -> {
-            UserAssertions.assertUserLoggedIn(softly, loginUserResponse, userDto);
+            UserAssertions.assertLoginUserCompleted(softly, loginUserResponse, userDto);
         });
     }
 
@@ -55,7 +55,7 @@ public class LoginUserTest extends BaseTest {
         });
 
         StepLogger.apiStep("Проверить авторизацию пользователя", () -> {
-            UserAssertions.assertUserLoggedIn(softly, loginUserResponse, userDto);
+            UserAssertions.assertLoginUserCompleted(softly, loginUserResponse, userDto);
         });
     }
 
