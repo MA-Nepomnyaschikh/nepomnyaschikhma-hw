@@ -18,20 +18,20 @@ echo ""
 echo "======================================"
 echo "Обновление Docker образов..."
 
-## Проверяем, что jq установлен
-#if ! command -v jq &> /dev/null; then
-#    echo "❌ jq is not installed. Please install jq and try again."
-#    exit 1
-#fi
-#
-## Извлекаем все значения .image через jq
-#images=$(jq -r '.. | objects | select(.image) | .image' "$JSON_FILE")
-#
-## Пробегаем по каждому образу и выполняем docker pull
-#for image in $images; do
-#    echo "Pulling $image..."
-#    docker pull "$image"
-#done
+# Проверяем, что jq установлен
+if ! command -v jq &> /dev/null; then
+    echo "❌ jq is not installed. Please install jq and try again."
+    exit 1
+fi
+
+# Извлекаем все значения .image через jq
+images=$(jq -r '.. | objects | select(.image) | .image' "$JSON_FILE")
+
+# Пробегаем по каждому образу и выполняем docker pull
+for image in $images; do
+    echo "Pulling $image..."
+    docker pull "$image"
+done
 
 docker compose -f "$COMPOSE_FILE" pull
 
