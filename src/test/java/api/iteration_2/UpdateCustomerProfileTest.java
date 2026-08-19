@@ -1,10 +1,11 @@
 package api.iteration_2;
 
 import api.BaseTest;
-import models.request.UpdateUserRequestDto;
-import models.response.CreateUserResponseDto;
-import models.response.ErrorResponseDto;
-import models.response.UpdateUserResponseDto;
+import models.api.request.UpdateUserRequestDto;
+import models.api.response.CreateUserResponseDto;
+import models.api.response.ErrorResponseDto;
+import models.api.response.UpdateUserResponseDto;
+import models.db.Customer;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -40,9 +41,14 @@ public class UpdateCustomerProfileTest extends BaseTest {
             softly.assertThat(updatedUser.getCustomer().getName()).isEqualTo(updateUserDto.getName());
         });
 
-        StepLogger.apiStep("Проверить профиль после изменения имени", () -> {
+        StepLogger.apiStep("Проверить профиль после изменения имени через API", () -> {
             CreateUserResponseDto actualUser = userSteps.getCustomerProfile(user.getToken());
             softly.assertThat(actualUser.getName()).isEqualTo(updateUserDto.getName());
+        });
+
+        StepLogger.apiStep("Проверить профиль после изменения имени через БД", () -> {
+            Customer customer = databaseSteps.getCustomerById(user.getId());
+            softly.assertThat(customer.getName()).isEqualTo(updateUserDto.getName());
         });
     }
 
@@ -73,9 +79,14 @@ public class UpdateCustomerProfileTest extends BaseTest {
             softly.assertThat(errorResponse).isEqualTo(PROFILE_UPDATE_INVALID_NAME);
         });
 
-        StepLogger.apiStep("Проверить отсутствие изменений в профиле", () -> {
+        StepLogger.apiStep("Проверить отсутствие изменений в профиле через API", () -> {
             CreateUserResponseDto actualUser = userSteps.getCustomerProfile(user.getToken());
             softly.assertThat(actualUser.getName()).isNull();
+        });
+
+        StepLogger.apiStep("Проверить отсутствие изменений в профиле через БД", () -> {
+            Customer customer = databaseSteps.getCustomerById(user.getId());
+            softly.assertThat(customer.getName()).isNull();
         });
     }
 
@@ -89,9 +100,14 @@ public class UpdateCustomerProfileTest extends BaseTest {
             userSteps.updateCustomerProfile(updateUserDto, RequestSpecs.unauth(), ResponseSpecs.unauthorized());
         });
 
-        StepLogger.apiStep("Проверить отсутствие изменений в профиле", () -> {
+        StepLogger.apiStep("Проверить отсутствие изменений в профиле через API", () -> {
             CreateUserResponseDto actualUser = userSteps.getCustomerProfile(user.getToken());
             softly.assertThat(actualUser.getName()).isNull();
+        });
+
+        StepLogger.apiStep("Проверить отсутствие изменений в профиле через БД", () -> {
+            Customer customer = databaseSteps.getCustomerById(user.getId());
+            softly.assertThat(customer.getName()).isNull();
         });
     }
 

@@ -1,9 +1,10 @@
 package testdata;
 
-import models.enams.TransactionType;
-import models.request.DepositRequestDto;
-import models.request.TransferRequestDto;
+import models.api.enams.TransactionType;
+import models.api.request.DepositRequestDto;
+import models.api.request.TransferRequestDto;
 
+import java.math.BigDecimal;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class AccountData {
@@ -12,34 +13,34 @@ public class AccountData {
     public static final String TRANSFER_IN = TransactionType.TRANSFER_IN.toString();
     public static final String TRANSFER_OUT = TransactionType.TRANSFER_OUT.toString();
 
-    public static final double MIN_DEPOSIT_AMOUNT = 0.01;
-    public static final double MAX_DEPOSIT_AMOUNT = 5000.00;
+    public static final BigDecimal MIN_DEPOSIT_AMOUNT = BigDecimal.valueOf(0.01);
+    public static final BigDecimal MAX_DEPOSIT_AMOUNT = BigDecimal.valueOf(5000.00);
 
-    public static final double MIN_TRANSFER_AMOUNT = 0.01;
-    public static final double MAX_TRANSFER_AMOUNT = 10000.00;
+    public static final BigDecimal MIN_TRANSFER_AMOUNT = BigDecimal.valueOf(0.01);
+    public static final BigDecimal MAX_TRANSFER_AMOUNT = BigDecimal.valueOf(10000.00);
 
     public static final int NON_EXISTING_ACCOUNT_ID = Integer.MIN_VALUE;
 
     private AccountData() {}
 
-    public static double getRandomValidDepositAmount() {
+    public static BigDecimal getRandomValidDepositAmount() {
         double amount = getRandomDouble(MIN_DEPOSIT_AMOUNT, MAX_DEPOSIT_AMOUNT);
-        return Math.round(amount * 100.0) / 100.0;
+        return BigDecimal.valueOf(Math.round(amount * 100.0) / 100.0);
     }
 
-    public static double getRandomValidTransferAmount() {
+    public static BigDecimal getRandomValidTransferAmount() {
         double amount = getRandomDouble(MIN_TRANSFER_AMOUNT, MAX_TRANSFER_AMOUNT);
-        return Math.round(amount * 100.0) / 100.0;
+        return BigDecimal.valueOf(Math.round(amount * 100.0) / 100.0);
     }
 
-    public static DepositRequestDto generateDepositDto(int accountId, double amount) {
+    public static DepositRequestDto generateDepositDto(long accountId, BigDecimal amount) {
         return DepositRequestDto.builder()
                 .id(accountId)
                 .balance(amount)
                 .build();
     }
 
-    public static TransferRequestDto generateTransferDto(int senderAccountId, int receiverAccountId, double amount) {
+    public static TransferRequestDto generateTransferDto(long senderAccountId, long receiverAccountId, BigDecimal amount) {
         return TransferRequestDto.builder()
                 .receiverAccountId(receiverAccountId)
                 .senderAccountId(senderAccountId)
@@ -47,8 +48,8 @@ public class AccountData {
                 .build();
     }
 
-    private static double getRandomDouble(double min, double max) {
-        double value = ThreadLocalRandom.current().nextDouble(min, max);
+    private static double getRandomDouble(BigDecimal min, BigDecimal max) {
+        double value = ThreadLocalRandom.current().nextDouble(min.doubleValue(), max.doubleValue());
         return Math.round(value * 100.0) / 100.0;
     }
 

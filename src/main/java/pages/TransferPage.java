@@ -1,7 +1,9 @@
 package pages;
 
 import com.codeborne.selenide.SelenideElement;
-import models.response.CreateAccountResponseDto;
+import models.api.response.CreateAccountResponseDto;
+
+import java.math.BigDecimal;
 
 import static com.codeborne.selenide.Condition.*;
 import static com.codeborne.selenide.Selenide.*;
@@ -46,7 +48,7 @@ public class TransferPage extends BasePage<TransferPage> {
         return this;
     }
 
-    public TransferPage setAmount(double amount) {
+    public TransferPage setAmount(BigDecimal amount) {
         amountInput.shouldBe(visible, enabled)
                 .setValue(String.valueOf(amount))
                 .shouldHave(value(String.valueOf(amount)));
@@ -63,7 +65,7 @@ public class TransferPage extends BasePage<TransferPage> {
         return this;
     }
 
-    public TransferPage sendTransfer(CreateAccountResponseDto senderAccount, CreateAccountResponseDto receiverAccount, double amount) {
+    public TransferPage sendTransfer(CreateAccountResponseDto senderAccount, CreateAccountResponseDto receiverAccount, BigDecimal amount) {
         selectSenderAccount(senderAccount);
         setReceiverAccount(receiverAccount);
         setAmount(amount);

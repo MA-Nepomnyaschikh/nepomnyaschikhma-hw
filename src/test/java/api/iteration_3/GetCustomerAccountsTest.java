@@ -1,14 +1,16 @@
 package api.iteration_3;
 
 import api.BaseTest;
-import models.response.CreateAccountResponseDto;
-import models.response.ErrorResponseDto;
+import models.api.response.CreateAccountResponseDto;
+import models.api.response.ErrorResponseDto;
+import models.db.Account;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import specs.RequestSpecs;
 import specs.ResponseSpecs;
 import supports.StepLogger;
 import supports.annotations.UserSession;
+import supports.comparisons.AccountComparisonFields;
 import supports.context.TestUser;
 
 import java.util.List;
@@ -32,8 +34,16 @@ public class GetCustomerAccountsTest extends BaseTest {
             return accountSteps.getClientAccounts(user.getToken());
         });
 
-        StepLogger.apiStep("Проверить список счетов пользователя", () -> {
+        StepLogger.apiStep("Проверить список счетов пользователя через API", () -> {
             softly.assertThat(actualAccounts)
+                    .isEqualTo(expectedAccounts);
+        });
+
+        StepLogger.apiStep("Проверить список счетов пользователя через БД", () -> {
+            List<Account> actualAccountsFromDb = databaseSteps.getCustomerAccounts(user.getId());
+
+            softly.assertThat(actualAccountsFromDb)
+                    .usingRecursiveFieldByFieldElementComparatorOnFields(AccountComparisonFields.SELECT_ACCOUNT_RESPONSE_TO_CREATE_ACCOUNT_RESPONSE.fields())
                     .isEqualTo(expectedAccounts);
         });
     }

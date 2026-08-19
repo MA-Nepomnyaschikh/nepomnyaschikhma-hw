@@ -1,4 +1,4 @@
-package models.response;
+package models.api.response;
 
 import models.BaseModel;
 import lombok.AllArgsConstructor;
@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Data
@@ -13,8 +14,14 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 public class CreateAccountResponseDto extends BaseModel {
-    private int id;
+    private long id;
     private String accountNumber;
-    private double balance;
+    private BigDecimal balance;
     private List<TransactionResponseDto> transactions;
+
+    public void setBalance(BigDecimal balance) {
+        this.balance = balance == null
+                ? null
+                : balance.setScale(2);
+    }
 }

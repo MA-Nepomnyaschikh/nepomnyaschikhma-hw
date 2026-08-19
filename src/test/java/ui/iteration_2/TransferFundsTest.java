@@ -1,6 +1,6 @@
 package ui.iteration_2;
 
-import models.response.CreateAccountResponseDto;
+import models.api.response.CreateAccountResponseDto;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import pages.UserDashboardPage;
@@ -9,6 +9,8 @@ import supports.annotations.Browsers;
 import supports.annotations.UserSession;
 import supports.context.TestUser;
 import ui.BaseUiTest;
+
+import java.math.BigDecimal;
 
 import static testdata.AccountData.MAX_TRANSFER_AMOUNT;
 import static testdata.AccountData.getRandomValidTransferAmount;
@@ -22,7 +24,7 @@ public class TransferFundsTest extends BaseUiTest {
     @Browsers(values = {"chrome"})
     @UserSession(needBrowserLogin = true)
     public void userCanTransferFundsBetweenTheirAccountsTest(TestUser user) {
-        double transferAmount = getRandomValidTransferAmount();
+        BigDecimal transferAmount = getRandomValidTransferAmount();
 
         CreateAccountResponseDto senderAccount =  StepLogger.apiStep("Создать первый счет пользователя с балансом " + MAX_TRANSFER_AMOUNT, () -> {
             return accountSteps.createAccountWithBalance(user.getToken(), MAX_TRANSFER_AMOUNT);
@@ -48,10 +50,10 @@ public class TransferFundsTest extends BaseUiTest {
 
         StepLogger.apiStep("Проверить отправку перевода через API", () -> {
             CreateAccountResponseDto actualSenderAccount = accountSteps.getClientAccountById(user.getToken(), senderAccount.getId());
-            softly.assertThat(actualSenderAccount.getBalance()).isEqualTo(senderAccount.getBalance() - transferAmount);
+            softly.assertThat(actualSenderAccount.getBalance()).isEqualTo(senderAccount.getBalance().subtract(transferAmount));
 
             CreateAccountResponseDto actualReceiverAccount = accountSteps.getClientAccountById(user.getToken(), receiverAccount.getId());
-            softly.assertThat(actualReceiverAccount.getBalance()).isEqualTo(receiverAccount.getBalance() + transferAmount);
+            softly.assertThat(actualReceiverAccount.getBalance()).isEqualTo(receiverAccount.getBalance().add(transferAmount));
         });
     }
 
@@ -60,7 +62,7 @@ public class TransferFundsTest extends BaseUiTest {
     @Browsers(values = {"chrome"})
     @UserSession(usersCount = 2, needBrowserLogin = true)
     public void userCanTransferFundsToAnotherUserAccountTest(TestUser sender, TestUser receiver) {
-        double transferAmount = getRandomValidTransferAmount();
+        BigDecimal transferAmount = getRandomValidTransferAmount();
 
         CreateAccountResponseDto senderAccount =  StepLogger.apiStep("Создать счет отправителя с балансом " + MAX_TRANSFER_AMOUNT, () -> {
             return accountSteps.createAccountWithBalance(sender.getToken(), MAX_TRANSFER_AMOUNT);
@@ -86,10 +88,10 @@ public class TransferFundsTest extends BaseUiTest {
 
         StepLogger.apiStep("Проверить отправку перевода через API", () -> {
             CreateAccountResponseDto actualSenderAccount = accountSteps.getClientAccountById(sender.getToken(), senderAccount.getId());
-            softly.assertThat(actualSenderAccount.getBalance()).isEqualTo(senderAccount.getBalance() - transferAmount);
+            softly.assertThat(actualSenderAccount.getBalance()).isEqualByComparingTo(senderAccount.getBalance().subtract(transferAmount));
 
             CreateAccountResponseDto actualReceiverAccount = accountSteps.getClientAccountById(receiver.getToken(), receiverAccount.getId());
-            softly.assertThat(actualReceiverAccount.getBalance()).isEqualTo(transferAmount);
+            softly.assertThat(actualReceiverAccount.getBalance()).isEqualByComparingTo(transferAmount);
         });
     }
 
@@ -98,7 +100,7 @@ public class TransferFundsTest extends BaseUiTest {
     @Browsers(values = {"chrome"})
     @UserSession(usersCount = 2, needBrowserLogin = true)
     public void userCannotTransferFundsWithoutSenderAccountNumberTest(TestUser sender, TestUser receiver) {
-        double transferAmount = getRandomValidTransferAmount();
+        BigDecimal transferAmount = getRandomValidTransferAmount();
 
         CreateAccountResponseDto senderAccount =  StepLogger.apiStep("Создать счет отправителя с балансом " + MAX_TRANSFER_AMOUNT, () -> {
             return accountSteps.createAccountWithBalance(sender.getToken(), MAX_TRANSFER_AMOUNT);
@@ -139,7 +141,7 @@ public class TransferFundsTest extends BaseUiTest {
     @Browsers(values = {"chrome"})
     @UserSession(usersCount = 2, needBrowserLogin = true)
     public void userCannotTransferFundsWithoutReceiverAccountNumberTest(TestUser sender, TestUser receiver) {
-        double transferAmount = getRandomValidTransferAmount();
+        BigDecimal transferAmount = getRandomValidTransferAmount();
 
         CreateAccountResponseDto senderAccount =  StepLogger.apiStep("Создать счет отправителя с балансом " + MAX_TRANSFER_AMOUNT, () -> {
             return accountSteps.createAccountWithBalance(sender.getToken(), MAX_TRANSFER_AMOUNT);
@@ -219,7 +221,7 @@ public class TransferFundsTest extends BaseUiTest {
     @Browsers(values = {"chrome"})
     @UserSession(usersCount = 2, needBrowserLogin = true)
     public void userCannotTransferFundsWithoutConfirmTest(TestUser sender, TestUser receiver) {
-        double transferAmount = getRandomValidTransferAmount();
+        BigDecimal transferAmount = getRandomValidTransferAmount();
 
         CreateAccountResponseDto senderAccount =  StepLogger.apiStep("Создать счет отправителя с балансом " + MAX_TRANSFER_AMOUNT, () -> {
             return accountSteps.createAccountWithBalance(sender.getToken(), MAX_TRANSFER_AMOUNT);
@@ -260,7 +262,7 @@ public class TransferFundsTest extends BaseUiTest {
     @Browsers(values = {"chrome"})
     @UserSession(usersCount = 2, needBrowserLogin = true)
     public void userCannotTransferFundsWithInvalidAmountTest(TestUser sender, TestUser receiver) {
-        double transferAmount = 0.0;
+        BigDecimal transferAmount = BigDecimal.valueOf(0.0);
 
         CreateAccountResponseDto senderAccount =  StepLogger.apiStep("Создать счет отправителя с балансом " + MAX_TRANSFER_AMOUNT, () -> {
             return accountSteps.createAccountWithBalance(sender.getToken(), MAX_TRANSFER_AMOUNT);

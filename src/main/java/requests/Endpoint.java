@@ -1,8 +1,8 @@
 package requests;
 
 import models.BaseModel;
-import models.request.*;
-import models.response.*;
+import models.api.request.*;
+import models.api.response.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -43,7 +43,7 @@ public enum Endpoint {
     GET_ALL_USERS(
             "/admin/users",
             null,
-            CreateUserResponseDto.class
+            GetUserResponseDto.class
     ),
 
     DEPOSIT(

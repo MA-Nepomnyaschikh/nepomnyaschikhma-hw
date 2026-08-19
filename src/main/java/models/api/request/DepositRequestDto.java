@@ -1,4 +1,4 @@
-package models.request;
+package models.api.request;
 
 import models.BaseModel;
 import lombok.AllArgsConstructor;
@@ -6,12 +6,13 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class TransferRequestDto extends BaseModel {
-    private int senderAccountId;
-    private int receiverAccountId;
-    private double amount;
+public class DepositRequestDto extends BaseModel {
+    private long id;
+    private BigDecimal balance;
 }

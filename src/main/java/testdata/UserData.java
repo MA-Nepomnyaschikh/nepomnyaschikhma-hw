@@ -1,8 +1,8 @@
 package testdata;
 
-import models.enams.UserRole;
-import models.request.CreateUserRequestDto;
-import models.request.UpdateUserRequestDto;
+import models.api.enams.UserRole;
+import models.api.request.CreateUserRequestDto;
+import models.api.request.UpdateUserRequestDto;
 import net.datafaker.Faker;
 import org.apache.commons.lang3.RandomStringUtils;
 
