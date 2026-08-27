@@ -28,10 +28,7 @@ public class WireMockExtension
                 .getAnnotation(Mock.class);
 
         if (mock == null) {
-            throw new IllegalStateException(
-                    "@Mock annotation is missing on test method: "
-                            + context.getRequiredTestMethod().getName()
-            );
+            return;
         }
 
         wireMockServer = new WireMockServer(
