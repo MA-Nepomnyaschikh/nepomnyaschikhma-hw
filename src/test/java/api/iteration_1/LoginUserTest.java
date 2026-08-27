@@ -5,6 +5,7 @@ import io.restassured.response.ValidatableResponse;
 import models.api.request.CreateUserRequestDto;
 import models.api.request.LoginUserRequestDto;
 import models.api.response.ErrorResponseDto;
+import models.api.response.ValidationErrorResponseDto;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -83,13 +84,13 @@ public class LoginUserTest extends BaseTest {
     public void userCannotGenerateAuthTokenWithInvalidDataTest(String testName, String username, String password) {
         LoginUserRequestDto loginDto = generateLoginDto(username, password);
 
-        ErrorResponseDto errorResponse = StepLogger.apiStep("Авторизовать пользователя", () -> {
+        ValidationErrorResponseDto errorResponse = StepLogger.apiStep("Авторизовать пользователя", () -> {
             return authSteps.login(loginDto, RequestSpecs.unauth(), ResponseSpecs.unauthorized())
-                    .extract().as(ErrorResponseDto.class);
+                    .extract().as(ValidationErrorResponseDto.class);
         });
 
         StepLogger.apiStep("Проверить ошибку авторизации пользователя", () -> {
-            softly.assertThat(errorResponse.getError()).isEqualTo(LOGIN_USER_INVALID_DATA);
+            softly.assertThat(errorResponse.getMessage()).isEqualTo(LOGIN_USER_INVALID_DATA);
         });
     }
 }

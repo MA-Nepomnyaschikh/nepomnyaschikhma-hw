@@ -6,19 +6,17 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import models.BaseModel;
 
-import java.util.List;
+import java.math.BigDecimal;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class GetUserResponseDto extends BaseModel {
+public class DepositResponseDto extends BaseModel {
 
     private long id;
-    private String username;
-    private String password;
-    private String name;
-    private String role;
-    private List<CreateAccountResponseDto> accounts;
-
+    private String accountNumber;
+    private BigDecimal balance;
+    private BigDecimal depositAmount;
+    private long transactionId;
 }

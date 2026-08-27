@@ -3,7 +3,9 @@ package api.iteration_2;
 import api.BaseTest;
 import models.api.request.TransferRequestDto;
 import models.api.response.CreateAccountResponseDto;
+import models.api.response.TransactionResponseDto;
 import models.api.response.TransferResponseDto;
+import models.api.response.ValidationErrorResponseDto;
 import models.db.Account;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -18,6 +20,7 @@ import supports.assertions.AccountAssertions;
 import supports.context.TestUser;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.stream.Stream;
 
 import static testdata.AccountData.*;
@@ -48,34 +51,38 @@ public class TransferFundsTest extends BaseTest {
             return accountSteps.createAccount(user.getToken());
         });
 
-        TransferRequestDto transferDto = generateTransferDto(senderAccount.getId(), receiverAccount.getId(), transferAmount);
+        TransferRequestDto transferRequestDto = generateTransferDto(senderAccount.getId(), receiverAccount.getId(), transferAmount);
 
         TransferResponseDto transferResponseDto = StepLogger.apiStep("Перевести валидную сумму с первого счета на второй", () -> {
-            return accountSteps.transfer(user.getToken(), transferDto);
+            return accountSteps.transfer(user.getToken(), transferRequestDto);
         });
 
         StepLogger.apiStep("Проверить перевод средств", () -> {
-            AccountAssertions.assertTransferCompleted(softly, transferResponseDto, transferDto);
+            AccountAssertions.assertTransferCompleted(softly, transferResponseDto, transferRequestDto);
         });
 
         StepLogger.apiStep("Проверить состояние второго счета через API", () -> {
             CreateAccountResponseDto actualReceiverAcc = accountSteps.getClientAccountById(user.getToken(), receiverAccount.getId());
-            AccountAssertions.assertTransferInTransaction(softly, receiverAccount, actualReceiverAcc, transferDto);
+            softly.assertThat(actualReceiverAcc.getBalance()).isEqualTo(receiverAccount.getBalance().add(transferRequestDto.getAmount()));
+            List<TransactionResponseDto> actualTransactions = accountSteps.getAccountTransactions(user.getToken(), receiverAccount.getId());
+            AccountAssertions.assertTransferInTransaction(softly, actualTransactions, transferResponseDto);
         });
 
         StepLogger.apiStep("Проверить состояние второго счета через БД", () -> {
             Account actualReceiverAccFromDB = databaseSteps.getCustomerAccount(user.getId(), receiverAccount.getId());
-            softly.assertThat(actualReceiverAccFromDB.getBalance()).isEqualByComparingTo(receiverAccount.getBalance().add(transferDto.getAmount()));
+            softly.assertThat(actualReceiverAccFromDB.getBalance()).isEqualByComparingTo(receiverAccount.getBalance().add(transferRequestDto.getAmount()));
         });
 
         StepLogger.apiStep("Проверить состояние первого счета через API", () -> {
             CreateAccountResponseDto actualSenderAcc = accountSteps.getClientAccountById(user.getToken(), senderAccount.getId());
-            AccountAssertions.assertTransferOutTransaction(softly, senderAccount, actualSenderAcc, transferDto);
+            softly.assertThat(actualSenderAcc.getBalance()).isEqualTo(senderAccount.getBalance().subtract(transferRequestDto.getAmount()));
+            List<TransactionResponseDto> actualTransactions = accountSteps.getAccountTransactions(user.getToken(), senderAccount.getId());
+            AccountAssertions.assertTransferOutTransaction(softly, actualTransactions, transferResponseDto);
         });
 
         StepLogger.apiStep("Проверить состояние первого счета через БД", () -> {
             Account actualSenderAccFromDB = databaseSteps.getCustomerAccount(user.getId(), senderAccount.getId());
-            softly.assertThat(actualSenderAccFromDB.getBalance()).isEqualByComparingTo(senderAccount.getBalance().subtract(transferDto.getAmount()));
+            softly.assertThat(actualSenderAccFromDB.getBalance()).isEqualByComparingTo(senderAccount.getBalance().subtract(transferRequestDto.getAmount()));
         });
     }
 
@@ -104,7 +111,9 @@ public class TransferFundsTest extends BaseTest {
 
         StepLogger.apiStep("Проверить состояние счета получателя через API", () -> {
             CreateAccountResponseDto actualReceiverAcc = accountSteps.getClientAccountById(receiver.getToken(), receiverAccount.getId());
-            AccountAssertions.assertTransferInTransaction(softly, receiverAccount, actualReceiverAcc, transferDto);
+            softly.assertThat(actualReceiverAcc.getBalance()).isEqualTo(receiverAccount.getBalance().add(transferDto.getAmount()));
+            List<TransactionResponseDto> actualTransactions = accountSteps.getAccountTransactions(receiver.getToken(), receiverAccount.getId());
+            AccountAssertions.assertTransferInTransaction(softly, actualTransactions, transferResponseDto);
         });
 
         StepLogger.apiStep("Проверить состояние счета получателя через БД", () -> {
@@ -114,7 +123,9 @@ public class TransferFundsTest extends BaseTest {
 
         StepLogger.apiStep("Проверить состояние счета отправителя через API", () -> {
             CreateAccountResponseDto actualSenderAcc = accountSteps.getClientAccountById(sender.getToken(), senderAccount.getId());
-            AccountAssertions.assertTransferOutTransaction(softly, senderAccount, actualSenderAcc, transferDto);
+            softly.assertThat(actualSenderAcc.getBalance()).isEqualTo(senderAccount.getBalance().subtract(transferDto.getAmount()));
+            List<TransactionResponseDto> actualTransactions = accountSteps.getAccountTransactions(sender.getToken(), senderAccount.getId());
+            AccountAssertions.assertTransferOutTransaction(softly, actualTransactions, transferResponseDto);
         });
 
         StepLogger.apiStep("Проверить состояние счета отправителя через БД", () -> {
@@ -145,18 +156,20 @@ public class TransferFundsTest extends BaseTest {
 
         TransferRequestDto transferDto = generateTransferDto(senderAccount.getId(), receiverAccount.getId(), transferAmount);
 
-        String errorResponse = StepLogger.apiStep("Перевести невалидную сумму с первого счета на второй", () -> {
-            return accountSteps.transfer(transferDto, RequestSpecs.authAsUser(user.getToken()), ResponseSpecs.badRequest());
+        ValidationErrorResponseDto errorResponse = StepLogger.apiStep("Перевести невалидную сумму с первого счета на второй", () -> {
+            return accountSteps.transfer(transferDto, RequestSpecs.authAsUser(user.getToken()), ResponseSpecs.badRequest())
+                    .extract().as(ValidationErrorResponseDto.class);
         });
 
         StepLogger.apiStep("Проверить сообщение об ошибке", () -> {
-            softly.assertThat(errorResponse).isEqualTo(errorMessage);
+            softly.assertThat(errorResponse.getMessage()).isEqualTo(errorMessage);
         });
 
         StepLogger.apiStep("Проверить состояние второго счета через API", () -> {
             CreateAccountResponseDto actualReceiverAcc = accountSteps.getClientAccountById(user.getToken(), receiverAccount.getId());
             softly.assertThat(actualReceiverAcc.getBalance()).isEqualByComparingTo(receiverAccount.getBalance());
-            softly.assertThat(actualReceiverAcc.getTransactions())
+            List<TransactionResponseDto> actualTransactions = accountSteps.getAccountTransactions(user.getToken(), receiverAccount.getId());
+            softly.assertThat(actualTransactions)
                     .filteredOn(actualTransaction -> actualTransaction.getType().equals(TRANSFER_IN))
                     .isEmpty();
         });
@@ -169,7 +182,8 @@ public class TransferFundsTest extends BaseTest {
         StepLogger.apiStep("Проверить состояние первого счета через API", () -> {
             CreateAccountResponseDto actualSenderAcc = accountSteps.getClientAccountById(user.getToken(), senderAccount.getId());
             softly.assertThat(actualSenderAcc.getBalance()).isEqualByComparingTo(senderAccount.getBalance());
-            softly.assertThat(actualSenderAcc.getTransactions())
+            List<TransactionResponseDto> actualTransactions = accountSteps.getAccountTransactions(user.getToken(), senderAccount.getId());
+            softly.assertThat(actualTransactions)
                     .filteredOn(actualTransaction -> actualTransaction.getType().equals(TRANSFER_OUT))
                     .isEmpty();
         });
@@ -195,20 +209,22 @@ public class TransferFundsTest extends BaseTest {
 
         TransferRequestDto transferDto = generateTransferDto(senderAccount.getId(), receiverAccount.getId(), transferAmount);
 
-        String errorResponse = StepLogger.apiStep("Перевести невалидную сумму со счета отправителя на счет получателя", () -> {
-            return accountSteps.transfer(transferDto, RequestSpecs.authAsUser(sender.getToken()), ResponseSpecs.badRequest());
+        ValidationErrorResponseDto errorResponse = StepLogger.apiStep("Перевести невалидную сумму со счета отправителя на счет получателя", () -> {
+            return accountSteps.transfer(transferDto, RequestSpecs.authAsUser(sender.getToken()), ResponseSpecs.badRequest())
+                    .extract().as(ValidationErrorResponseDto.class);
         });
 
         StepLogger.apiStep("Проверить сообщение об ошибке", () -> {
-            softly.assertThat(errorResponse).isEqualTo(errorMessage);
+            softly.assertThat(errorResponse.getMessage()).isEqualTo(errorMessage);
         });
 
         StepLogger.apiStep("Проверить состояние счета получателя через API", () -> {
-        CreateAccountResponseDto actualReceiverAcc = accountSteps.getClientAccountById(receiver.getToken(), receiverAccount.getId());
-        softly.assertThat(actualReceiverAcc.getBalance()).isEqualByComparingTo(receiverAccount.getBalance());
-        softly.assertThat(actualReceiverAcc.getTransactions())
-                .filteredOn(actualTransaction -> actualTransaction.getType().equals(TRANSFER_IN))
-                .isEmpty();
+            CreateAccountResponseDto actualReceiverAcc = accountSteps.getClientAccountById(receiver.getToken(), receiverAccount.getId());
+            softly.assertThat(actualReceiverAcc.getBalance()).isEqualByComparingTo(receiverAccount.getBalance());
+            List<TransactionResponseDto> actualTransactions = accountSteps.getAccountTransactions(receiver.getToken(), receiverAccount.getId());
+            softly.assertThat(actualTransactions)
+                    .filteredOn(actualTransaction -> actualTransaction.getType().equals(TRANSFER_IN))
+                    .isEmpty();
         });
 
         StepLogger.apiStep("Проверить состояние счета получателя через БД", () -> {
@@ -217,11 +233,12 @@ public class TransferFundsTest extends BaseTest {
         });
 
         StepLogger.apiStep("Проверить состояние счета отправителя через API", () -> {
-        CreateAccountResponseDto actualSenderAcc = accountSteps.getClientAccountById(sender.getToken(), senderAccount.getId());
-        softly.assertThat(actualSenderAcc.getBalance()).isEqualByComparingTo(senderAccount.getBalance());
-        softly.assertThat(actualSenderAcc.getTransactions())
-                .filteredOn(actualTransaction -> actualTransaction.getType().equals(TRANSFER_OUT))
-                .isEmpty();
+            CreateAccountResponseDto actualSenderAcc = accountSteps.getClientAccountById(sender.getToken(), senderAccount.getId());
+            softly.assertThat(actualSenderAcc.getBalance()).isEqualByComparingTo(senderAccount.getBalance());
+            List<TransactionResponseDto> actualTransactions = accountSteps.getAccountTransactions(sender.getToken(), senderAccount.getId());
+            softly.assertThat(actualTransactions)
+                    .filteredOn(actualTransaction -> actualTransaction.getType().equals(TRANSFER_OUT))
+                    .isEmpty();
         });
 
         StepLogger.apiStep("Проверить состояние счета отправителя через БД", () -> {
@@ -246,18 +263,20 @@ public class TransferFundsTest extends BaseTest {
 
         TransferRequestDto transferDto = generateTransferDto(senderAccount.getId(), receiverAccount.getId(), transferAmountExceedingBalance);
 
-        String errorResponse = StepLogger.apiStep("Перевести сумму превышающую баланс со счета отправителя на счет получателя", () -> {
-            return accountSteps.transfer(transferDto, RequestSpecs.authAsUser(sender.getToken()), ResponseSpecs.badRequest());
+        ValidationErrorResponseDto errorResponse = StepLogger.apiStep("Перевести сумму превышающую баланс со счета отправителя на счет получателя", () -> {
+            return accountSteps.transfer(transferDto, RequestSpecs.authAsUser(sender.getToken()), ResponseSpecs.badRequest())
+                    .extract().as(ValidationErrorResponseDto.class);
         });
 
         StepLogger.apiStep("Проверить сообщение об ошибке", () -> {
-            softly.assertThat(errorResponse).isEqualTo(TRANSFER_FAILED);
+            softly.assertThat(errorResponse.getMessage()).isEqualTo(TRANSFER_FAILED);
         });
 
         StepLogger.apiStep("Проверить состояние счета получателя через API", () -> {
             CreateAccountResponseDto actualReceiverAcc = accountSteps.getClientAccountById(receiver.getToken(), receiverAccount.getId());
             softly.assertThat(actualReceiverAcc.getBalance()).isEqualByComparingTo(receiverAccount.getBalance());
-            softly.assertThat(actualReceiverAcc.getTransactions())
+            List<TransactionResponseDto> actualTransactions = accountSteps.getAccountTransactions(receiver.getToken(), receiverAccount.getId());
+            softly.assertThat(actualTransactions)
                     .filteredOn(actualTransaction -> actualTransaction.getType().equals(TRANSFER_IN))
                     .isEmpty();
         });
@@ -270,7 +289,8 @@ public class TransferFundsTest extends BaseTest {
         StepLogger.apiStep("Проверить состояние счета отправителя через API", () -> {
             CreateAccountResponseDto actualSenderAcc = accountSteps.getClientAccountById(sender.getToken(), senderAccount.getId());
             softly.assertThat(actualSenderAcc.getBalance()).isEqualByComparingTo(senderAccount.getBalance());
-            softly.assertThat(actualSenderAcc.getTransactions())
+            List<TransactionResponseDto> actualTransactions = accountSteps.getAccountTransactions(sender.getToken(), senderAccount.getId());
+            softly.assertThat(actualTransactions)
                     .filteredOn(actualTransaction -> actualTransaction.getType().equals(TRANSFER_OUT))
                     .isEmpty();
         });
@@ -294,20 +314,22 @@ public class TransferFundsTest extends BaseTest {
         TransferRequestDto transferDto = generateTransferDto(senderAccount.getId(), NON_EXISTING_ACCOUNT_ID, transferAmount);
 
 
-        String errorResponse = StepLogger.apiStep("Перевести валидную сумму со счета отправителя на несуществующий счет", () -> {
-            return accountSteps.transfer(transferDto, RequestSpecs.authAsUser(user.getToken()), ResponseSpecs.badRequest());
+        ValidationErrorResponseDto errorResponse = StepLogger.apiStep("Перевести валидную сумму со счета отправителя на несуществующий счет", () -> {
+            return accountSteps.transfer(transferDto, RequestSpecs.authAsUser(user.getToken()), ResponseSpecs.badRequest())
+                    .extract().as(ValidationErrorResponseDto.class);
         });
 
         StepLogger.apiStep("Проверить сообщение об ошибке", () -> {
-            softly.assertThat(errorResponse).isEqualTo(TRANSFER_FAILED);
+            softly.assertThat(errorResponse.getMessage()).isEqualTo(TRANSFER_FAILED);
         });
 
         StepLogger.apiStep("Проверить состояние счета отправителя через API", () -> {
-        CreateAccountResponseDto actualSenderAcc = accountSteps.getClientAccountById(user.getToken(), senderAccount.getId());
-        softly.assertThat(actualSenderAcc.getBalance()).isEqualByComparingTo(senderAccount.getBalance());
-        softly.assertThat(actualSenderAcc.getTransactions())
-                .filteredOn(actualTransaction -> actualTransaction.getType().equals(TRANSFER_OUT))
-                .isEmpty();
+            CreateAccountResponseDto actualSenderAcc = accountSteps.getClientAccountById(user.getToken(), senderAccount.getId());
+            softly.assertThat(actualSenderAcc.getBalance()).isEqualByComparingTo(senderAccount.getBalance());
+            List<TransactionResponseDto> actualTransactions = accountSteps.getAccountTransactions(user.getToken(), senderAccount.getId());
+            softly.assertThat(actualTransactions)
+                    .filteredOn(actualTransaction -> actualTransaction.getType().equals(TRANSFER_OUT))
+                    .isEmpty();
         });
 
         StepLogger.apiStep("Проверить состояние счета отправителя через БД", () -> {
@@ -333,18 +355,20 @@ public class TransferFundsTest extends BaseTest {
         TransferRequestDto transferDto = generateTransferDto(NON_EXISTING_ACCOUNT_ID, receiverAccount.getId(), transferAmount);
 
 
-        String errorResponse = StepLogger.apiStep("Перевести валидную сумму с несуществующего счета на счет получателя", () -> {
-            return accountSteps.transfer(transferDto, RequestSpecs.authAsUser(sender.getToken()), ResponseSpecs.forbidden());
+        ValidationErrorResponseDto errorResponse = StepLogger.apiStep("Перевести валидную сумму с несуществующего счета на счет получателя", () -> {
+            return accountSteps.transfer(transferDto, RequestSpecs.authAsUser(sender.getToken()), ResponseSpecs.forbidden())
+                    .extract().as(ValidationErrorResponseDto.class);
         });
 
         StepLogger.apiStep("Проверить сообщение об ошибке", () -> {
-            softly.assertThat(errorResponse).isEqualTo(DEPOSIT_UNAUTHORIZED);
+            softly.assertThat(errorResponse.getMessage()).isEqualTo(DEPOSIT_UNAUTHORIZED);
         });
 
         StepLogger.apiStep("Проверить состояние счета получателя через API", () -> {
             CreateAccountResponseDto actualReceiverAcc = accountSteps.getClientAccountById(receiver.getToken(), receiverAccount.getId());
             softly.assertThat(actualReceiverAcc.getBalance()).isEqualByComparingTo(receiverAccount.getBalance());
-            softly.assertThat(actualReceiverAcc.getTransactions())
+            List<TransactionResponseDto> actualTransactions = accountSteps.getAccountTransactions(receiver.getToken(), receiverAccount.getId());
+            softly.assertThat(actualTransactions)
                     .filteredOn(actualTransaction -> actualTransaction.getType().equals(TRANSFER_IN))
                     .isEmpty();
         });
@@ -357,7 +381,8 @@ public class TransferFundsTest extends BaseTest {
         StepLogger.apiStep("Проверить состояние счета отправителя через API", () -> {
             CreateAccountResponseDto actualSenderAcc = accountSteps.getClientAccountById(sender.getToken(), senderAccount.getId());
             softly.assertThat(actualSenderAcc.getBalance()).isEqualByComparingTo(senderAccount.getBalance());
-            softly.assertThat(actualSenderAcc.getTransactions())
+            List<TransactionResponseDto> actualTransactions = accountSteps.getAccountTransactions(sender.getToken(), senderAccount.getId());
+            softly.assertThat(actualTransactions)
                     .filteredOn(actualTransaction -> actualTransaction.getType().equals(TRANSFER_OUT))
                     .isEmpty();
         });
@@ -391,7 +416,8 @@ public class TransferFundsTest extends BaseTest {
         StepLogger.apiStep("Проверить состояние счета получателя через API", () -> {
             CreateAccountResponseDto actualReceiverAcc = accountSteps.getClientAccountById(receiver.getToken(), receiverAccount.getId());
             softly.assertThat(actualReceiverAcc.getBalance()).isEqualByComparingTo(receiverAccount.getBalance());
-            softly.assertThat(actualReceiverAcc.getTransactions())
+            List<TransactionResponseDto> actualTransactions = accountSteps.getAccountTransactions(receiver.getToken(), receiverAccount.getId());
+            softly.assertThat(actualTransactions)
                     .filteredOn(actualTransaction -> actualTransaction.getType().equals(TRANSFER_IN))
                     .isEmpty();
         });
@@ -404,7 +430,8 @@ public class TransferFundsTest extends BaseTest {
         StepLogger.apiStep("Проверить состояние счета отправителя через API", () -> {
             CreateAccountResponseDto actualSenderAcc = accountSteps.getClientAccountById(sender.getToken(), senderAccount.getId());
             softly.assertThat(actualSenderAcc.getBalance()).isEqualByComparingTo(senderAccount.getBalance());
-            softly.assertThat(actualSenderAcc.getTransactions())
+            List<TransactionResponseDto> actualTransactions = accountSteps.getAccountTransactions(sender.getToken(), senderAccount.getId());
+            softly.assertThat(actualTransactions)
                     .filteredOn(actualTransaction -> actualTransaction.getType().equals(TRANSFER_OUT))
                     .isEmpty();
         });

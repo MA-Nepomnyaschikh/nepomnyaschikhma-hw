@@ -5,6 +5,7 @@ import models.api.request.CreateUserRequestDto;
 import models.api.response.CreateUserResponseDto;
 import models.api.response.ErrorResponseDto;
 import models.api.response.GetUserResponseDto;
+import models.api.response.ValidationErrorResponseDto;
 import models.db.Customer;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -78,14 +79,13 @@ public class DeleteUserTest extends BaseTest {
     public void adminCannotDeleteUserWithInvalidIdTest() {
         long invalidId = -1L;
 
-        String errorResponse = StepLogger.apiStep("Удалить пользователя", () -> {
+        ValidationErrorResponseDto errorResponse = StepLogger.apiStep("Удалить пользователя", () -> {
             return userSteps.deleteUserById(invalidId, RequestSpecs.authAsAdmin(), ResponseSpecs.notFound())
-                    .extract().asString();
+                    .extract().as(ValidationErrorResponseDto.class);
         });
 
         StepLogger.apiStep("Проверить ошибку при удалении пользователя", () -> {
-            softly.assertThat(errorResponse)
-                    .isEqualTo(DELETE_USER_INVALID_ID.formatted(invalidId));
+            softly.assertThat(errorResponse.getMessage()).isEqualTo(DELETE_USER_INVALID_ID.formatted(invalidId));
         });
     }
 

@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import models.api.enams.TransactionStatus;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -24,6 +25,9 @@ public class TransactionResponseDto extends BaseModel {
     private BigDecimal amount;
     private String type;
     private String timestamp;
+    private CreateAccountResponseDto relatedAccount;
+    private TransactionStatus status;
+    private boolean fraudCheckRequired;
     private long relatedAccountId;
 
     public void setAmount(BigDecimal amount) {

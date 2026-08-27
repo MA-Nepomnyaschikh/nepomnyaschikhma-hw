@@ -1,18 +1,15 @@
 package models.api.response;
 
-import models.BaseModel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import models.BaseModel;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class UpdateUserResponseDto extends BaseModel {
-    private long id;
-    private String username;
-    private String name;
-    private String role;
+public class ValidationErrorResponseDto extends BaseModel {
+    private String message;
 }

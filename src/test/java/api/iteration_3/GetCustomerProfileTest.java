@@ -1,9 +1,8 @@
 package api.iteration_3;
 
 import api.BaseTest;
-import models.api.response.CreateUserResponseDto;
 import models.api.response.ErrorResponseDto;
-import models.db.Account;
+import models.api.response.GetUserProfileResponseDto;
 import models.db.Customer;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -14,8 +13,6 @@ import supports.annotations.UserSession;
 import supports.comparisons.UserComparisonFields;
 import supports.context.TestUser;
 
-import java.util.List;
-
 import static testdata.expectedmessages.api.UserApiMessages.CREATE_USER_FORBIDDEN;
 
 @DisplayName("API. Получение профиля пользователя")
@@ -25,13 +22,14 @@ public class GetCustomerProfileTest extends BaseTest {
     @Test
     @UserSession
     public void authorizedUserCanGetProfileTest(TestUser user) {
-        CreateUserResponseDto actualUser = StepLogger.apiStep("Получить профиль пользователя", () -> {
+        GetUserProfileResponseDto actualUser = StepLogger.apiStep("Получить профиль пользователя", () -> {
             return userSteps.getCustomerProfile(user.getToken());
         });
 
         StepLogger.apiStep("Проверить профиль пользователя через API", () -> {
             softly.assertThat(actualUser)
                     .usingRecursiveComparison()
+                    .comparingOnlyFields(UserComparisonFields.GET_USER_PROFILE_RESPONSE_TO_CREATE_USER_RESPONSE.fields())
                     .isEqualTo(user.getResponseDto());
         });
 
@@ -41,11 +39,6 @@ public class GetCustomerProfileTest extends BaseTest {
                     .usingRecursiveComparison()
                     .comparingOnlyFields(UserComparisonFields.SELECT_USER_RESPONSE_TO_CREATE_USER_RESPONSE.fields())
                     .isEqualTo(user.getResponseDto());
-
-            List<Account> customerAccounts = databaseSteps.getCustomerAccounts(user.getId());
-            softly.assertThat(customerAccounts)
-                    .usingRecursiveComparison()
-                    .isEqualTo(actualUser.getAccounts());
         });
     }
 

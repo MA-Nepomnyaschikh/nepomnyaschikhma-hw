@@ -6,6 +6,7 @@ import io.restassured.specification.ResponseSpecification;
 import models.api.request.CreateUserRequestDto;
 import models.api.request.UpdateUserRequestDto;
 import models.api.response.CreateUserResponseDto;
+import models.api.response.GetUserProfileResponseDto;
 import models.api.response.GetUserResponseDto;
 import models.api.response.UpdateUserResponseDto;
 import requests.Endpoint;
@@ -16,6 +17,7 @@ import specs.ResponseSpecs;
 import supports.CleanupManager;
 import testdata.randommodelgenerator.RandomModelGenerator;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -60,8 +62,8 @@ public class UserSteps {
         return userDto;
     }
 
-    public CreateUserResponseDto getCustomerProfile(String token) {
-        return new ValidatableRestRequest<CreateUserResponseDto>(
+    public GetUserProfileResponseDto getCustomerProfile(String token) {
+        return new ValidatableRestRequest<GetUserProfileResponseDto>(
                 RequestSpecs.authAsUser(token),
                 Endpoint.GET_CUSTOMER_PROFILE,
                 ResponseSpecs.ok())
@@ -97,7 +99,10 @@ public class UserSteps {
                 RequestSpecs.authAsAdmin(),
                 Endpoint.GET_ALL_USERS,
                 ResponseSpecs.ok())
-                .getAll();
+                .getAll()
+                .stream()
+                .sorted(Comparator.comparing(GetUserResponseDto::getId))
+                .toList();
     }
 
     public ValidatableResponse getAllUsers(RequestSpecification requestSpec, ResponseSpecification responseSpec) {

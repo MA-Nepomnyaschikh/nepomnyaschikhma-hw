@@ -5,9 +5,7 @@ import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import models.api.request.DepositRequestDto;
 import models.api.request.TransferRequestDto;
-import models.api.response.CreateAccountResponseDto;
-import models.api.response.TransactionResponseDto;
-import models.api.response.TransferResponseDto;
+import models.api.response.*;
 import requests.Endpoint;
 import requests.RestRequest;
 import requests.ValidatableRestRequest;
@@ -15,6 +13,7 @@ import specs.RequestSpecs;
 import specs.ResponseSpecs;
 
 import java.math.BigDecimal;
+import java.util.Comparator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
@@ -40,46 +39,44 @@ public class AccountSteps {
                 .post();
     }
 
-    public CreateAccountResponseDto deposit(String token, DepositRequestDto dto) {
-        return new ValidatableRestRequest<CreateAccountResponseDto>(
+    public DepositResponseDto deposit(String token, DepositRequestDto dto) {
+        return new ValidatableRestRequest<DepositResponseDto>(
                 RequestSpecs.authAsUser(token),
                 Endpoint.DEPOSIT,
                 ResponseSpecs.ok())
                 .post(dto);
     }
 
-    public String deposit(DepositRequestDto dto, RequestSpecification requestSpec, ResponseSpecification responseSpec) {
+    public ValidatableResponse deposit(DepositRequestDto dto, RequestSpecification requestSpec, ResponseSpecification responseSpec) {
         return new RestRequest(
                 requestSpec,
                 Endpoint.DEPOSIT,
                 responseSpec)
-                .post(dto)
-                .extract().asString();
+                .post(dto);
     }
 
-    public CreateAccountResponseDto deposit(String token, long accountId, BigDecimal amount) {
+    public DepositResponseDto deposit(String token, long accountId, BigDecimal amount) {
         DepositRequestDto dto = generateDepositDto(accountId, amount);
         return deposit(token, dto);
     }
 
     public CreateAccountResponseDto createAccountWithBalance(String token, BigDecimal balance) {
-        double remainingBalance = balance.doubleValue();
-
-        if (remainingBalance <= 0) {
+        if (balance.signum() <= 0) {
             throw new IllegalArgumentException("Balance must be positive");
         }
 
         CreateAccountResponseDto account = createAccount(token);
+        BigDecimal remainingBalance = balance;
 
-        while (remainingBalance > 0) {
-            double depositAmount = Math.min(remainingBalance, MAX_DEPOSIT_AMOUNT.doubleValue());
+        while (remainingBalance.signum() > 0) {
+            BigDecimal depositAmount = remainingBalance.min(MAX_DEPOSIT_AMOUNT);
 
-            account = deposit(token, account.getId(), BigDecimal.valueOf(depositAmount));
+            deposit(token, account.getId(), depositAmount);
 
-            remainingBalance -= depositAmount;
+            remainingBalance = remainingBalance.subtract(depositAmount);
         }
 
-        return account;
+        return getClientAccountById(token, account.getId());
     }
 
     public List<CreateAccountResponseDto> getClientAccounts(String token) {
@@ -114,13 +111,28 @@ public class AccountSteps {
                 .post(dto);
     }
 
-    public String transfer(TransferRequestDto dto, RequestSpecification requestSpec, ResponseSpecification responseSpec) {
+    public TransferWithFraudCheckResponseDto transferWithFraudCheck(String token, TransferRequestDto dto) {
+        return new ValidatableRestRequest<TransferWithFraudCheckResponseDto>(
+                RequestSpecs.authAsUser(token),
+                Endpoint.TRANSFER_WITH_FRAUD_CHECK,
+                ResponseSpecs.ok())
+                .post(dto);
+    }
+
+    public ValidatableResponse transfer(TransferRequestDto dto, RequestSpecification requestSpec, ResponseSpecification responseSpec) {
         return new RestRequest(
                 requestSpec,
                 Endpoint.TRANSFER,
                 responseSpec)
-                .post(dto)
-                .extract().asString();
+                .post(dto);
+    }
+
+    public ValidatableResponse transferWithFraudCheck(TransferRequestDto dto, RequestSpecification requestSpec, ResponseSpecification responseSpec) {
+        return new RestRequest(
+                requestSpec,
+                Endpoint.TRANSFER_WITH_FRAUD_CHECK,
+                responseSpec)
+                .post(dto);
     }
 
     public List<TransactionResponseDto> getAccountTransactions(String token, long accountId) {
@@ -128,7 +140,10 @@ public class AccountSteps {
                 RequestSpecs.authAsUser(token),
                 Endpoint.GET_ACCOUNT_TRANSACTIONS,
                 ResponseSpecs.ok())
-                .getAll(accountId);
+                .getAll(accountId)
+                .stream()
+                .sorted(Comparator.comparing(TransactionResponseDto::getId))
+                .toList();
     }
 
     public ValidatableResponse getAccountTransactions(long accountId, RequestSpecification requestSpec, ResponseSpecification responseSpec) {
@@ -137,5 +152,13 @@ public class AccountSteps {
                 Endpoint.GET_ACCOUNT_TRANSACTIONS,
                 responseSpec)
                 .getAll(accountId);
+    }
+
+    public TransactionResponseDto getAccountTransactionById(String token, long accountId, long transactionId) {
+        return getAccountTransactions(token, accountId)
+                .stream()
+                .filter(transaction -> transaction.getId() == transactionId)
+                .findFirst()
+                .orElseThrow();
     }
 }

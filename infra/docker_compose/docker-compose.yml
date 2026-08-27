@@ -19,21 +19,21 @@ services:
       retries: 5
 
   backend:
-    image: nobugsme/nbank:with_database_with_fix
+    image: nobugsme/nbank:preprod_version
     ports:
       - "4111:4111"
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/nbank
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=postgres
-      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.postgresql.Driver
+      - FRAUD_DETECTION_SERVICE_URL=http://host.docker.internal:9090
     depends_on:
       - postgres
     networks:
       - nbank-network
 
   frontend:
-    image: nobugsme/nbank-ui:with_nginx
+    image: nobugsme/nbank-ui:preprod_version
     ports:
       - "3000:80"
     depends_on:

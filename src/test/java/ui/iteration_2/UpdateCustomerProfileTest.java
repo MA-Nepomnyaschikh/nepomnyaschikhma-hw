@@ -1,6 +1,7 @@
 package ui.iteration_2;
 
 import models.api.response.CreateUserResponseDto;
+import models.api.response.GetUserProfileResponseDto;
 import models.api.response.GetUserResponseDto;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -49,7 +50,7 @@ public class UpdateCustomerProfileTest extends BaseUiTest {
         });
 
         StepLogger.apiStep("Проверить изменение имени пользователя через API", () -> {
-            CreateUserResponseDto actualUser = userSteps.getCustomerProfile(user.getToken());
+            GetUserProfileResponseDto actualUser = userSteps.getCustomerProfile(user.getToken());
             softly.assertThat(actualUser.getName()).isEqualTo(newName);
         });
     }
@@ -84,7 +85,7 @@ public class UpdateCustomerProfileTest extends BaseUiTest {
         });
 
         StepLogger.apiStep("Проверить отсутствие изменений пользователя через API", () -> {
-            CreateUserResponseDto actualUser = userSteps.getCustomerProfile(user.getToken());
+            GetUserProfileResponseDto actualUser = userSteps.getCustomerProfile(user.getToken());
             softly.assertThat(actualUser.getName()).isNull();
         });
     }

@@ -49,13 +49,19 @@ public enum Endpoint {
     DEPOSIT(
             "/accounts/deposit",
             DepositRequestDto.class,
-            CreateAccountResponseDto.class
+            DepositResponseDto.class
     ),
 
     TRANSFER(
             "/accounts/transfer",
             TransferRequestDto.class,
             TransferResponseDto.class
+    ),
+
+    TRANSFER_WITH_FRAUD_CHECK(
+            "/accounts/transfer-with-fraud-check",
+            TransferRequestDto.class,
+            TransferWithFraudCheckResponseDto.class
     ),
 
     UPDATE_CUSTOMER_PROFILE(
@@ -67,7 +73,7 @@ public enum Endpoint {
     GET_CUSTOMER_PROFILE(
             "/customer/profile",
             null,
-            CreateUserResponseDto.class
+            GetUserProfileResponseDto.class
     ),
 
     DELETE_USER(

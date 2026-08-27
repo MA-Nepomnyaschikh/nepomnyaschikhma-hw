@@ -11,6 +11,6 @@ public class AccountUiMessages {
 
     public static final String TRANSFER_SUCCESSFULLY = "✅ Successfully transferred $%s to account %s!";
     public static final String TRANSFER_REQUIRED_FIELDS_NOT_FILLED = "❌ Please fill all fields and confirm.";
-    public static final String TRANSFER_AMOUNT_BELOW_MIN_LIMIT = "❌ Error: Invalid transfer: insufficient funds or invalid accounts";
+    public static final String TRANSFER_AMOUNT_BELOW_MIN_LIMIT = "Invalid transfer: insufficient funds or invalid accounts";
 
 }

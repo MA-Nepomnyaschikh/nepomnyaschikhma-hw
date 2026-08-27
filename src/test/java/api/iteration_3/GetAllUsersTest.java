@@ -26,10 +26,7 @@ public class GetAllUsersTest extends BaseTest {
     @UserSession
     public void authorizedUserWithAdminPermissionsCanGetUsersListTest(TestUser user) {
         List<GetUserResponseDto> actualUsersList = StepLogger.apiStep("Получить список пользователей", () -> {
-            return userSteps.getAllUsers()
-                    .stream()
-                    .sorted(Comparator.comparing(GetUserResponseDto::getId))
-                    .toList();
+            return userSteps.getAllUsers();
         });
 
         StepLogger.apiStep("Проверить список пользователей через API", () -> {

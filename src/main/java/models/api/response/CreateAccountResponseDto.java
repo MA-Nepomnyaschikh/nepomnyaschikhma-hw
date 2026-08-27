@@ -17,7 +17,6 @@ public class CreateAccountResponseDto extends BaseModel {
     private long id;
     private String accountNumber;
     private BigDecimal balance;
-    private List<TransactionResponseDto> transactions;
 
     public void setBalance(BigDecimal balance) {
         this.balance = balance == null

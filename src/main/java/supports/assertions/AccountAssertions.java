@@ -1,15 +1,15 @@
 package supports.assertions;
 
 import models.api.request.TransferRequestDto;
-import models.api.response.CreateAccountResponseDto;
-import models.api.response.TransferResponseDto;
+import models.api.response.*;
 import org.assertj.core.api.SoftAssertions;
 
 import java.math.BigDecimal;
+import java.util.List;
 
+import static models.api.enams.TransactionStatus.COMPLETED;
 import static testdata.AccountData.*;
 import static testdata.expectedmessages.api.AccountApiMessages.TRANSFER_SUCCESSFUL;
-import static org.assertj.core.api.Assertions.within;
 
 public final class AccountAssertions {
 
@@ -19,23 +19,33 @@ public final class AccountAssertions {
         softly.assertThat(createdAccount.getId()).isNotNull().isPositive();
         softly.assertThat(createdAccount.getBalance()).isZero();
         softly.assertThat(createdAccount.getAccountNumber()).isNotNull().isNotBlank();
-        softly.assertThat(createdAccount.getTransactions()).isEmpty();
     }
 
     public static void assertDepositCompleted(SoftAssertions softly,
-                                              CreateAccountResponseDto accountAfterDeposit,
+                                              DepositResponseDto depositResponse,
                                               CreateAccountResponseDto accountBeforeDeposit,
                                               BigDecimal depositAmount) {
 
-        softly.assertThat(accountAfterDeposit.getId()).isEqualTo(accountBeforeDeposit.getId());
-        softly.assertThat(accountAfterDeposit.getAccountNumber()).isEqualTo(accountBeforeDeposit.getAccountNumber());
-        softly.assertThat(accountAfterDeposit.getBalance()).isEqualTo(accountBeforeDeposit.getBalance().add(depositAmount));
-        softly.assertThat(accountAfterDeposit.getTransactions())
+        softly.assertThat(depositResponse.getId()).isEqualTo(accountBeforeDeposit.getId());
+        softly.assertThat(depositResponse.getAccountNumber()).isEqualTo(accountBeforeDeposit.getAccountNumber());
+        softly.assertThat(depositResponse.getBalance()).isEqualTo(accountBeforeDeposit.getBalance().add(depositAmount));
+        softly.assertThat(depositResponse.getDepositAmount()).isEqualByComparingTo(depositAmount);
+        softly.assertThat(depositResponse.getTransactionId()).isPositive();
+    }
+
+    public static void assertDepositTransaction(SoftAssertions softly,
+                                              List<TransactionResponseDto> transaction,
+                                              DepositResponseDto depositResponse,
+                                              BigDecimal depositAmount) {
+
+        softly.assertThat(transaction).filteredOn(actualTransaction -> actualTransaction.getType().equals(DEPOSIT))
                 .singleElement()
-                .satisfies(transaction -> {
-                    softly.assertThat(transaction.getAmount()).isEqualByComparingTo(depositAmount);
-                    softly.assertThat(transaction.getType()).isEqualTo(DEPOSIT);
-                    softly.assertThat(transaction.getRelatedAccountId()).isEqualTo(accountBeforeDeposit.getId());
+                .satisfies(actualTransaction -> {
+                    softly.assertThat(actualTransaction.getId()).isEqualTo(depositResponse.getTransactionId());
+                    softly.assertThat(actualTransaction.getRelatedAccountId()).isEqualTo(depositResponse.getId());
+                    softly.assertThat(actualTransaction.getAmount()).isEqualByComparingTo(depositAmount);
+                    softly.assertThat(actualTransaction.getStatus()).isEqualTo(COMPLETED);
+                    softly.assertThat(actualTransaction.isFraudCheckRequired()).isFalse();
                 });
     }
 
@@ -50,32 +60,34 @@ public final class AccountAssertions {
     }
 
     public static void assertTransferOutTransaction(SoftAssertions softly,
-                                                    CreateAccountResponseDto senderAccount,
-                                                    CreateAccountResponseDto actualSenderAcc,
-                                                    TransferRequestDto transferDto) {
+                                                    List<TransactionResponseDto> actualTransactions,
+                                                    TransferResponseDto transferResponseDto) {
 
-        softly.assertThat(actualSenderAcc.getBalance()).isEqualTo(senderAccount.getBalance().subtract(transferDto.getAmount()));
-        softly.assertThat(actualSenderAcc.getTransactions())
+        softly.assertThat(actualTransactions)
                 .filteredOn(actualTransaction -> actualTransaction.getType().equals(TRANSFER_OUT))
                 .singleElement()
                 .satisfies(actualTransaction -> {
-                    softly.assertThat(actualTransaction.getAmount()).isEqualByComparingTo(transferDto.getAmount());
-                    softly.assertThat(actualTransaction.getRelatedAccountId()).isEqualTo(transferDto.getReceiverAccountId());
+                    softly.assertThat(actualTransaction.getAmount()).isEqualByComparingTo(transferResponseDto.getAmount());
+                    softly.assertThat(actualTransaction.getRelatedAccountId()).isEqualTo(transferResponseDto.getReceiverAccountId());
+                    softly.assertThat(actualTransaction.getId()).isPositive();
+                    softly.assertThat(actualTransaction.getStatus()).isEqualTo(COMPLETED);
+                    softly.assertThat(actualTransaction.isFraudCheckRequired()).isFalse();
                 });
     }
 
     public static void assertTransferInTransaction(SoftAssertions softly,
-                                                   CreateAccountResponseDto receiverAccount,
-                                                   CreateAccountResponseDto actualReceiverAcc,
-                                                   TransferRequestDto transferDto) {
+                                                   List<TransactionResponseDto> actualTransactions,
+                                                   TransferResponseDto transferResponseDto) {
 
-        softly.assertThat(actualReceiverAcc.getBalance()).isEqualTo(receiverAccount.getBalance().add(transferDto.getAmount()));
-        softly.assertThat(actualReceiverAcc.getTransactions())
+        softly.assertThat(actualTransactions)
                 .filteredOn(actualTransaction -> actualTransaction.getType().equals(TRANSFER_IN))
                 .singleElement()
                 .satisfies(actualTransaction -> {
-                    softly.assertThat(actualTransaction.getAmount()).isEqualByComparingTo(transferDto.getAmount());
-                    softly.assertThat(actualTransaction.getRelatedAccountId()).isEqualTo(transferDto.getSenderAccountId());
+                    softly.assertThat(actualTransaction.getAmount()).isEqualByComparingTo(transferResponseDto.getAmount());
+                    softly.assertThat(actualTransaction.getRelatedAccountId()).isEqualTo(transferResponseDto.getSenderAccountId());
+                    softly.assertThat(actualTransaction.getId()).isPositive();
+                    softly.assertThat(actualTransaction.getStatus()).isEqualTo(COMPLETED);
+                    softly.assertThat(actualTransaction.isFraudCheckRequired()).isFalse();
                 });
     }
 }

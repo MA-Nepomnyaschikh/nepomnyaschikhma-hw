@@ -1,0 +1,20 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPath": "/fraud-check"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "status": "SUCCESS",
+      "decision": "BLOCKED",
+      "riskScore": 0.95,
+      "reason": "Suspicious activity detected",
+      "requiresManualReview": false,
+      "additionalVerificationRequired": false
+    }
+  }
+}

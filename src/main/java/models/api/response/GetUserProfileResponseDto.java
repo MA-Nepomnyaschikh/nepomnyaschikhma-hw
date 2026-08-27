@@ -12,13 +12,11 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class GetUserResponseDto extends BaseModel {
+public class GetUserProfileResponseDto extends BaseModel {
 
     private long id;
     private String username;
-    private String password;
     private String name;
     private String role;
-    private List<CreateAccountResponseDto> accounts;
 
 }

@@ -13,6 +13,6 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @Builder
 public class DepositRequestDto extends BaseModel {
-    private long id;
-    private BigDecimal balance;
+    private long accountId;
+    private BigDecimal amount;
 }

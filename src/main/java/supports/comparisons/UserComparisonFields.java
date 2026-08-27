@@ -7,6 +7,7 @@ public enum UserComparisonFields implements ComparisonFields {
     GET_USER_RESPONSE_TO_CREATE_USER_RESPONSE("id", "username", "name", "role", "accounts"),
     SELECT_USER_RESPONSE_TO_CREATE_USER_RESPONSE("id", "username", "password", "name", "role"),
     SELECT_USER_RESPONSE_TO_GET_USER_RESPONSE("id", "username", "name", "role"),
+    GET_USER_PROFILE_RESPONSE_TO_CREATE_USER_RESPONSE("id", "username", "name", "role"),
 
     LOGIN_USER_RESPONSE_TO_CREATE_USER_REQUEST("username","role");
 

@@ -35,8 +35,8 @@ public class AccountData {
 
     public static DepositRequestDto generateDepositDto(long accountId, BigDecimal amount) {
         return DepositRequestDto.builder()
-                .id(accountId)
-                .balance(amount)
+                .accountId(accountId)
+                .amount(amount)
                 .build();
     }
 

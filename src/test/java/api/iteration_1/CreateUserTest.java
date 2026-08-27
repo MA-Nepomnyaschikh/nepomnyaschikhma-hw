@@ -6,6 +6,7 @@ import models.api.request.CreateUserRequestDto;
 import models.api.response.CreateUserResponseDto;
 import models.api.response.ErrorResponseDto;
 import models.api.response.GetUserResponseDto;
+import models.api.response.ValidationErrorResponseDto;
 import models.db.Customer;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -123,14 +124,14 @@ public class CreateUserTest extends BaseTest {
             userSteps.createUser(userDto);
         });
 
-        String errorResponse = StepLogger.apiStep("Создать пользователя с таким же username", () -> {
+        ValidationErrorResponseDto errorResponse = StepLogger.apiStep("Создать пользователя с таким же username", () -> {
             return userSteps.createUser(
                     userDto, RequestSpecs.authAsAdmin(), ResponseSpecs.badRequest())
-                    .extract().asString();
+                    .extract().as(ValidationErrorResponseDto.class);
         });
 
         StepLogger.apiStep("Проверить ошибку при создании пользователя", () -> {
-            softly.assertThat(errorResponse)
+            softly.assertThat(errorResponse.getMessage())
                     .isEqualTo(CREATE_USER_DUPLICATE_USERNAME.formatted(userDto.getUsername()));
         });
 
