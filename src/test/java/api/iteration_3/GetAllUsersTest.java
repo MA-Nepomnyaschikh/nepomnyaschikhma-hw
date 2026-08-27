@@ -13,7 +13,6 @@ import supports.annotations.UserSession;
 import supports.comparisons.UserComparisonFields;
 import supports.context.TestUser;
 
-import java.util.Comparator;
 import java.util.List;
 
 import static testdata.expectedmessages.api.UserApiMessages.GET_USERS_LIST_FORBIDDEN;

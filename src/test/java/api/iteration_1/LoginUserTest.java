@@ -4,7 +4,6 @@ import api.BaseTest;
 import io.restassured.response.ValidatableResponse;
 import models.api.request.CreateUserRequestDto;
 import models.api.request.LoginUserRequestDto;
-import models.api.response.ErrorResponseDto;
 import models.api.response.ValidationErrorResponseDto;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

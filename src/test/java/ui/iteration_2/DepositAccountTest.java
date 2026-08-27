@@ -11,7 +11,6 @@ import pages.UserDashboardPage;
 import supports.StepLogger;
 import supports.annotations.Browsers;
 import supports.annotations.UserSession;
-import supports.assertions.AccountAssertions;
 import supports.context.TestUser;
 import ui.BaseUiTest;
 
