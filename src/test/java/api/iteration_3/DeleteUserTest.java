@@ -1,9 +1,11 @@
 package api.iteration_3;
 
 import api.BaseTest;
-import models.request.CreateUserRequestDto;
-import models.response.CreateUserResponseDto;
-import models.response.ErrorResponseDto;
+import models.api.request.CreateUserRequestDto;
+import models.api.response.CreateUserResponseDto;
+import models.api.response.ErrorResponseDto;
+import models.api.response.GetUserResponseDto;
+import models.db.Customer;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -56,10 +58,17 @@ public class DeleteUserTest extends BaseTest {
                     .isEqualTo(DELETE_USER_SUCCESSFULLY.formatted(createdUser.getId()));
         });
 
-        StepLogger.apiStep("Проверить отсутствие пользователя в системе", () -> {
-            List<CreateUserResponseDto> actualUsers = userSteps.getAllUsers();
+        StepLogger.apiStep("Проверить отсутствие пользователя в системе через API", () -> {
+            List<GetUserResponseDto> actualUsers = userSteps.getAllUsers();
             softly.assertThat(actualUsers)
                     .filteredOn(user -> user.getId() == createdUser.getId())
+                    .isEmpty();
+        });
+
+        StepLogger.apiStep("Проверить отсутствие пользователя в системе через БД", () -> {
+            List<Customer> actualUsersFromDb = databaseSteps.getAllCustomers();
+            softly.assertThat(actualUsersFromDb)
+                    .filteredOn(customer -> customer.getId() == createdUser.getId())
                     .isEmpty();
         });
     }
@@ -92,10 +101,17 @@ public class DeleteUserTest extends BaseTest {
             userSteps.deleteUserById(createdUser.getId(), RequestSpecs.unauth(), ResponseSpecs.unauthorized());
         });
 
-        StepLogger.apiStep("Проверить наличие пользователя в системе", () -> {
-            List<CreateUserResponseDto> actualUsers = userSteps.getAllUsers();
+        StepLogger.apiStep("Проверить наличие пользователя в системе через API", () -> {
+            List<GetUserResponseDto> actualUsers = userSteps.getAllUsers();
             softly.assertThat(actualUsers)
                     .filteredOn(user -> user.getId() == createdUser.getId())
+                    .singleElement();
+        });
+
+        StepLogger.apiStep("Проверить отсутствие пользователя в системе через БД", () -> {
+            List<Customer> actualUsersFromDb = databaseSteps.getAllCustomers();
+            softly.assertThat(actualUsersFromDb)
+                    .filteredOn(customer -> customer.getId() == createdUser.getId())
                     .singleElement();
         });
     }
@@ -119,10 +135,17 @@ public class DeleteUserTest extends BaseTest {
             softly.assertThat(errorResponse.getError()).isEqualTo(CREATE_USER_FORBIDDEN);
         });
 
-        StepLogger.apiStep("Проверить наличие пользователя в системе", () -> {
-            List<CreateUserResponseDto> actualUsers = userSteps.getAllUsers();
+        StepLogger.apiStep("Проверить наличие пользователя в системе через API", () -> {
+            List<GetUserResponseDto> actualUsers = userSteps.getAllUsers();
             softly.assertThat(actualUsers)
                     .filteredOn(user -> user.getId() == createdUser.getId())
+                    .singleElement();
+        });
+
+        StepLogger.apiStep("Проверить отсутствие пользователя в системе через БД", () -> {
+            List<Customer> actualUsersFromDb = databaseSteps.getAllCustomers();
+            softly.assertThat(actualUsersFromDb)
+                    .filteredOn(customer -> customer.getId() == createdUser.getId())
                     .singleElement();
         });
     }

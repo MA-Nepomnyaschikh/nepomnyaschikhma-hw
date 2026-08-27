@@ -1,6 +1,6 @@
 package pages;
 
-import models.request.CreateUserRequestDto;
+import models.api.request.CreateUserRequestDto;
 import pages.elements.UserBadge;
 import com.codeborne.selenide.ElementsCollection;
 import com.codeborne.selenide.Selectors;

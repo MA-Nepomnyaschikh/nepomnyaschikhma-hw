@@ -3,10 +3,11 @@ package steps;
 import io.restassured.response.ValidatableResponse;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
-import models.request.CreateUserRequestDto;
-import models.request.UpdateUserRequestDto;
-import models.response.CreateUserResponseDto;
-import models.response.UpdateUserResponseDto;
+import models.api.request.CreateUserRequestDto;
+import models.api.request.UpdateUserRequestDto;
+import models.api.response.CreateUserResponseDto;
+import models.api.response.GetUserResponseDto;
+import models.api.response.UpdateUserResponseDto;
 import requests.Endpoint;
 import requests.RestRequest;
 import requests.ValidatableRestRequest;
@@ -91,8 +92,8 @@ public class UserSteps {
                 .put(dto);
     }
 
-    public List<CreateUserResponseDto> getAllUsers() {
-        return new ValidatableRestRequest<CreateUserResponseDto>(
+    public List<GetUserResponseDto> getAllUsers() {
+        return new ValidatableRestRequest<GetUserResponseDto>(
                 RequestSpecs.authAsAdmin(),
                 Endpoint.GET_ALL_USERS,
                 ResponseSpecs.ok())
@@ -107,16 +108,16 @@ public class UserSteps {
                 .getAll();
     }
 
-    public CreateUserResponseDto getUserById(long id) {
-        List<CreateUserResponseDto> usersList = getAllUsers();
+    public GetUserResponseDto getUserById(long id) {
+        List<GetUserResponseDto> usersList = getAllUsers();
         return usersList.stream()
                 .filter(user -> user.getId() == id)
                 .findFirst()
                 .orElseThrow(() -> new NoSuchElementException("User with id: " + id + " not found"));
     }
 
-    public CreateUserResponseDto getUserByUsername(String username) {
-        List<CreateUserResponseDto> usersList = getAllUsers();
+    public GetUserResponseDto getUserByUsername(String username) {
+        List<GetUserResponseDto> usersList = getAllUsers();
         return usersList.stream()
                 .filter(user -> user.getUsername().equals(username))
                 .findFirst()

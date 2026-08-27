@@ -2,9 +2,11 @@ package api.iteration_1;
 
 import api.BaseTest;
 import io.restassured.common.mapper.TypeRef;
-import models.request.CreateUserRequestDto;
-import models.response.CreateUserResponseDto;
-import models.response.ErrorResponseDto;
+import models.api.request.CreateUserRequestDto;
+import models.api.response.CreateUserResponseDto;
+import models.api.response.ErrorResponseDto;
+import models.api.response.GetUserResponseDto;
+import models.db.Customer;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -14,6 +16,7 @@ import specs.RequestSpecs;
 import specs.ResponseSpecs;
 import supports.StepLogger;
 import supports.assertions.UserAssertions;
+import supports.comparisons.UserComparisonFields;
 import testdata.randommodelgenerator.RandomModelGenerator;
 
 import java.util.List;
@@ -41,14 +44,23 @@ public class CreateUserTest extends BaseTest {
             return userSteps.createUser(userDto);
         });
 
-        StepLogger.apiStep("Проверить создание пользователя", () -> {
-            UserAssertions.assertUserCreated(softly, createdUser, userDto);
+        StepLogger.apiStep("Проверить результат создания пользователя", () -> {
+            UserAssertions.assertCreateUserCompleted(softly, createdUser, userDto);
         });
 
-        StepLogger.apiStep("Проверить наличие пользователя в системе", () -> {
-            CreateUserResponseDto actualUser = userSteps.getUserById(createdUser.getId());
+        StepLogger.apiStep("Проверить создание пользователя через API", () -> {
+            GetUserResponseDto actualUser = userSteps.getUserById(createdUser.getId());
             softly.assertThat(actualUser)
                     .usingRecursiveComparison()
+                    .comparingOnlyFields(UserComparisonFields.GET_USER_RESPONSE_TO_CREATE_USER_RESPONSE.fields())
+                    .isEqualTo(createdUser);
+        });
+
+        StepLogger.apiStep("Проверить создание пользователя через БД", () -> {
+            Customer customer = databaseSteps.getCustomerById(createdUser.getId());
+            softly.assertThat(customer)
+                    .usingRecursiveComparison()
+                    .comparingOnlyFields(UserComparisonFields.SELECT_USER_RESPONSE_TO_CREATE_USER_RESPONSE.fields())
                     .isEqualTo(createdUser);
         });
     }
@@ -89,11 +101,16 @@ public class CreateUserTest extends BaseTest {
             softly.assertThat(errors.get(errorKey)).containsExactlyInAnyOrderElementsOf(errorValues);
         });
 
-        StepLogger.apiStep("Проверить отсутствие пользователя в системе", () -> {
-            List<CreateUserResponseDto> allUsers = userSteps.getAllUsers();
+        StepLogger.apiStep("Проверить отсутствие пользователя через API", () -> {
+            List<GetUserResponseDto> allUsers = userSteps.getAllUsers();
             softly.assertThat(allUsers)
                     .filteredOn(actualUser -> actualUser.getUsername().equals(userDto.getUsername()))
                     .isEmpty();
+        });
+
+        StepLogger.apiStep("Проверить отсутствие пользователя через БД", () -> {
+            Customer customer = databaseSteps.getCustomerByUsername(userDto.getUsername());
+            softly.assertThat(customer).isNull();
         });
     }
 
@@ -117,10 +134,17 @@ public class CreateUserTest extends BaseTest {
                     .isEqualTo(CREATE_USER_DUPLICATE_USERNAME.formatted(userDto.getUsername()));
         });
 
-        StepLogger.apiStep("Проверить отсутствие пользователя в системе", () -> {
-            List<CreateUserResponseDto> allUsers = userSteps.getAllUsers();
+        StepLogger.apiStep("Проверить отсутствие пользователя через API", () -> {
+            List<GetUserResponseDto> allUsers = userSteps.getAllUsers();
             softly.assertThat(allUsers)
                     .filteredOn(actualUser -> actualUser.getUsername().equals(userDto.getUsername()))
+                    .singleElement();
+        });
+
+        StepLogger.apiStep("Проверить отсутствие пользователя через БД", () -> {
+            List<Customer> customers = databaseSteps.getAllCustomers();
+            softly.assertThat(customers)
+                    .filteredOn(customer -> customer.getUsername().equals(userDto.getUsername()))
                     .singleElement();
         });
     }
@@ -134,11 +158,16 @@ public class CreateUserTest extends BaseTest {
                     userDto, RequestSpecs.unauth(), ResponseSpecs.unauthorized());
         });
 
-        StepLogger.apiStep("Проверить отсутствие пользователя в системе", () -> {
-            List<CreateUserResponseDto> allUsers = userSteps.getAllUsers();
+        StepLogger.apiStep("Проверить отсутствие пользователя через API", () -> {
+            List<GetUserResponseDto> allUsers = userSteps.getAllUsers();
             softly.assertThat(allUsers)
                     .filteredOn(actualUser -> actualUser.getUsername().equals(userDto.getUsername()))
                     .isEmpty();
+        });
+
+        StepLogger.apiStep("Проверить отсутствие пользователя через БД", () -> {
+            Customer customer = databaseSteps.getCustomerByUsername(userDto.getUsername());
+            softly.assertThat(customer).isNull();
         });
     }
 
@@ -164,11 +193,16 @@ public class CreateUserTest extends BaseTest {
             softly.assertThat(errorResponse.getError()).isEqualTo(DELETE_USER_FORBIDDEN);
         });
 
-        StepLogger.apiStep("Проверить отсутствие пользователя в системе", () -> {
-            List<CreateUserResponseDto> allUsers = userSteps.getAllUsers();
+        StepLogger.apiStep("Проверить отсутствие пользователя через API", () -> {
+            List<GetUserResponseDto> allUsers = userSteps.getAllUsers();
             softly.assertThat(allUsers)
                     .filteredOn(actualUser -> actualUser.getUsername().equals(userDto.getUsername()))
                     .isEmpty();
+        });
+
+        StepLogger.apiStep("Проверить отсутствие пользователя через БД", () -> {
+            Customer customer = databaseSteps.getCustomerByUsername(userDto.getUsername());
+            softly.assertThat(customer).isNull();
         });
     }
 }

@@ -1,6 +1,6 @@
 package ui.iteration_2;
 
-import models.response.CreateAccountResponseDto;
+import models.api.response.CreateAccountResponseDto;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -14,6 +14,7 @@ import supports.assertions.AccountAssertions;
 import supports.context.TestUser;
 import ui.BaseUiTest;
 
+import java.math.BigDecimal;
 import java.util.stream.Stream;
 
 import static testdata.AccountData.getRandomValidDepositAmount;
@@ -27,7 +28,7 @@ public class DepositAccountTest extends BaseUiTest {
     @Browsers(values = {"chrome"})
     @UserSession(needBrowserLogin = true)
     public void userCanDepositAccountTest(TestUser user) {
-        double depositAmount = getRandomValidDepositAmount();
+        BigDecimal depositAmount = getRandomValidDepositAmount();
 
         CreateAccountResponseDto userAccount =  StepLogger.apiStep("Создать счет", () -> {
             return accountSteps.createAccount(user.getToken());
@@ -55,9 +56,9 @@ public class DepositAccountTest extends BaseUiTest {
 
     public static Stream<Arguments> invalidAmountProvider() {
         return Stream.of(
-                Arguments.of("Сумма пополнения больше максимальной", 5000.01, DEPOSIT_AMOUNT_ABOVE_MAX_LIMIT),
-                Arguments.of("Сумма пополнения равна 0", 0, DEPOSIT_AMOUNT_BELOW_MIN_LIMIT),
-                Arguments.of("Сумма пополнения меньше минимальной", -0.01, DEPOSIT_AMOUNT_BELOW_MIN_LIMIT)
+                Arguments.of("Сумма пополнения больше максимальной", BigDecimal.valueOf(5000.01), DEPOSIT_AMOUNT_ABOVE_MAX_LIMIT),
+                Arguments.of("Сумма пополнения равна 0", BigDecimal.valueOf(0), DEPOSIT_AMOUNT_BELOW_MIN_LIMIT),
+                Arguments.of("Сумма пополнения меньше минимальной", BigDecimal.valueOf(-0.01), DEPOSIT_AMOUNT_BELOW_MIN_LIMIT)
         );
     }
 
@@ -66,7 +67,7 @@ public class DepositAccountTest extends BaseUiTest {
     @ParameterizedTest(name = "{0}")
     @Browsers(values = {"chrome"})
     @UserSession(needBrowserLogin = true)
-    public void userCannotDepositAccountWithInvalidAmountTest(String testName, double invalidAmount, String errorMessage, TestUser user) {
+    public void userCannotDepositAccountWithInvalidAmountTest(String testName, BigDecimal invalidAmount, String errorMessage, TestUser user) {
         CreateAccountResponseDto userAccount =  StepLogger.apiStep("Создать счет", () -> {
             return accountSteps.createAccount(user.getToken());
         });
@@ -97,7 +98,7 @@ public class DepositAccountTest extends BaseUiTest {
     @Browsers(values = {"chrome"})
     @UserSession(needBrowserLogin = true)
     public void userCannotDepositAccountWithoutAccountNumberTest(TestUser user) {
-        double depositAmount = getRandomValidDepositAmount();
+        BigDecimal depositAmount = getRandomValidDepositAmount();
 
         CreateAccountResponseDto userAccount =  StepLogger.apiStep("Создать счет", () -> {
             return accountSteps.createAccount(user.getToken());

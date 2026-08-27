@@ -1,4 +1,4 @@
-package models.request;
+package models.api.response;
 
 import models.BaseModel;
 import lombok.AllArgsConstructor;
@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class DepositRequestDto extends BaseModel {
-    private int id;
-    private double balance;
+public class UpdateUserResponseDto extends BaseModel {
+    private CreateUserResponseDto customer;
+    private String message;
 }

@@ -1,6 +1,7 @@
 package ui.iteration_2;
 
-import models.response.CreateUserResponseDto;
+import models.api.response.CreateUserResponseDto;
+import models.api.response.GetUserResponseDto;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import pages.ProfilePage;

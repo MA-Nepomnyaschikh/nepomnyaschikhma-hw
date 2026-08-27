@@ -1,16 +1,19 @@
 package api.iteration_3;
 
 import api.BaseTest;
-import models.response.CreateUserResponseDto;
-import models.response.ErrorResponseDto;
+import models.api.response.ErrorResponseDto;
+import models.api.response.GetUserResponseDto;
+import models.db.Customer;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import specs.RequestSpecs;
 import specs.ResponseSpecs;
 import supports.StepLogger;
 import supports.annotations.UserSession;
+import supports.comparisons.UserComparisonFields;
 import supports.context.TestUser;
 
+import java.util.Comparator;
 import java.util.List;
 
 import static testdata.expectedmessages.api.UserApiMessages.GET_USERS_LIST_FORBIDDEN;
@@ -22,14 +25,27 @@ public class GetAllUsersTest extends BaseTest {
     @Test
     @UserSession
     public void authorizedUserWithAdminPermissionsCanGetUsersListTest(TestUser user) {
-        List<CreateUserResponseDto> actualUsersList = StepLogger.apiStep("Получить список пользователей", () -> {
-            return userSteps.getAllUsers();
+        List<GetUserResponseDto> actualUsersList = StepLogger.apiStep("Получить список пользователей", () -> {
+            return userSteps.getAllUsers()
+                    .stream()
+                    .sorted(Comparator.comparing(GetUserResponseDto::getId))
+                    .toList();
         });
 
-        List<CreateUserResponseDto> expectedUserList = List.of(user.getResponseDto());
+        StepLogger.apiStep("Проверить список пользователей через API", () -> {
+        softly.assertThat(actualUsersList)
+                .anySatisfy(actualUser -> {
+                    softly.assertThat(actualUser.getId()).isEqualTo(user.getId());
+                    softly.assertThat(actualUser.getUsername()).isEqualTo(user.getUsername());
+                });
+        });
 
-        StepLogger.apiStep("Проверить полученный список пользователей", () -> {
-            softly.assertThat(actualUsersList).isEqualTo(expectedUserList);
+        StepLogger.apiStep("Проверить список пользователей через БД", () -> {
+            List<Customer> expectedUsersListFromDb = databaseSteps.getAllCustomers();
+
+            softly.assertThat(expectedUsersListFromDb)
+                    .usingRecursiveFieldByFieldElementComparatorOnFields(UserComparisonFields.SELECT_USER_RESPONSE_TO_GET_USER_RESPONSE.fields())
+                    .isEqualTo(actualUsersList);
         });
     }
 

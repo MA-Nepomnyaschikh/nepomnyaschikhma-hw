@@ -1,7 +1,8 @@
 package ui.iteration_1;
 
-import models.request.CreateUserRequestDto;
-import models.response.CreateUserResponseDto;
+import models.api.request.CreateUserRequestDto;
+import models.api.response.CreateUserResponseDto;
+import models.api.response.GetUserResponseDto;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import pages.AdminPanelPage;
@@ -48,7 +49,7 @@ public class CreateUserTest extends BaseUiTest {
         });
 
         StepLogger.apiStep("Проверить создание пользователя через API", () -> {
-            CreateUserResponseDto actualUser = userSteps.getUserByUsername(user.getUsername());
+            GetUserResponseDto actualUser = userSteps.getUserByUsername(user.getUsername());
             UserAssertions.assertUserCreated(softly, actualUser, user);
             cleanupManager.register(() -> userSteps.deleteUserById(actualUser.getId()));
         });
@@ -83,7 +84,7 @@ public class CreateUserTest extends BaseUiTest {
         });
 
         StepLogger.apiStep("Проверить отсутствие пользователя через API", () -> {
-            List<CreateUserResponseDto> allUsers = userSteps.getAllUsers();
+            List<GetUserResponseDto> allUsers = userSteps.getAllUsers();
             softly.assertThat(allUsers)
                     .filteredOn(actualUser -> actualUser.getUsername().equals(user.getUsername()))
                     .isEmpty();

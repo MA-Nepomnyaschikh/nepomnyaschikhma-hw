@@ -3,17 +3,18 @@ package steps;
 import io.restassured.response.ValidatableResponse;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
-import models.request.DepositRequestDto;
-import models.request.TransferRequestDto;
-import models.response.CreateAccountResponseDto;
-import models.response.TransactionResponseDto;
-import models.response.TransferResponseDto;
+import models.api.request.DepositRequestDto;
+import models.api.request.TransferRequestDto;
+import models.api.response.CreateAccountResponseDto;
+import models.api.response.TransactionResponseDto;
+import models.api.response.TransferResponseDto;
 import requests.Endpoint;
 import requests.RestRequest;
 import requests.ValidatableRestRequest;
 import specs.RequestSpecs;
 import specs.ResponseSpecs;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
@@ -56,13 +57,13 @@ public class AccountSteps {
                 .extract().asString();
     }
 
-    public CreateAccountResponseDto deposit(String token, int accountId, double amount) {
+    public CreateAccountResponseDto deposit(String token, long accountId, BigDecimal amount) {
         DepositRequestDto dto = generateDepositDto(accountId, amount);
         return deposit(token, dto);
     }
 
-    public CreateAccountResponseDto createAccountWithBalance(String token, double balance) {
-        double remainingBalance = balance;
+    public CreateAccountResponseDto createAccountWithBalance(String token, BigDecimal balance) {
+        double remainingBalance = balance.doubleValue();
 
         if (remainingBalance <= 0) {
             throw new IllegalArgumentException("Balance must be positive");
@@ -71,9 +72,9 @@ public class AccountSteps {
         CreateAccountResponseDto account = createAccount(token);
 
         while (remainingBalance > 0) {
-            double depositAmount = Math.min(remainingBalance, MAX_DEPOSIT_AMOUNT);
+            double depositAmount = Math.min(remainingBalance, MAX_DEPOSIT_AMOUNT.doubleValue());
 
-            account = deposit(token, account.getId(), depositAmount);
+            account = deposit(token, account.getId(), BigDecimal.valueOf(depositAmount));
 
             remainingBalance -= depositAmount;
         }
@@ -97,7 +98,7 @@ public class AccountSteps {
                 .getAll();
     }
 
-    public CreateAccountResponseDto getClientAccountById(String token, int id) {
+    public CreateAccountResponseDto getClientAccountById(String token, long id) {
         List<CreateAccountResponseDto> accountsList = getClientAccounts(token);
         return accountsList.stream()
                 .filter(acc -> Objects.equals(acc.getId(), id))

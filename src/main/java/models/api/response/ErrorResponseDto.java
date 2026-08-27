@@ -1,4 +1,4 @@
-package models.response;
+package models.api.response;
 
 import models.BaseModel;
 import lombok.AllArgsConstructor;
@@ -10,10 +10,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class TransactionResponseDto extends BaseModel {
-    private int id;
-    private double amount;
-    private String type;
+public class ErrorResponseDto extends BaseModel {
     private String timestamp;
-    private int relatedAccountId;
+    private String status;
+    private String error;
+    private String path;
 }

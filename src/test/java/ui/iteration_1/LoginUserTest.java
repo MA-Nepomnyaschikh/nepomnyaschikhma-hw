@@ -1,6 +1,6 @@
 package ui.iteration_1;
 
-import models.request.CreateUserRequestDto;
+import models.api.request.CreateUserRequestDto;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import pages.AdminPanelPage;

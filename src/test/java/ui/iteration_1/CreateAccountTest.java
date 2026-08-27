@@ -1,6 +1,6 @@
 package ui.iteration_1;
 
-import models.response.CreateAccountResponseDto;
+import models.api.response.CreateAccountResponseDto;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import pages.UserDashboardPage;
@@ -45,7 +45,7 @@ public class CreateAccountTest extends BaseUiTest {
             softly.assertThat(userAccounts)
                     .singleElement()
                     .satisfies(account -> {
-                        AccountAssertions.assertAccountCreated(softly, account);
+                        AccountAssertions.assertCreateAccountResponse(softly, account);
                         softly.assertThat(account.getAccountNumber()).isEqualTo(accountNumber);
                     });
         });

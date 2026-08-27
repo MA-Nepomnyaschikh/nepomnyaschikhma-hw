@@ -1,16 +1,19 @@
 package api.iteration_3;
 
 import api.BaseTest;
-import models.response.CreateAccountResponseDto;
-import models.response.TransactionResponseDto;
+import models.api.response.CreateAccountResponseDto;
+import models.api.response.TransactionResponseDto;
+import models.db.Transaction;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import specs.RequestSpecs;
 import specs.ResponseSpecs;
 import supports.StepLogger;
 import supports.annotations.UserSession;
+import supports.comparisons.TransactionComparisonFields;
 import supports.context.TestUser;
 
+import java.util.Comparator;
 import java.util.List;
 
 import static testdata.AccountData.MAX_TRANSFER_AMOUNT;
@@ -27,14 +30,28 @@ public class GetAccountTransactionsTest extends BaseTest {
             return accountSteps.createAccountWithBalance(user.getToken(), MAX_TRANSFER_AMOUNT);
         });
 
-        List<TransactionResponseDto> expectedTransactions = createdAccount.getTransactions();
+        List<TransactionResponseDto> expectedTransactions = createdAccount.getTransactions()
+                .stream()
+                .sorted(Comparator.comparing(TransactionResponseDto::getId))
+                .toList();
 
         List<TransactionResponseDto> actualTransactions = StepLogger.apiStep("Получить список транзакций по счету пользователя", () -> {
-            return accountSteps.getAccountTransactions(user.getToken(), createdAccount.getId());
+            return accountSteps.getAccountTransactions(user.getToken(), createdAccount.getId())
+                    .stream()
+                    .sorted(Comparator.comparing(TransactionResponseDto::getId))
+                    .toList();
         });
 
-        StepLogger.apiStep("Проверить список транзакций по счету пользователя", () -> {
+        StepLogger.apiStep("Проверить список транзакций по счету пользователя через API", () -> {
             softly.assertThat(actualTransactions)
+                    .isEqualTo(expectedTransactions);
+        });
+
+        StepLogger.apiStep("Проверить список транзакций по счету пользователя через БД", () -> {
+            List<Transaction> actualTransactionsFromDb = databaseSteps.getAccountTransactions(createdAccount.getId());
+
+            softly.assertThat(actualTransactionsFromDb)
+                    .usingRecursiveFieldByFieldElementComparatorOnFields(TransactionComparisonFields.SELECT_ACCOUNT_TRANSACTIONS_TO_CREATE_ACCOUNT_RESPONSE.fields())
                     .isEqualTo(expectedTransactions);
         });
     }
@@ -48,7 +65,7 @@ public class GetAccountTransactionsTest extends BaseTest {
         });
 
         String errorResponse = StepLogger.apiStep("Получить первым пользователем список транзакций по счету второго пользователя", () -> {
-            return accountSteps.getAccountTransactions( createdAccount.getId(), RequestSpecs.authAsUser(firstUser.getToken()), ResponseSpecs.forbidden())
+            return accountSteps.getAccountTransactions(createdAccount.getId(), RequestSpecs.authAsUser(firstUser.getToken()), ResponseSpecs.forbidden())
                     .extract().asString();
         });
 

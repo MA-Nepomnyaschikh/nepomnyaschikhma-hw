@@ -1,6 +1,6 @@
 package supports.comparisons;
 
-public interface Comparisons {
+public interface ComparisonFields {
 
     String[] fields();
 }

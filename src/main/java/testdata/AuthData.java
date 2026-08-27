@@ -1,8 +1,8 @@
 package testdata;
 
 import configs.Config;
-import models.request.CreateUserRequestDto;
-import models.request.LoginUserRequestDto;
+import models.api.request.CreateUserRequestDto;
+import models.api.request.LoginUserRequestDto;
 
 public class AuthData {
 
