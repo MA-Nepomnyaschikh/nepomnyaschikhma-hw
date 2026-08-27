@@ -24,10 +24,14 @@ public class WireMockExtension
     @Override
     public void beforeEach(ExtensionContext context) throws Exception {
 
-        Mock mock = findMock(context);
+        Mock mock = context.getRequiredTestMethod()
+                .getAnnotation(Mock.class);
 
         if (mock == null) {
-            return;
+            throw new IllegalStateException(
+                    "@Mock annotation is missing on test method: "
+                            + context.getRequiredTestMethod().getName()
+            );
         }
 
         wireMockServer = new WireMockServer(
@@ -35,6 +39,7 @@ public class WireMockExtension
         );
 
         wireMockServer.start();
+        wireMockServer.resetAll();
 
         System.out.println(
                 "WIREMOCK STARTED: " +
@@ -50,6 +55,10 @@ public class WireMockExtension
         System.out.println(
                 "WIREMOCK MAPPING: " +
                         mock.scenario().name()
+        );
+
+        System.out.println(
+                wireMockServer.getStubMappings()
         );
     }
 
@@ -77,21 +86,6 @@ public class WireMockExtension
         }
     }
 
-    private Mock findMock(ExtensionContext context) {
-
-        Mock mock = context.getTestMethod()
-                .map(method -> method.getAnnotation(Mock.class))
-                .orElse(null);
-
-        if (mock != null) {
-            return mock;
-        }
-
-        return context.getTestClass()
-                .map(clazz -> clazz.getAnnotation(Mock.class))
-                .orElse(null);
-    }
-
     @Override
     public void afterEach(ExtensionContext context) {
 
@@ -105,16 +99,5 @@ public class WireMockExtension
 
             wireMockServer = null;
         }
-    }
-
-    public String getBaseUrl() {
-
-        if (wireMockServer == null) {
-            throw new IllegalStateException(
-                    "WireMock server is not running"
-            );
-        }
-
-        return "http://host.docker.internal:" + wireMockServer.port();
     }
 }

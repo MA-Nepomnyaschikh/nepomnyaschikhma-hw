@@ -27,6 +27,8 @@ services:
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=postgres
       - FRAUD_DETECTION_SERVICE_URL=http://host.docker.internal:9090
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     depends_on:
       - postgres
     networks:
