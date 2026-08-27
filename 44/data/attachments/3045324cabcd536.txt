@@ -1,0 +1,1 @@
+[2026-08-27T15:31:26.505Z] [SEVERE] http://frontend/api/v1/accounts/transfer - Failed to load resource: the server responded with a status of 400 ()
