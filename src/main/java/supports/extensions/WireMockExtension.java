@@ -38,21 +38,7 @@ public class WireMockExtension
         wireMockServer.start();
         wireMockServer.resetAll();
 
-        System.out.println(
-                "WIREMOCK STARTED: " +
-                        wireMockServer.baseUrl()
-        );
-
-        System.out.println(
-                "WIREMOCK SCENARIO: " + mock.scenario()
-        );
-
         registerMapping(mock.scenario());
-
-        System.out.println(
-                "WIREMOCK MAPPING: " +
-                        mock.scenario().name()
-        );
 
         System.out.println(
                 wireMockServer.getStubMappings()
@@ -88,12 +74,6 @@ public class WireMockExtension
 
         if (wireMockServer != null) {
             wireMockServer.stop();
-
-            System.out.println(
-                    "WIREMOCK STOPPED: " +
-                            context.getDisplayName()
-            );
-
             wireMockServer = null;
         }
     }

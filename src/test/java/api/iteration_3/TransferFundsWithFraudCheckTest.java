@@ -8,6 +8,7 @@ import models.api.response.CreateAccountResponseDto;
 import models.api.response.TransactionResponseDto;
 import models.api.response.TransferWithFraudCheckResponseDto;
 import models.db.Account;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import supports.StepLogger;
@@ -372,74 +373,74 @@ public class TransferFundsWithFraudCheckTest extends BaseTest {
         });
     }
 
-//    @Disabled("БАГ: Если decision = APPROVED И additionalVerificationRequired = true, трансфер не переводится в REVIEW_REQUIRED")
-//    @DisplayName("API. Авторизованный пользователь не может выполнить перевод при необходимости дополнительной верификации транзакции (additionalVerificationRequired=true)")
-//    @Test
-//    @Mock(scenario = MockScenario.FRAUD_CHECK_VERIFICATION_REQUIRED_BY_FLAG)
-//    @UserSession
-//    public void authorizedUserCannotTransferFundsWhenAdditionalVerificationIsRequiredByFlagTest(TestUser user) {
-//        BigDecimal transferAmount = BigDecimal.valueOf(10000.00);
-//
-//        CreateAccountResponseDto senderAccount = StepLogger.apiStep("Создать первый счет", () -> {
-//            return accountSteps.createAccountWithBalance(user.getToken(), MAX_TRANSFER_AMOUNT);
-//        });
-//        CreateAccountResponseDto receiverAccount = StepLogger.apiStep("Создать второй счет", () -> {
-//            return accountSteps.createAccount(user.getToken());
-//        });
-//
-//        TransferRequestDto transferRequestDto = generateTransferDto(senderAccount.getId(), receiverAccount.getId(), transferAmount);
-//
-//        TransferWithFraudCheckResponseDto transferResponseDto = StepLogger.apiStep("Перевести валидную сумму с первого счета на второй", () -> {
-//            return accountSteps.transferWithFraudCheck(user.getToken(), transferRequestDto);
-//        });
-//
-//        StepLogger.apiStep("Проверить перевод средств", () -> {
-//            softly.assertThat(transferResponseDto.getSenderAccountId()).isEqualTo(transferRequestDto.getSenderAccountId());
-//            softly.assertThat(transferResponseDto.getReceiverAccountId()).isEqualTo(transferRequestDto.getReceiverAccountId());
-//            softly.assertThat(transferResponseDto.getAmount()).isEqualTo(transferRequestDto.getAmount());
-//            softly.assertThat(transferResponseDto.getMessage()).isEqualTo(ADDITIONAL_VERIFICATION_REQUIRED);
-//            softly.assertThat(transferResponseDto.getStatus()).isEqualTo(VERIFICATION_REQUIRED);
-//            softly.assertThat(transferResponseDto.getTransactionId()).isPositive();
-//            softly.assertThat(transferResponseDto.getFraudRiskScore()).isPositive();
-//        });
-//
-//        StepLogger.apiStep("Проверить состояние второго счета через API", () -> {
-//            CreateAccountResponseDto actualReceiverAcc = accountSteps.getClientAccountById(user.getToken(), receiverAccount.getId());
-//            softly.assertThat(actualReceiverAcc.getBalance()).isEqualTo(receiverAccount.getBalance());
-//
-//            List<TransactionResponseDto> actualTransactions = accountSteps.getAccountTransactions(user.getToken(), receiverAccount.getId());
-//            softly.assertThat(actualTransactions)
-//                    .filteredOn(actualTransaction -> actualTransaction.getType().equals(TRANSFER_IN))
-//                    .isEmpty();
-//        });
-//
-//        StepLogger.apiStep("Проверить состояние второго счета через БД", () -> {
-//            Account actualReceiverAccFromDB = databaseSteps.getCustomerAccount(user.getId(), receiverAccount.getId());
-//            softly.assertThat(actualReceiverAccFromDB.getBalance()).isEqualByComparingTo(receiverAccount.getBalance());
-//        });
-//
-//        StepLogger.apiStep("Проверить состояние первого счета через API", () -> {
-//            CreateAccountResponseDto actualSenderAcc = accountSteps.getClientAccountById(user.getToken(), senderAccount.getId());
-//            softly.assertThat(actualSenderAcc.getBalance()).isEqualTo(senderAccount.getBalance());
-//
-//            List<TransactionResponseDto> actualTransactions = accountSteps.getAccountTransactions(user.getToken(), senderAccount.getId());
-//            softly.assertThat(actualTransactions)
-//                    .filteredOn(actualTransaction -> actualTransaction.getType().equals(TRANSFER_OUT))
-//                    .singleElement()
-//                    .satisfies(actualTransaction -> {
-//                        softly.assertThat(actualTransaction.getAmount()).isEqualByComparingTo(transferResponseDto.getAmount());
-//                        softly.assertThat(actualTransaction.getRelatedAccountId()).isEqualTo(transferResponseDto.getReceiverAccountId());
-//                        softly.assertThat(actualTransaction.getId()).isEqualTo(transferResponseDto.getTransactionId());
-//                        softly.assertThat(actualTransaction.getStatus()).isEqualTo(TransactionStatus.PENDING);
-//                        softly.assertThat(actualTransaction.isFraudCheckRequired()).isTrue();
-//                    });
-//        });
-//
-//        StepLogger.apiStep("Проверить состояние первого счета через БД", () -> {
-//            Account actualSenderAccFromDB = databaseSteps.getCustomerAccount(user.getId(), senderAccount.getId());
-//            softly.assertThat(actualSenderAccFromDB.getBalance()).isEqualByComparingTo(senderAccount.getBalance());
-//        });
-//    }
+    @Disabled("БАГ: Если decision = APPROVED И additionalVerificationRequired = true, трансфер не переводится в REVIEW_REQUIRED")
+    @DisplayName("API. Авторизованный пользователь не может выполнить перевод при необходимости дополнительной верификации транзакции (additionalVerificationRequired=true)")
+    @Test
+    @Mock(scenario = MockScenario.FRAUD_CHECK_VERIFICATION_REQUIRED_BY_FLAG)
+    @UserSession
+    public void authorizedUserCannotTransferFundsWhenAdditionalVerificationIsRequiredByFlagTest(TestUser user) {
+        BigDecimal transferAmount = BigDecimal.valueOf(10000.00);
+
+        CreateAccountResponseDto senderAccount = StepLogger.apiStep("Создать первый счет", () -> {
+            return accountSteps.createAccountWithBalance(user.getToken(), MAX_TRANSFER_AMOUNT);
+        });
+        CreateAccountResponseDto receiverAccount = StepLogger.apiStep("Создать второй счет", () -> {
+            return accountSteps.createAccount(user.getToken());
+        });
+
+        TransferRequestDto transferRequestDto = generateTransferDto(senderAccount.getId(), receiverAccount.getId(), transferAmount);
+
+        TransferWithFraudCheckResponseDto transferResponseDto = StepLogger.apiStep("Перевести валидную сумму с первого счета на второй", () -> {
+            return accountSteps.transferWithFraudCheck(user.getToken(), transferRequestDto);
+        });
+
+        StepLogger.apiStep("Проверить перевод средств", () -> {
+            softly.assertThat(transferResponseDto.getSenderAccountId()).isEqualTo(transferRequestDto.getSenderAccountId());
+            softly.assertThat(transferResponseDto.getReceiverAccountId()).isEqualTo(transferRequestDto.getReceiverAccountId());
+            softly.assertThat(transferResponseDto.getAmount()).isEqualTo(transferRequestDto.getAmount());
+            softly.assertThat(transferResponseDto.getMessage()).isEqualTo(ADDITIONAL_VERIFICATION_REQUIRED);
+            softly.assertThat(transferResponseDto.getStatus()).isEqualTo(VERIFICATION_REQUIRED);
+            softly.assertThat(transferResponseDto.getTransactionId()).isPositive();
+            softly.assertThat(transferResponseDto.getFraudRiskScore()).isPositive();
+        });
+
+        StepLogger.apiStep("Проверить состояние второго счета через API", () -> {
+            CreateAccountResponseDto actualReceiverAcc = accountSteps.getClientAccountById(user.getToken(), receiverAccount.getId());
+            softly.assertThat(actualReceiverAcc.getBalance()).isEqualTo(receiverAccount.getBalance());
+
+            List<TransactionResponseDto> actualTransactions = accountSteps.getAccountTransactions(user.getToken(), receiverAccount.getId());
+            softly.assertThat(actualTransactions)
+                    .filteredOn(actualTransaction -> actualTransaction.getType().equals(TRANSFER_IN))
+                    .isEmpty();
+        });
+
+        StepLogger.apiStep("Проверить состояние второго счета через БД", () -> {
+            Account actualReceiverAccFromDB = databaseSteps.getCustomerAccount(user.getId(), receiverAccount.getId());
+            softly.assertThat(actualReceiverAccFromDB.getBalance()).isEqualByComparingTo(receiverAccount.getBalance());
+        });
+
+        StepLogger.apiStep("Проверить состояние первого счета через API", () -> {
+            CreateAccountResponseDto actualSenderAcc = accountSteps.getClientAccountById(user.getToken(), senderAccount.getId());
+            softly.assertThat(actualSenderAcc.getBalance()).isEqualTo(senderAccount.getBalance());
+
+            List<TransactionResponseDto> actualTransactions = accountSteps.getAccountTransactions(user.getToken(), senderAccount.getId());
+            softly.assertThat(actualTransactions)
+                    .filteredOn(actualTransaction -> actualTransaction.getType().equals(TRANSFER_OUT))
+                    .singleElement()
+                    .satisfies(actualTransaction -> {
+                        softly.assertThat(actualTransaction.getAmount()).isEqualByComparingTo(transferResponseDto.getAmount());
+                        softly.assertThat(actualTransaction.getRelatedAccountId()).isEqualTo(transferResponseDto.getReceiverAccountId());
+                        softly.assertThat(actualTransaction.getId()).isEqualTo(transferResponseDto.getTransactionId());
+                        softly.assertThat(actualTransaction.getStatus()).isEqualTo(TransactionStatus.PENDING);
+                        softly.assertThat(actualTransaction.isFraudCheckRequired()).isTrue();
+                    });
+        });
+
+        StepLogger.apiStep("Проверить состояние первого счета через БД", () -> {
+            Account actualSenderAccFromDB = databaseSteps.getCustomerAccount(user.getId(), senderAccount.getId());
+            softly.assertThat(actualSenderAccFromDB.getBalance()).isEqualByComparingTo(senderAccount.getBalance());
+        });
+    }
 
     @DisplayName("API. Авторизованный пользователь не может выполнить перевод при пустом ответе фрод-сервиса (HTTP 200, empty response)")
     @Test
