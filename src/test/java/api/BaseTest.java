@@ -9,7 +9,8 @@ import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import steps.AccountSteps;
 import steps.AuthSteps;
 import steps.DatabaseSteps;
@@ -19,10 +20,20 @@ import supports.extensions.TimingExtension;
 import supports.extensions.UserSessionExtension;
 import supports.extensions.WireMockExtension;
 
-@ExtendWith(WireMockExtension.class)
-@ExtendWith(UserSessionExtension.class)
-@ExtendWith(TimingExtension.class)
 public class BaseTest {
+
+    @RegisterExtension
+    @Order(1)
+    static TimingExtension timingExtension = new TimingExtension();
+
+    @RegisterExtension
+    @Order(2)
+    static WireMockExtension wireMockExtension = new WireMockExtension();
+
+    @RegisterExtension
+    @Order(3)
+    static UserSessionExtension userSessionExtension = new UserSessionExtension();
+
     protected CleanupManager cleanupManager;
 
     protected ConnectionManager connectionManager;

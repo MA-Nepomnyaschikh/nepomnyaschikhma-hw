@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
-import static supports.annotations.Mock.*;
+import static supports.annotations.Mock.MockScenario;
 
 public class WireMockExtension
         implements BeforeEachCallback, AfterEachCallback {
