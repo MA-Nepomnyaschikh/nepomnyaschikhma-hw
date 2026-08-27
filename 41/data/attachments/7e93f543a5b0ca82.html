@@ -1,0 +1,69 @@
+<div>Status code 200 </div>
+
+
+<h4>Body</h4>
+<div>
+    <pre class="preformated-text">
+[
+    {
+        &quot;id&quot;: 51,
+        &quot;accountNumber&quot;: &quot;ACC17E1408F&quot;,
+        &quot;balance&quot;: 0.00,
+        &quot;transactions&quot;: [
+            {
+                &quot;id&quot;: 53,
+                &quot;amount&quot;: 5000.00,
+                &quot;type&quot;: &quot;DEPOSIT&quot;,
+                &quot;timestamp&quot;: &quot;2026-08-27T14:18:07.810105&quot;,
+                &quot;relatedAccountId&quot;: 51
+            },
+            {
+                &quot;id&quot;: 54,
+                &quot;amount&quot;: 5000.00,
+                &quot;type&quot;: &quot;DEPOSIT&quot;,
+                &quot;timestamp&quot;: &quot;2026-08-27T14:18:07.913398&quot;,
+                &quot;relatedAccountId&quot;: 51
+            },
+            {
+                &quot;id&quot;: 55,
+                &quot;amount&quot;: 10000.00,
+                &quot;type&quot;: &quot;TRANSFER_OUT&quot;,
+                &quot;timestamp&quot;: &quot;2026-08-27T14:18:08.117508&quot;,
+                &quot;relatedAccountId&quot;: 52
+            }
+        ]
+    },
+    {
+        &quot;id&quot;: 52,
+        &quot;accountNumber&quot;: &quot;ACC91DBB418&quot;,
+        &quot;balance&quot;: 10000.00,
+        &quot;transactions&quot;: [
+            {
+                &quot;id&quot;: 56,
+                &quot;amount&quot;: 10000.00,
+                &quot;type&quot;: &quot;TRANSFER_IN&quot;,
+                &quot;timestamp&quot;: &quot;2026-08-27T14:18:08.118623&quot;,
+                &quot;relatedAccountId&quot;: 51
+            }
+        ]
+    }
+]    </pre>
+</div>
+
+<h4>Headers</h4>
+<div>
+        <div>X-Frame-Options: DENY</div>
+        <div>Transfer-Encoding: chunked</div>
+        <div>Keep-Alive: timeout=60</div>
+        <div>Cache-Control: no-cache, no-store, max-age=0, must-revalidate</div>
+        <div>X-Content-Type-Options: nosniff</div>
+        <div>Connection: keep-alive</div>
+        <div>Vary: Access-Control-Request-Headers</div>
+        <div>Pragma: no-cache</div>
+        <div>Expires: 0</div>
+        <div>X-XSS-Protection: 0</div>
+        <div>Date: Thu, 27 Aug 2026 14:18:07 GMT</div>
+        <div>Content-Type: application/json</div>
+</div>
+
+
