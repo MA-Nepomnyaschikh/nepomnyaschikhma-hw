@@ -1,21 +1,21 @@
 package ui.iteration_1;
 
-import models.api.request.CreateUserRequestDto;
-import models.api.response.GetUserResponseDto;
+import api.models.request.CreateUserRequestDto;
+import api.models.response.GetUserResponseDto;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import pages.AdminPanelPage;
-import supports.StepLogger;
-import supports.annotations.AdminSession;
-import supports.annotations.Browsers;
-import supports.assertions.UserAssertions;
-import testdata.randommodelgenerator.RandomModelGenerator;
+import ui.pages.AdminPanelPage;
+import common.allure.StepLogger;
+import common.annotations.AdminSession;
+import common.annotations.Browsers;
+import common.assertions.UserAssertions;
+import common.testdata.generator.RandomModelGenerator;
 import ui.BaseUiTest;
 
 import java.util.List;
 
-import static testdata.UserData.*;
-import static testdata.expectedmessages.ui.UserUiMessages.*;
+import static common.testdata.factories.UserData.*;
+import static common.testdata.messages.ui.UserUiMessages.*;
 
 @DisplayName("UI. Создание пользователя")
 public class CreateUserTest extends BaseUiTest {

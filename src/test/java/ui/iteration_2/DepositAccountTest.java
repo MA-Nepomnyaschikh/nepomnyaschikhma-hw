@@ -1,25 +1,25 @@
 package ui.iteration_2;
 
-import models.api.response.CreateAccountResponseDto;
-import models.api.response.TransactionResponseDto;
+import api.models.response.CreateAccountResponseDto;
+import api.models.response.TransactionResponseDto;
+import common.allure.StepLogger;
+import common.annotations.Browsers;
+import common.annotations.UserSession;
+import common.context.TestUser;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import pages.UserDashboardPage;
-import supports.StepLogger;
-import supports.annotations.Browsers;
-import supports.annotations.UserSession;
-import supports.context.TestUser;
 import ui.BaseUiTest;
+import ui.pages.UserDashboardPage;
 
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static testdata.AccountData.getRandomValidDepositAmount;
-import static testdata.expectedmessages.ui.AccountUiMessages.*;
+import static common.testdata.factories.AccountData.getRandomValidDepositAmount;
+import static common.testdata.messages.ui.AccountUiMessages.*;
 
 @DisplayName("UI. Пополнение счета")
 public class DepositAccountTest extends BaseUiTest {

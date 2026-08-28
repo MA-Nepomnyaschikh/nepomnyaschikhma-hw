@@ -1,25 +1,28 @@
 package api.iteration_2;
 
 import api.BaseTest;
-import models.api.request.UpdateUserRequestDto;
-import models.api.response.*;
-import models.db.Customer;
+import api.models.request.UpdateUserRequestDto;
+import api.models.response.ErrorResponseDto;
+import api.models.response.GetUserProfileResponseDto;
+import api.models.response.UpdateUserResponseDto;
+import api.models.response.ValidationErrorResponseDto;
+import database.models.Customer;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import specs.RequestSpecs;
-import specs.ResponseSpecs;
-import supports.StepLogger;
-import supports.annotations.UserSession;
-import supports.context.TestUser;
-import testdata.randommodelgenerator.RandomModelGenerator;
+import api.specs.RequestSpecs;
+import api.specs.ResponseSpecs;
+import common.allure.StepLogger;
+import common.annotations.UserSession;
+import common.context.TestUser;
+import common.testdata.generator.RandomModelGenerator;
 
 import java.util.stream.Stream;
 
-import static testdata.UserData.generateUpdateUserDto;
-import static testdata.expectedmessages.api.UserApiMessages.*;
+import static common.testdata.factories.UserData.generateUpdateUserDto;
+import static common.testdata.messages.api.UserApiMessages.*;
 
 @DisplayName("API. Обновление профиля пользователя")
 public class UpdateCustomerProfileTest extends BaseTest {

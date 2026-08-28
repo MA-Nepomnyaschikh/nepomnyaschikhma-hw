@@ -1,23 +1,23 @@
 package api;
 
-import configs.Config;
-import dao.ConnectionManager;
-import dao.DatabaseClient;
-import dao.loggers.ConsoleDbLogger;
-import dao.loggers.DbLogger;
+import common.configs.Config;
+import database.core.ConnectionManager;
+import database.core.DatabaseClient;
+import database.loggers.ConsoleDbLogger;
+import database.loggers.DbLogger;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
-import steps.AccountSteps;
-import steps.AuthSteps;
-import steps.DatabaseSteps;
-import steps.UserSteps;
-import supports.CleanupManager;
-import supports.extensions.TimingExtension;
-import supports.extensions.UserSessionExtension;
-import supports.extensions.WireMockExtension;
+import api.steps.AccountSteps;
+import api.steps.AuthSteps;
+import database.steps.DatabaseSteps;
+import api.steps.UserSteps;
+import common.cleanup.CleanupManager;
+import common.extensions.TimingExtension;
+import common.extensions.UserSessionExtension;
+import common.extensions.WireMockExtension;
 
 @ExtendWith(TimingExtension.class)
 @ExtendWith(WireMockExtension.class)

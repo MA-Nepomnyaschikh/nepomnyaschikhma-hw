@@ -1,28 +1,28 @@
 package api.iteration_3;
 
 import api.BaseTest;
-import models.api.enams.TransactionStatus;
-import models.api.enams.TransferStatus;
-import models.api.request.TransferRequestDto;
-import models.api.response.CreateAccountResponseDto;
-import models.api.response.TransactionResponseDto;
-import models.api.response.TransferWithFraudCheckResponseDto;
-import models.db.Account;
+import api.models.enams.TransactionStatus;
+import api.models.enams.TransferStatus;
+import api.models.request.TransferRequestDto;
+import api.models.response.CreateAccountResponseDto;
+import api.models.response.TransactionResponseDto;
+import api.models.response.TransferWithFraudCheckResponseDto;
+import database.models.Account;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import supports.StepLogger;
-import supports.annotations.Mock;
-import supports.annotations.UserSession;
-import supports.context.TestUser;
+import common.allure.StepLogger;
+import common.annotations.Mock;
+import common.annotations.UserSession;
+import common.context.TestUser;
 
 import java.math.BigDecimal;
 import java.util.List;
 
-import static models.api.enams.TransferStatus.*;
-import static supports.annotations.Mock.MockScenario;
-import static testdata.AccountData.*;
-import static testdata.expectedmessages.api.AccountApiMessages.*;
+import static api.models.enams.TransferStatus.*;
+import static common.annotations.Mock.MockScenario;
+import static common.testdata.factories.AccountData.*;
+import static common.testdata.messages.api.AccountApiMessages.*;
 
 public class TransferFundsWithFraudCheckTest extends BaseTest {
 

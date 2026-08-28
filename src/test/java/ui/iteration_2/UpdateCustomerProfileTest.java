@@ -1,19 +1,19 @@
 package ui.iteration_2;
 
-import models.api.response.GetUserProfileResponseDto;
+import api.models.response.GetUserProfileResponseDto;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import pages.ProfilePage;
-import pages.UserDashboardPage;
-import supports.StepLogger;
-import supports.annotations.Browsers;
-import supports.annotations.UserSession;
-import supports.context.TestUser;
-import testdata.UserData;
+import ui.pages.ProfilePage;
+import ui.pages.UserDashboardPage;
+import common.allure.StepLogger;
+import common.annotations.Browsers;
+import common.annotations.UserSession;
+import common.context.TestUser;
+import common.testdata.factories.UserData;
 import ui.BaseUiTest;
 
-import static testdata.expectedmessages.ui.UserUiMessages.UPDATE_USER_FAILED;
-import static testdata.expectedmessages.ui.UserUiMessages.UPDATE_USER_SUCCESSFULLY;
+import static common.testdata.messages.ui.UserUiMessages.UPDATE_USER_FAILED;
+import static common.testdata.messages.ui.UserUiMessages.UPDATE_USER_SUCCESSFULLY;
 
 @DisplayName("UI. Обновление профиля пользователя")
 public class UpdateCustomerProfileTest extends BaseUiTest {

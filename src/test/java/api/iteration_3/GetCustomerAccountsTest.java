@@ -1,21 +1,21 @@
 package api.iteration_3;
 
 import api.BaseTest;
-import models.api.response.CreateAccountResponseDto;
-import models.api.response.ErrorResponseDto;
-import models.db.Account;
+import api.models.response.CreateAccountResponseDto;
+import api.models.response.ErrorResponseDto;
+import database.models.Account;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import specs.RequestSpecs;
-import specs.ResponseSpecs;
-import supports.StepLogger;
-import supports.annotations.UserSession;
-import supports.comparisons.AccountComparisonFields;
-import supports.context.TestUser;
+import api.specs.RequestSpecs;
+import api.specs.ResponseSpecs;
+import common.allure.StepLogger;
+import common.annotations.UserSession;
+import common.comparisons.AccountComparisonFields;
+import common.context.TestUser;
 
 import java.util.List;
 
-import static testdata.expectedmessages.api.UserApiMessages.CREATE_USER_FORBIDDEN;
+import static common.testdata.messages.api.UserApiMessages.CREATE_USER_FORBIDDEN;
 
 @DisplayName("API. Получение списка счетов пользователя")
 public class GetCustomerAccountsTest extends BaseTest {

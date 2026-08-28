@@ -1,24 +1,24 @@
 package api.iteration_3;
 
 import api.BaseTest;
-import models.api.request.DepositRequestDto;
-import models.api.request.TransferRequestDto;
-import models.api.response.*;
-import models.db.Transaction;
+import api.models.request.DepositRequestDto;
+import api.models.request.TransferRequestDto;
+import api.models.response.*;
+import database.models.Transaction;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import specs.RequestSpecs;
-import specs.ResponseSpecs;
-import supports.StepLogger;
-import supports.annotations.UserSession;
-import supports.comparisons.TransactionComparisonFields;
-import supports.context.TestUser;
+import api.specs.RequestSpecs;
+import api.specs.ResponseSpecs;
+import common.allure.StepLogger;
+import common.annotations.UserSession;
+import common.comparisons.TransactionComparisonFields;
+import common.context.TestUser;
 
 import java.math.BigDecimal;
 import java.util.List;
 
-import static testdata.AccountData.*;
-import static testdata.expectedmessages.api.AccountApiMessages.GET_ACCOUNT_TRANSACTIONS_FORBIDDEN;
+import static common.testdata.factories.AccountData.*;
+import static common.testdata.messages.api.AccountApiMessages.GET_ACCOUNT_TRANSACTIONS_FORBIDDEN;
 
 @DisplayName("API. Получение списка транзакций по счету")
 public class GetAccountTransactionsTest extends BaseTest {

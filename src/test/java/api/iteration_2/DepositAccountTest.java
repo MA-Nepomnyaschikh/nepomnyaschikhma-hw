@@ -1,31 +1,31 @@
 package api.iteration_2;
 
 import api.BaseTest;
-import models.api.request.DepositRequestDto;
-import models.api.response.CreateAccountResponseDto;
-import models.api.response.DepositResponseDto;
-import models.api.response.TransactionResponseDto;
-import models.api.response.ValidationErrorResponseDto;
-import models.db.Account;
+import api.models.request.DepositRequestDto;
+import api.models.response.CreateAccountResponseDto;
+import api.models.response.DepositResponseDto;
+import api.models.response.TransactionResponseDto;
+import api.models.response.ValidationErrorResponseDto;
+import api.specs.RequestSpecs;
+import api.specs.ResponseSpecs;
+import common.allure.StepLogger;
+import common.annotations.UserSession;
+import common.assertions.AccountAssertions;
+import common.comparisons.AccountComparisonFields;
+import common.context.TestUser;
+import database.models.Account;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import specs.RequestSpecs;
-import specs.ResponseSpecs;
-import supports.StepLogger;
-import supports.annotations.UserSession;
-import supports.assertions.AccountAssertions;
-import supports.comparisons.AccountComparisonFields;
-import supports.context.TestUser;
 
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static testdata.AccountData.*;
-import static testdata.expectedmessages.api.AccountApiMessages.DEPOSIT_UNAUTHORIZED;
+import static common.testdata.factories.AccountData.*;
+import static common.testdata.messages.api.AccountApiMessages.DEPOSIT_UNAUTHORIZED;
 
 @DisplayName("API. Пополнение счета")
 public class DepositAccountTest extends BaseTest {

@@ -1,19 +1,19 @@
 package api.iteration_3;
 
 import api.BaseTest;
-import models.api.response.ErrorResponseDto;
-import models.api.response.GetUserProfileResponseDto;
-import models.db.Customer;
+import api.models.response.ErrorResponseDto;
+import api.models.response.GetUserProfileResponseDto;
+import database.models.Customer;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import specs.RequestSpecs;
-import specs.ResponseSpecs;
-import supports.StepLogger;
-import supports.annotations.UserSession;
-import supports.comparisons.UserComparisonFields;
-import supports.context.TestUser;
+import api.specs.RequestSpecs;
+import api.specs.ResponseSpecs;
+import common.allure.StepLogger;
+import common.annotations.UserSession;
+import common.comparisons.UserComparisonFields;
+import common.context.TestUser;
 
-import static testdata.expectedmessages.api.UserApiMessages.CREATE_USER_FORBIDDEN;
+import static common.testdata.messages.api.UserApiMessages.CREATE_USER_FORBIDDEN;
 
 @DisplayName("API. Получение профиля пользователя")
 public class GetCustomerProfileTest extends BaseTest {
