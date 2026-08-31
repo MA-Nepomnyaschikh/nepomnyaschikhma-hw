@@ -7,16 +7,15 @@ import api.models.request.TransferRequestDto;
 import api.models.response.CreateAccountResponseDto;
 import api.models.response.TransactionResponseDto;
 import api.models.response.TransferWithFraudCheckResponseDto;
-import database.models.Account;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
 import common.allure.StepLogger;
 import common.annotations.Mock;
 import common.annotations.UserSession;
 import common.context.TestUser;
+import database.models.Account;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 import static api.models.enams.TransferStatus.*;
@@ -24,6 +23,7 @@ import static common.annotations.Mock.MockScenario;
 import static common.testdata.factories.AccountData.*;
 import static common.testdata.messages.api.AccountApiMessages.*;
 
+@DisplayName("API. Перевод с проверкой на мошенничество")
 public class TransferFundsWithFraudCheckTest extends BaseTest {
 
     @DisplayName("API. Авторизованный пользователь может выполнить перевод при одобрении транзакции фрод-сервисом (decision=APPROVED)")
@@ -31,8 +31,6 @@ public class TransferFundsWithFraudCheckTest extends BaseTest {
     @Mock(scenario = MockScenario.FRAUD_CHECK_APPROVED)
     @UserSession
     public void authorizedUserCanTransferFundsWhenTransactionApprovedByFraudServiceTest(TestUser user) {
-        BigDecimal transferAmount = BigDecimal.valueOf(10000.00);
-
         CreateAccountResponseDto senderAccount = StepLogger.apiStep("Создать первый счет", () -> {
             return accountSteps.createAccountWithBalance(user.getToken(), MAX_TRANSFER_AMOUNT);
         });
@@ -40,7 +38,7 @@ public class TransferFundsWithFraudCheckTest extends BaseTest {
             return accountSteps.createAccount(user.getToken());
         });
 
-        TransferRequestDto transferRequestDto = generateTransferDto(senderAccount.getId(), receiverAccount.getId(), transferAmount);
+        TransferRequestDto transferRequestDto = generateTransferDto(senderAccount.getId(), receiverAccount.getId(), MAX_TRANSFER_AMOUNT);
 
         TransferWithFraudCheckResponseDto transferResponseDto = StepLogger.apiStep("Перевести валидную сумму с первого счета на второй", () -> {
             return accountSteps.transferWithFraudCheck(user.getToken(), transferRequestDto);
@@ -106,8 +104,6 @@ public class TransferFundsWithFraudCheckTest extends BaseTest {
     @Mock(scenario = MockScenario.FRAUD_CHECK_BLOCKED)
     @UserSession
     public void authorizedUserCannotTransferFundsWhenTransactionBlockedByFraudServiceTest(TestUser user) {
-        BigDecimal transferAmount = BigDecimal.valueOf(10000.00);
-
         CreateAccountResponseDto senderAccount = StepLogger.apiStep("Создать первый счет", () -> {
             return accountSteps.createAccountWithBalance(user.getToken(), MAX_TRANSFER_AMOUNT);
         });
@@ -115,7 +111,7 @@ public class TransferFundsWithFraudCheckTest extends BaseTest {
             return accountSteps.createAccount(user.getToken());
         });
 
-        TransferRequestDto transferRequestDto = generateTransferDto(senderAccount.getId(), receiverAccount.getId(), transferAmount);
+        TransferRequestDto transferRequestDto = generateTransferDto(senderAccount.getId(), receiverAccount.getId(), MAX_TRANSFER_AMOUNT);
 
         TransferWithFraudCheckResponseDto transferResponseDto = StepLogger.apiStep("Перевести валидную сумму с первого счета на второй", () -> {
             return accountSteps.transferWithFraudCheck(user.getToken(), transferRequestDto);
@@ -174,8 +170,6 @@ public class TransferFundsWithFraudCheckTest extends BaseTest {
     @Mock(scenario = MockScenario.FRAUD_CHECK_REVIEW_REQUIRED_BY_DECISION)
     @UserSession
     public void authorizedUserCannotTransferFundsWhenTransactionNeedsManualReviewTest(TestUser user) {
-        BigDecimal transferAmount = BigDecimal.valueOf(10000.00);
-
         CreateAccountResponseDto senderAccount = StepLogger.apiStep("Создать первый счет", () -> {
             return accountSteps.createAccountWithBalance(user.getToken(), MAX_TRANSFER_AMOUNT);
         });
@@ -183,7 +177,7 @@ public class TransferFundsWithFraudCheckTest extends BaseTest {
             return accountSteps.createAccount(user.getToken());
         });
 
-        TransferRequestDto transferRequestDto = generateTransferDto(senderAccount.getId(), receiverAccount.getId(), transferAmount);
+        TransferRequestDto transferRequestDto = generateTransferDto(senderAccount.getId(), receiverAccount.getId(), MAX_TRANSFER_AMOUNT);
 
         TransferWithFraudCheckResponseDto transferResponseDto = StepLogger.apiStep("Перевести валидную сумму с первого счета на второй", () -> {
             return accountSteps.transferWithFraudCheck(user.getToken(), transferRequestDto);
@@ -242,8 +236,6 @@ public class TransferFundsWithFraudCheckTest extends BaseTest {
     @Mock(scenario = MockScenario.FRAUD_CHECK_REVIEW_REQUIRED_BY_FLAG)
     @UserSession
     public void authorizedUserCannotTransferFundsWhenManualReviewIsRequiredByFlagTest(TestUser user) {
-        BigDecimal transferAmount = BigDecimal.valueOf(10000.00);
-
         CreateAccountResponseDto senderAccount = StepLogger.apiStep("Создать первый счет", () -> {
             return accountSteps.createAccountWithBalance(user.getToken(), MAX_TRANSFER_AMOUNT);
         });
@@ -251,7 +243,7 @@ public class TransferFundsWithFraudCheckTest extends BaseTest {
             return accountSteps.createAccount(user.getToken());
         });
 
-        TransferRequestDto transferRequestDto = generateTransferDto(senderAccount.getId(), receiverAccount.getId(), transferAmount);
+        TransferRequestDto transferRequestDto = generateTransferDto(senderAccount.getId(), receiverAccount.getId(), MAX_TRANSFER_AMOUNT);
 
         TransferWithFraudCheckResponseDto transferResponseDto = StepLogger.apiStep("Перевести валидную сумму с первого счета на второй", () -> {
             return accountSteps.transferWithFraudCheck(user.getToken(), transferRequestDto);
@@ -310,8 +302,6 @@ public class TransferFundsWithFraudCheckTest extends BaseTest {
     @Mock(scenario = MockScenario.FRAUD_CHECK_VERIFICATION_REQUIRED_BY_DECISION)
     @UserSession
     public void authorizedUserCannotTransferFundsWhenAdditionalVerificationIsRequiredTest(TestUser user) {
-        BigDecimal transferAmount = BigDecimal.valueOf(10000.00);
-
         CreateAccountResponseDto senderAccount = StepLogger.apiStep("Создать первый счет", () -> {
             return accountSteps.createAccountWithBalance(user.getToken(), MAX_TRANSFER_AMOUNT);
         });
@@ -319,7 +309,7 @@ public class TransferFundsWithFraudCheckTest extends BaseTest {
             return accountSteps.createAccount(user.getToken());
         });
 
-        TransferRequestDto transferRequestDto = generateTransferDto(senderAccount.getId(), receiverAccount.getId(), transferAmount);
+        TransferRequestDto transferRequestDto = generateTransferDto(senderAccount.getId(), receiverAccount.getId(), MAX_TRANSFER_AMOUNT);
 
         TransferWithFraudCheckResponseDto transferResponseDto = StepLogger.apiStep("Перевести валидную сумму с первого счета на второй", () -> {
             return accountSteps.transferWithFraudCheck(user.getToken(), transferRequestDto);
@@ -379,8 +369,6 @@ public class TransferFundsWithFraudCheckTest extends BaseTest {
     @Mock(scenario = MockScenario.FRAUD_CHECK_VERIFICATION_REQUIRED_BY_FLAG)
     @UserSession
     public void authorizedUserCannotTransferFundsWhenAdditionalVerificationIsRequiredByFlagTest(TestUser user) {
-        BigDecimal transferAmount = BigDecimal.valueOf(10000.00);
-
         CreateAccountResponseDto senderAccount = StepLogger.apiStep("Создать первый счет", () -> {
             return accountSteps.createAccountWithBalance(user.getToken(), MAX_TRANSFER_AMOUNT);
         });
@@ -388,7 +376,7 @@ public class TransferFundsWithFraudCheckTest extends BaseTest {
             return accountSteps.createAccount(user.getToken());
         });
 
-        TransferRequestDto transferRequestDto = generateTransferDto(senderAccount.getId(), receiverAccount.getId(), transferAmount);
+        TransferRequestDto transferRequestDto = generateTransferDto(senderAccount.getId(), receiverAccount.getId(), MAX_TRANSFER_AMOUNT);
 
         TransferWithFraudCheckResponseDto transferResponseDto = StepLogger.apiStep("Перевести валидную сумму с первого счета на второй", () -> {
             return accountSteps.transferWithFraudCheck(user.getToken(), transferRequestDto);
@@ -447,8 +435,6 @@ public class TransferFundsWithFraudCheckTest extends BaseTest {
     @Mock(scenario = MockScenario.FRAUD_CHECK_EMPTY_RESPONSE)
     @UserSession
     public void authorizedUserCannotTransferFundsWhenFraudServiceReturnsEmptyResponseTest(TestUser user) {
-        BigDecimal transferAmount = BigDecimal.valueOf(10000.00);
-
         CreateAccountResponseDto senderAccount = StepLogger.apiStep("Создать первый счет", () -> {
             return accountSteps.createAccountWithBalance(user.getToken(), MAX_TRANSFER_AMOUNT);
         });
@@ -456,7 +442,7 @@ public class TransferFundsWithFraudCheckTest extends BaseTest {
             return accountSteps.createAccount(user.getToken());
         });
 
-        TransferRequestDto transferRequestDto = generateTransferDto(senderAccount.getId(), receiverAccount.getId(), transferAmount);
+        TransferRequestDto transferRequestDto = generateTransferDto(senderAccount.getId(), receiverAccount.getId(), MAX_TRANSFER_AMOUNT);
 
         TransferWithFraudCheckResponseDto transferResponseDto = StepLogger.apiStep("Перевести валидную сумму с первого счета на второй", () -> {
             return accountSteps.transferWithFraudCheck(user.getToken(), transferRequestDto);
@@ -515,8 +501,6 @@ public class TransferFundsWithFraudCheckTest extends BaseTest {
     @Mock(scenario = MockScenario.FRAUD_CHECK_SERVICE_ERROR_400)
     @UserSession
     public void authorizedUserCannotTransferFundsWhenFraudServiceReturnsBadRequestTest(TestUser user) {
-        BigDecimal transferAmount = BigDecimal.valueOf(10000.00);
-
         CreateAccountResponseDto senderAccount = StepLogger.apiStep("Создать первый счет", () -> {
             return accountSteps.createAccountWithBalance(user.getToken(), MAX_TRANSFER_AMOUNT);
         });
@@ -524,7 +508,7 @@ public class TransferFundsWithFraudCheckTest extends BaseTest {
             return accountSteps.createAccount(user.getToken());
         });
 
-        TransferRequestDto transferRequestDto = generateTransferDto(senderAccount.getId(), receiverAccount.getId(), transferAmount);
+        TransferRequestDto transferRequestDto = generateTransferDto(senderAccount.getId(), receiverAccount.getId(), MAX_TRANSFER_AMOUNT);
 
         TransferWithFraudCheckResponseDto transferResponseDto = StepLogger.apiStep("Перевести валидную сумму с первого счета на второй", () -> {
             return accountSteps.transferWithFraudCheck(user.getToken(), transferRequestDto);
@@ -583,8 +567,6 @@ public class TransferFundsWithFraudCheckTest extends BaseTest {
     @Mock(scenario = MockScenario.FRAUD_CHECK_SERVICE_ERROR_500)
     @UserSession
     public void authorizedUserCannotTransferFundsWhenFraudServiceReturnsInternalServerErrorTest(TestUser user) {
-        BigDecimal transferAmount = BigDecimal.valueOf(10000.00);
-
         CreateAccountResponseDto senderAccount = StepLogger.apiStep("Создать первый счет", () -> {
             return accountSteps.createAccountWithBalance(user.getToken(), MAX_TRANSFER_AMOUNT);
         });
@@ -592,7 +574,7 @@ public class TransferFundsWithFraudCheckTest extends BaseTest {
             return accountSteps.createAccount(user.getToken());
         });
 
-        TransferRequestDto transferRequestDto = generateTransferDto(senderAccount.getId(), receiverAccount.getId(), transferAmount);
+        TransferRequestDto transferRequestDto = generateTransferDto(senderAccount.getId(), receiverAccount.getId(), MAX_TRANSFER_AMOUNT);
 
         TransferWithFraudCheckResponseDto transferResponseDto = StepLogger.apiStep("Перевести валидную сумму с первого счета на второй", () -> {
             return accountSteps.transferWithFraudCheck(user.getToken(), transferRequestDto);
@@ -651,8 +633,6 @@ public class TransferFundsWithFraudCheckTest extends BaseTest {
     @Mock(scenario = MockScenario.FRAUD_CHECK_SERVICE_UNAVAILABLE_503)
     @UserSession
     public void authorizedUserCannotTransferFundsWhenFraudServiceUnavailableTest(TestUser user) {
-        BigDecimal transferAmount = BigDecimal.valueOf(10000.00);
-
         CreateAccountResponseDto senderAccount = StepLogger.apiStep("Создать первый счет", () -> {
             return accountSteps.createAccountWithBalance(user.getToken(), MAX_TRANSFER_AMOUNT);
         });
@@ -660,7 +640,7 @@ public class TransferFundsWithFraudCheckTest extends BaseTest {
             return accountSteps.createAccount(user.getToken());
         });
 
-        TransferRequestDto transferRequestDto = generateTransferDto(senderAccount.getId(), receiverAccount.getId(), transferAmount);
+        TransferRequestDto transferRequestDto = generateTransferDto(senderAccount.getId(), receiverAccount.getId(), MAX_TRANSFER_AMOUNT);
 
         TransferWithFraudCheckResponseDto transferResponseDto = StepLogger.apiStep("Перевести валидную сумму с первого счета на второй", () -> {
             return accountSteps.transferWithFraudCheck(user.getToken(), transferRequestDto);
@@ -719,8 +699,6 @@ public class TransferFundsWithFraudCheckTest extends BaseTest {
     @Mock(scenario = MockScenario.FRAUD_CHECK_TIMEOUT)
     @UserSession
     public void authorizedUserCannotTransferFundsWhenFraudServiceTimeoutExceededTest(TestUser user) {
-        BigDecimal transferAmount = BigDecimal.valueOf(10000.00);
-
         CreateAccountResponseDto senderAccount = StepLogger.apiStep("Создать первый счет", () -> {
             return accountSteps.createAccountWithBalance(user.getToken(), MAX_TRANSFER_AMOUNT);
         });
@@ -728,7 +706,7 @@ public class TransferFundsWithFraudCheckTest extends BaseTest {
             return accountSteps.createAccount(user.getToken());
         });
 
-        TransferRequestDto transferRequestDto = generateTransferDto(senderAccount.getId(), receiverAccount.getId(), transferAmount);
+        TransferRequestDto transferRequestDto = generateTransferDto(senderAccount.getId(), receiverAccount.getId(), MAX_TRANSFER_AMOUNT);
 
         TransferWithFraudCheckResponseDto transferResponseDto = StepLogger.apiStep("Перевести валидную сумму с первого счета на второй", () -> {
             return accountSteps.transferWithFraudCheck(user.getToken(), transferRequestDto);
@@ -787,8 +765,6 @@ public class TransferFundsWithFraudCheckTest extends BaseTest {
     @Mock(scenario = MockScenario.FRAUD_CHECK_CONNECTION_ERROR)
     @UserSession
     public void authorizedUserCannotTransferFundsWhenFraudServiceConnectionErrorTest(TestUser user) {
-        BigDecimal transferAmount = BigDecimal.valueOf(10000.00);
-
         CreateAccountResponseDto senderAccount = StepLogger.apiStep("Создать первый счет", () -> {
             return accountSteps.createAccountWithBalance(user.getToken(), MAX_TRANSFER_AMOUNT);
         });
@@ -796,7 +772,7 @@ public class TransferFundsWithFraudCheckTest extends BaseTest {
             return accountSteps.createAccount(user.getToken());
         });
 
-        TransferRequestDto transferRequestDto = generateTransferDto(senderAccount.getId(), receiverAccount.getId(), transferAmount);
+        TransferRequestDto transferRequestDto = generateTransferDto(senderAccount.getId(), receiverAccount.getId(), MAX_TRANSFER_AMOUNT);
 
         TransferWithFraudCheckResponseDto transferResponseDto = StepLogger.apiStep("Перевести валидную сумму с первого счета на второй", () -> {
             return accountSteps.transferWithFraudCheck(user.getToken(), transferRequestDto);
