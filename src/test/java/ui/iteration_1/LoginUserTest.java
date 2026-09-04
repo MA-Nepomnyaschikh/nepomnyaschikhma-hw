@@ -1,17 +1,17 @@
 package ui.iteration_1;
 
-import models.api.request.CreateUserRequestDto;
+import api.models.request.CreateUserRequestDto;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import pages.AdminPanelPage;
-import pages.LoginPage;
-import pages.UserDashboardPage;
-import supports.StepLogger;
-import supports.annotations.Browsers;
+import ui.pages.AdminPanelPage;
+import ui.pages.LoginPage;
+import ui.pages.UserDashboardPage;
+import common.allure.StepLogger;
+import common.annotations.Browsers;
 import ui.BaseUiTest;
 
-import static testdata.AuthData.ADMIN_PASSWORD;
-import static testdata.AuthData.ADMIN_USERNAME;
+import static common.testdata.factories.AuthData.ADMIN_PASSWORD;
+import static common.testdata.factories.AuthData.ADMIN_USERNAME;
 
 @DisplayName("UI. Авторизация пользователя")
 public class LoginUserTest extends BaseUiTest {

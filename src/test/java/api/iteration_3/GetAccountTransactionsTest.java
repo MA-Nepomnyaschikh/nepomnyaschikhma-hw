@@ -1,23 +1,24 @@
 package api.iteration_3;
 
 import api.BaseTest;
-import models.api.response.CreateAccountResponseDto;
-import models.api.response.TransactionResponseDto;
-import models.db.Transaction;
+import api.models.request.DepositRequestDto;
+import api.models.request.TransferRequestDto;
+import api.models.response.*;
+import database.models.Transaction;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import specs.RequestSpecs;
-import specs.ResponseSpecs;
-import supports.StepLogger;
-import supports.annotations.UserSession;
-import supports.comparisons.TransactionComparisonFields;
-import supports.context.TestUser;
+import api.specs.RequestSpecs;
+import api.specs.ResponseSpecs;
+import common.allure.StepLogger;
+import common.annotations.UserSession;
+import common.comparisons.TransactionComparisonFields;
+import common.context.TestUser;
 
-import java.util.Comparator;
+import java.math.BigDecimal;
 import java.util.List;
 
-import static testdata.AccountData.MAX_TRANSFER_AMOUNT;
-import static testdata.expectedmessages.api.AccountApiMessages.GET_ACCOUNT_TRANSACTIONS_FORBIDDEN;
+import static common.testdata.factories.AccountData.*;
+import static common.testdata.messages.api.AccountApiMessages.GET_ACCOUNT_TRANSACTIONS_FORBIDDEN;
 
 @DisplayName("API. Получение списка транзакций по счету")
 public class GetAccountTransactionsTest extends BaseTest {
@@ -26,33 +27,55 @@ public class GetAccountTransactionsTest extends BaseTest {
     @Test
     @UserSession
     public void authorizedUserCanGetOwnAccountTransactionsTest(TestUser user) {
-        CreateAccountResponseDto createdAccount = StepLogger.apiStep("Создать счет", () -> {
-            return accountSteps.createAccountWithBalance(user.getToken(), MAX_TRANSFER_AMOUNT);
+        BigDecimal depositAmount = MAX_DEPOSIT_AMOUNT;
+        BigDecimal transferAmount = MAX_DEPOSIT_AMOUNT;
+
+        CreateAccountResponseDto firstAccount = StepLogger.apiStep("Создать первый счет", () -> {
+            return accountSteps.createAccount(user.getToken());
         });
 
-        List<TransactionResponseDto> expectedTransactions = createdAccount.getTransactions()
-                .stream()
-                .sorted(Comparator.comparing(TransactionResponseDto::getId))
-                .toList();
+        CreateAccountResponseDto secondAccount = StepLogger.apiStep("Создать второй счет", () -> {
+            return accountSteps.createAccount(user.getToken());
+        });
+
+        DepositRequestDto depositRequestDto = generateDepositDto(firstAccount.getId(), depositAmount);
+        DepositResponseDto depositResponseDto = StepLogger.apiStep("Создать транзакцию пополнения", () -> {
+            return accountSteps.deposit(user.getToken(), depositRequestDto);
+        });
+
+        TransferRequestDto transferRequestDto = generateTransferDto(firstAccount.getId(), secondAccount.getId(), transferAmount);
+        TransferResponseDto transferResponseDto = StepLogger.apiStep("Создать транзакцию перевода", () -> {
+            return accountSteps.transfer(user.getToken(), transferRequestDto);
+        });
 
         List<TransactionResponseDto> actualTransactions = StepLogger.apiStep("Получить список транзакций по счету пользователя", () -> {
-            return accountSteps.getAccountTransactions(user.getToken(), createdAccount.getId())
-                    .stream()
-                    .sorted(Comparator.comparing(TransactionResponseDto::getId))
-                    .toList();
+            return accountSteps.getAccountTransactions(user.getToken(), firstAccount.getId());
         });
 
-        StepLogger.apiStep("Проверить список транзакций по счету пользователя через API", () -> {
+        StepLogger.apiStep("Проверить созданную транзакцию по счету пользователя через API", () -> {
             softly.assertThat(actualTransactions)
-                    .isEqualTo(expectedTransactions);
+                    .satisfiesExactlyInAnyOrder(
+                            deposit -> {
+                                softly.assertThat(deposit.getType()).isEqualTo(DEPOSIT);
+                                softly.assertThat(deposit.getAmount()).isEqualByComparingTo(depositAmount);
+                                softly.assertThat(deposit.getId()).isEqualTo(depositResponseDto.getTransactionId());
+                                softly.assertThat(deposit.getRelatedAccountId()).isEqualTo(firstAccount.getId());
+
+                            },
+                            transfer -> {
+                                softly.assertThat(transfer.getType()).isEqualTo(TRANSFER_OUT);
+                                softly.assertThat(transfer.getAmount()).isEqualByComparingTo(transferAmount);
+                                softly.assertThat(transfer.getRelatedAccountId()).isEqualTo(secondAccount.getId());
+                            }
+                    );
         });
 
         StepLogger.apiStep("Проверить список транзакций по счету пользователя через БД", () -> {
-            List<Transaction> actualTransactionsFromDb = databaseSteps.getAccountTransactions(createdAccount.getId());
+            List<Transaction> actualTransactionsFromDb = databaseSteps.getAccountTransactions(firstAccount.getId());
 
             softly.assertThat(actualTransactionsFromDb)
                     .usingRecursiveFieldByFieldElementComparatorOnFields(TransactionComparisonFields.SELECT_ACCOUNT_TRANSACTIONS_TO_CREATE_ACCOUNT_RESPONSE.fields())
-                    .isEqualTo(expectedTransactions);
+                    .isEqualTo(actualTransactions);
         });
     }
 
@@ -64,13 +87,13 @@ public class GetAccountTransactionsTest extends BaseTest {
             return accountSteps.createAccountWithBalance(secondUser.getToken(), MAX_TRANSFER_AMOUNT);
         });
 
-        String errorResponse = StepLogger.apiStep("Получить первым пользователем список транзакций по счету второго пользователя", () -> {
+        ValidationErrorResponseDto errorResponse = StepLogger.apiStep("Получить первым пользователем список транзакций по счету второго пользователя", () -> {
             return accountSteps.getAccountTransactions(createdAccount.getId(), RequestSpecs.authAsUser(firstUser.getToken()), ResponseSpecs.forbidden())
-                    .extract().asString();
+                    .extract().as(ValidationErrorResponseDto.class);
         });
 
         StepLogger.apiStep("Проверить ошибку при получении списка транзакций", () -> {
-            softly.assertThat(errorResponse).isEqualTo(GET_ACCOUNT_TRANSACTIONS_FORBIDDEN);
+            softly.assertThat(errorResponse.getMessage()).isEqualTo(GET_ACCOUNT_TRANSACTIONS_FORBIDDEN);
         });
     }
 

@@ -1,20 +1,20 @@
 package ui.iteration_2;
 
-import models.api.response.CreateAccountResponseDto;
+import api.models.response.CreateAccountResponseDto;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import pages.UserDashboardPage;
-import supports.StepLogger;
-import supports.annotations.Browsers;
-import supports.annotations.UserSession;
-import supports.context.TestUser;
+import ui.pages.UserDashboardPage;
+import common.allure.StepLogger;
+import common.annotations.Browsers;
+import common.annotations.UserSession;
+import common.context.TestUser;
 import ui.BaseUiTest;
 
 import java.math.BigDecimal;
 
-import static testdata.AccountData.MAX_TRANSFER_AMOUNT;
-import static testdata.AccountData.getRandomValidTransferAmount;
-import static testdata.expectedmessages.ui.AccountUiMessages.*;
+import static common.testdata.factories.AccountData.MAX_TRANSFER_AMOUNT;
+import static common.testdata.factories.AccountData.getRandomValidTransferAmount;
+import static common.testdata.messages.ui.AccountUiMessages.*;
 
 @DisplayName("UI. Перевод")
 public class TransferFundsTest extends BaseUiTest {

@@ -4,16 +4,16 @@ import api.BaseTest;
 import com.codeborne.selenide.Configuration;
 import com.codeborne.selenide.Selenide;
 import com.codeborne.selenide.logevents.SelenideLogger;
-import configs.Config;
+import common.configs.Config;
 import io.qameta.allure.selenide.AllureSelenide;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
-import supports.AllureAttachments;
-import supports.StepLogger;
-import supports.extensions.AdminSessionExtension;
-import supports.extensions.BrowserMatchExtension;
+import common.allure.AllureAttachments;
+import common.allure.StepLogger;
+import common.extensions.AdminSessionExtension;
+import common.extensions.BrowserMatchExtension;
 
 import java.util.Map;
 

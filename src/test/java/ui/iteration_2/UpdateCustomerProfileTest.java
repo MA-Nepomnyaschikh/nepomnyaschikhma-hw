@@ -1,20 +1,19 @@
 package ui.iteration_2;
 
-import models.api.response.CreateUserResponseDto;
-import models.api.response.GetUserResponseDto;
+import api.models.response.GetUserProfileResponseDto;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import pages.ProfilePage;
-import pages.UserDashboardPage;
-import supports.StepLogger;
-import supports.annotations.Browsers;
-import supports.annotations.UserSession;
-import supports.context.TestUser;
-import testdata.UserData;
+import ui.pages.ProfilePage;
+import ui.pages.UserDashboardPage;
+import common.allure.StepLogger;
+import common.annotations.Browsers;
+import common.annotations.UserSession;
+import common.context.TestUser;
+import common.testdata.factories.UserData;
 import ui.BaseUiTest;
 
-import static testdata.expectedmessages.ui.UserUiMessages.UPDATE_USER_FAILED;
-import static testdata.expectedmessages.ui.UserUiMessages.UPDATE_USER_SUCCESSFULLY;
+import static common.testdata.messages.ui.UserUiMessages.UPDATE_USER_FAILED;
+import static common.testdata.messages.ui.UserUiMessages.UPDATE_USER_SUCCESSFULLY;
 
 @DisplayName("UI. Обновление профиля пользователя")
 public class UpdateCustomerProfileTest extends BaseUiTest {
@@ -49,7 +48,7 @@ public class UpdateCustomerProfileTest extends BaseUiTest {
         });
 
         StepLogger.apiStep("Проверить изменение имени пользователя через API", () -> {
-            CreateUserResponseDto actualUser = userSteps.getCustomerProfile(user.getToken());
+            GetUserProfileResponseDto actualUser = userSteps.getCustomerProfile(user.getToken());
             softly.assertThat(actualUser.getName()).isEqualTo(newName);
         });
     }
@@ -84,7 +83,7 @@ public class UpdateCustomerProfileTest extends BaseUiTest {
         });
 
         StepLogger.apiStep("Проверить отсутствие изменений пользователя через API", () -> {
-            CreateUserResponseDto actualUser = userSteps.getCustomerProfile(user.getToken());
+            GetUserProfileResponseDto actualUser = userSteps.getCustomerProfile(user.getToken());
             softly.assertThat(actualUser.getName()).isNull();
         });
     }

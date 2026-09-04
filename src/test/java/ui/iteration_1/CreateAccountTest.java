@@ -1,19 +1,19 @@
 package ui.iteration_1;
 
-import models.api.response.CreateAccountResponseDto;
+import api.models.response.CreateAccountResponseDto;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import pages.UserDashboardPage;
-import supports.StepLogger;
-import supports.annotations.Browsers;
-import supports.annotations.UserSession;
-import supports.assertions.AccountAssertions;
-import supports.context.TestUser;
+import ui.pages.UserDashboardPage;
+import common.allure.StepLogger;
+import common.annotations.Browsers;
+import common.annotations.UserSession;
+import common.assertions.AccountAssertions;
+import common.context.TestUser;
 import ui.BaseUiTest;
 
 import java.util.List;
 
-import static testdata.expectedmessages.ui.AccountUiMessages.ACCOUNT_CREATED_SUCCESSFULLY;
+import static common.testdata.messages.ui.AccountUiMessages.ACCOUNT_CREATED_SUCCESSFULLY;
 
 @DisplayName("UI. Создание счета")
 public class CreateAccountTest extends BaseUiTest {

@@ -1,22 +1,21 @@
 package api.iteration_3;
 
 import api.BaseTest;
-import models.api.response.ErrorResponseDto;
-import models.api.response.GetUserResponseDto;
-import models.db.Customer;
+import api.models.response.ErrorResponseDto;
+import api.models.response.GetUserResponseDto;
+import database.models.Customer;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import specs.RequestSpecs;
-import specs.ResponseSpecs;
-import supports.StepLogger;
-import supports.annotations.UserSession;
-import supports.comparisons.UserComparisonFields;
-import supports.context.TestUser;
+import api.specs.RequestSpecs;
+import api.specs.ResponseSpecs;
+import common.allure.StepLogger;
+import common.annotations.UserSession;
+import common.comparisons.UserComparisonFields;
+import common.context.TestUser;
 
-import java.util.Comparator;
 import java.util.List;
 
-import static testdata.expectedmessages.api.UserApiMessages.GET_USERS_LIST_FORBIDDEN;
+import static common.testdata.messages.api.UserApiMessages.GET_USERS_LIST_FORBIDDEN;
 
 @DisplayName("API. Получение списка пользователей")
 public class GetAllUsersTest extends BaseTest {
@@ -26,10 +25,7 @@ public class GetAllUsersTest extends BaseTest {
     @UserSession
     public void authorizedUserWithAdminPermissionsCanGetUsersListTest(TestUser user) {
         List<GetUserResponseDto> actualUsersList = StepLogger.apiStep("Получить список пользователей", () -> {
-            return userSteps.getAllUsers()
-                    .stream()
-                    .sorted(Comparator.comparing(GetUserResponseDto::getId))
-                    .toList();
+            return userSteps.getAllUsers();
         });
 
         StepLogger.apiStep("Проверить список пользователей через API", () -> {

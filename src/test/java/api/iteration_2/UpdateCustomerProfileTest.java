@@ -1,27 +1,28 @@
 package api.iteration_2;
 
 import api.BaseTest;
-import models.api.request.UpdateUserRequestDto;
-import models.api.response.CreateUserResponseDto;
-import models.api.response.ErrorResponseDto;
-import models.api.response.UpdateUserResponseDto;
-import models.db.Customer;
+import api.models.request.UpdateUserRequestDto;
+import api.models.response.ErrorResponseDto;
+import api.models.response.GetUserProfileResponseDto;
+import api.models.response.UpdateUserResponseDto;
+import api.models.response.ValidationErrorResponseDto;
+import database.models.Customer;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import specs.RequestSpecs;
-import specs.ResponseSpecs;
-import supports.StepLogger;
-import supports.annotations.UserSession;
-import supports.context.TestUser;
-import testdata.randommodelgenerator.RandomModelGenerator;
+import api.specs.RequestSpecs;
+import api.specs.ResponseSpecs;
+import common.allure.StepLogger;
+import common.annotations.UserSession;
+import common.context.TestUser;
+import common.testdata.generator.RandomModelGenerator;
 
 import java.util.stream.Stream;
 
-import static testdata.UserData.generateUpdateUserDto;
-import static testdata.expectedmessages.api.UserApiMessages.*;
+import static common.testdata.factories.UserData.generateUpdateUserDto;
+import static common.testdata.messages.api.UserApiMessages.*;
 
 @DisplayName("API. Обновление профиля пользователя")
 public class UpdateCustomerProfileTest extends BaseTest {
@@ -37,12 +38,14 @@ public class UpdateCustomerProfileTest extends BaseTest {
         });
 
         StepLogger.apiStep("Проверить изменение имени", () -> {
-            softly.assertThat(updatedUser.getMessage()).isEqualTo(PROFILE_UPDATE_SUCCESSFULLY);
-            softly.assertThat(updatedUser.getCustomer().getName()).isEqualTo(updateUserDto.getName());
+            softly.assertThat(updatedUser.getId()).isEqualTo(user.getId());
+            softly.assertThat(updatedUser.getUsername()).isEqualTo(user.getUsername());
+            softly.assertThat(updatedUser.getName()).isEqualTo(updateUserDto.getName());
+            softly.assertThat(updatedUser.getRole()).isEqualTo(user.getRole());
         });
 
         StepLogger.apiStep("Проверить профиль после изменения имени через API", () -> {
-            CreateUserResponseDto actualUser = userSteps.getCustomerProfile(user.getToken());
+            GetUserProfileResponseDto actualUser = userSteps.getCustomerProfile(user.getToken());
             softly.assertThat(actualUser.getName()).isEqualTo(updateUserDto.getName());
         });
 
@@ -69,18 +72,18 @@ public class UpdateCustomerProfileTest extends BaseTest {
     @ParameterizedTest(name = "{0}")
     @UserSession
     public void authorizedUserCannotSetInvalidNameTest(String testName, UpdateUserRequestDto updateUserDto, TestUser user) {
-        String errorResponse = StepLogger.apiStep("Изменить имя в профиле на невалидное", () -> {
+        ValidationErrorResponseDto errorResponse = StepLogger.apiStep("Изменить имя в профиле на невалидное", () -> {
             return userSteps.updateCustomerProfile(
                 updateUserDto, RequestSpecs.authAsUser(user.getToken()), ResponseSpecs.badRequest())
-                .extract().asString();
+                .extract().as(ValidationErrorResponseDto.class);
         });
 
         StepLogger.apiStep("Проверить сообщение об ошибке", () -> {
-            softly.assertThat(errorResponse).isEqualTo(PROFILE_UPDATE_INVALID_NAME);
+            softly.assertThat(errorResponse.getMessage()).isEqualTo(PROFILE_UPDATE_INVALID_NAME);
         });
 
         StepLogger.apiStep("Проверить отсутствие изменений в профиле через API", () -> {
-            CreateUserResponseDto actualUser = userSteps.getCustomerProfile(user.getToken());
+            GetUserProfileResponseDto actualUser = userSteps.getCustomerProfile(user.getToken());
             softly.assertThat(actualUser.getName()).isNull();
         });
 
@@ -101,7 +104,7 @@ public class UpdateCustomerProfileTest extends BaseTest {
         });
 
         StepLogger.apiStep("Проверить отсутствие изменений в профиле через API", () -> {
-            CreateUserResponseDto actualUser = userSteps.getCustomerProfile(user.getToken());
+            GetUserProfileResponseDto actualUser = userSteps.getCustomerProfile(user.getToken());
             softly.assertThat(actualUser.getName()).isNull();
         });
 

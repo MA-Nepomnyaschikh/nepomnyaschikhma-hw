@@ -2,25 +2,24 @@ package api.iteration_1;
 
 import api.BaseTest;
 import io.restassured.response.ValidatableResponse;
-import models.api.request.CreateUserRequestDto;
-import models.api.request.LoginUserRequestDto;
-import models.api.response.ErrorResponseDto;
+import api.models.request.CreateUserRequestDto;
+import api.models.request.LoginUserRequestDto;
+import api.models.response.ValidationErrorResponseDto;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import specs.RequestSpecs;
-import specs.ResponseSpecs;
-import supports.StepLogger;
-import supports.assertions.UserAssertions;
+import api.specs.RequestSpecs;
+import api.specs.ResponseSpecs;
+import common.allure.StepLogger;
+import common.assertions.UserAssertions;
 
 import java.util.stream.Stream;
 
-import static testdata.AuthData.*;
-import static testdata.UserData.ADMIN_ROLE;
-import static testdata.UserData.generateUserDto;
-import static testdata.expectedmessages.api.UserApiMessages.LOGIN_USER_INVALID_DATA;
+import static common.testdata.factories.AuthData.*;
+import static common.testdata.factories.UserData.*;
+import static common.testdata.messages.api.UserApiMessages.LOGIN_USER_INVALID_DATA;
 
 @DisplayName("API. Авторизация пользователя")
 public class LoginUserTest extends BaseTest {
@@ -83,13 +82,13 @@ public class LoginUserTest extends BaseTest {
     public void userCannotGenerateAuthTokenWithInvalidDataTest(String testName, String username, String password) {
         LoginUserRequestDto loginDto = generateLoginDto(username, password);
 
-        ErrorResponseDto errorResponse = StepLogger.apiStep("Авторизовать пользователя", () -> {
+        ValidationErrorResponseDto errorResponse = StepLogger.apiStep("Авторизовать пользователя", () -> {
             return authSteps.login(loginDto, RequestSpecs.unauth(), ResponseSpecs.unauthorized())
-                    .extract().as(ErrorResponseDto.class);
+                    .extract().as(ValidationErrorResponseDto.class);
         });
 
         StepLogger.apiStep("Проверить ошибку авторизации пользователя", () -> {
-            softly.assertThat(errorResponse.getError()).isEqualTo(LOGIN_USER_INVALID_DATA);
+            softly.assertThat(errorResponse.getMessage()).isEqualTo(LOGIN_USER_INVALID_DATA);
         });
     }
 }
